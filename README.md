@@ -6,3 +6,7 @@ Requirements
 Project Start
 * cd front
 * yarn dev
+* cd back
+* cd strapi
+* yarn
+* yarn dev
