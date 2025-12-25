@@ -3,6 +3,7 @@ This platform is a web and mobile based printing marketplace that connects users
 
 Requirements
 * node -v 20+
+
 Project Start
 * cd front
 * yarn dev
