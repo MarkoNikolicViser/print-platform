@@ -6,4 +6,5 @@ Requirements
 
 Project Start
 * cd front
+* yarn
 * yarn dev
