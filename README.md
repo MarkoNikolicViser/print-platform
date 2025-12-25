@@ -10,10 +10,11 @@ Project Start
 * yarn dev
 
 Login params for the dummy account
-admin@copyshop.rs
-admin123
+* admin@copyshop.rs
+* admin123
 
 3 Pages for now
+
 http://localhost:3000/
 <img width="1898" height="865" alt="image" src="https://github.com/user-attachments/assets/fddf846c-b3e6-495c-acbb-512b765d07ce" />
 http://localhost:3000/profile
