@@ -8,3 +8,15 @@ Project Start
 * cd front
 * yarn
 * yarn dev
+
+Login params for the dummy account
+admin@copyshop.rs
+admin123
+
+3 Pages for now
+http://localhost:3000/
+<img width="1898" height="865" alt="image" src="https://github.com/user-attachments/assets/fddf846c-b3e6-495c-acbb-512b765d07ce" />
+http://localhost:3000/profile
+<img width="1902" height="866" alt="image" src="https://github.com/user-attachments/assets/c1af3a9a-bb4d-46eb-9b63-ad42556fd205" />
+http://localhost:3000/admin
+<img width="1900" height="867" alt="image" src="https://github.com/user-attachments/assets/d25dbb3e-137d-425b-92eb-6fff63a55bd8" />
