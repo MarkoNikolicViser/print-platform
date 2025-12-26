@@ -1,0 +1,59 @@
+{
+  "kind": "collectionType",
+  "collectionName": "print_shops",
+  "info": {
+    "singularName": "print-shop",
+    "pluralName": "print-shops",
+    "displayName": "PrintShop"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "address": {
+      "type": "string",
+      "required": true
+    },
+    "city": {
+      "type": "string",
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "required": true
+    },
+    "phone": {
+      "type": "string",
+      "required": false,
+      "unique": true
+    },
+    "bank_account": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "is_active": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "orders": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order.order",
+      "mappedBy": "print_shop_id"
+    },
+    "print_shop_prices": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::print-shop-price.print-shop-price",
+      "mappedBy": "print_shop_id"
+    }
+  }
+}
