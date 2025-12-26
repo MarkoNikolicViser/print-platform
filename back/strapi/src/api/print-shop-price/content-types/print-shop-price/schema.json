@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "print_shop_prices",
+  "info": {
+    "singularName": "print-shop-price",
+    "pluralName": "print-shop-prices",
+    "displayName": "PrintShopPrice"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "paper_size": {
+      "type": "enumeration",
+      "required": true,
+      "default": "A4",
+      "enum": [
+        "A4",
+        "A3"
+      ]
+    },
+    "color": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "price": {
+      "type": "decimal",
+      "required": true
+    },
+    "print_shop_id": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::print-shop.print-shop",
+      "inversedBy": "print_shop_prices"
+    }
+  }
+}
