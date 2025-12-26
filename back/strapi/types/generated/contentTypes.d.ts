@@ -430,6 +430,206 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiOrderFileOrderFile extends Struct.CollectionTypeSchema {
+  collectionName: 'order_files';
+  info: {
+    displayName: 'OrderFile';
+    pluralName: 'order-files';
+    singularName: 'order-file';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    color: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    copies: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<1>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    file_url: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::order-file.order-file'
+    > &
+      Schema.Attribute.Private;
+    order_id: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    page_count: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<1>;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
+  collectionName: 'orders';
+  info: {
+    displayName: 'Order';
+    pluralName: 'orders';
+    singularName: 'order';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    customer_email: Schema.Attribute.Email & Schema.Attribute.Required;
+    customer_phone: Schema.Attribute.String & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
+      Schema.Attribute.Private;
+    order_code: Schema.Attribute.String & Schema.Attribute.Required;
+    order_files: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::order-file.order-file'
+    >;
+    print_shop_id: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::print-shop.print-shop'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    status_code: Schema.Attribute.Enumeration<
+      ['uploaded', 'paid', 'printing', 'ready', 'picked_up']
+    > &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'uploaded'>;
+    total_price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPaymentPayment extends Struct.CollectionTypeSchema {
+  collectionName: 'payments';
+  info: {
+    displayName: 'Payment';
+    pluralName: 'payments';
+    singularName: 'payment';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    amount: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    fee: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::payment.payment'
+    > &
+      Schema.Attribute.Private;
+    order_id: Schema.Attribute.Relation<'oneToOne', 'api::order.order'>;
+    provider: Schema.Attribute.Enumeration<['PayPal', 'Stripe']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'PayPal'>;
+    provider_payment_id: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    status_code: Schema.Attribute.Enumeration<['pending', 'paid', 'failed']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'pending'>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPrintShopPricePrintShopPrice
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'print_shop_prices';
+  info: {
+    displayName: 'PrintShopPrice';
+    pluralName: 'print-shop-prices';
+    singularName: 'print-shop-price';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    color: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::print-shop-price.print-shop-price'
+    > &
+      Schema.Attribute.Private;
+    paper_size: Schema.Attribute.Enumeration<['A4', 'A3']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'A4'>;
+    price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    print_shop_id: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::print-shop.print-shop'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
+  collectionName: 'print_shops';
+  info: {
+    displayName: 'PrintShop';
+    pluralName: 'print-shops';
+    singularName: 'print-shop';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    address: Schema.Attribute.String & Schema.Attribute.Required;
+    bank_account: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    city: Schema.Attribute.String & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    is_active: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::print-shop.print-shop'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
+    orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
+    phone: Schema.Attribute.String & Schema.Attribute.Unique;
+    print_shop_prices: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::print-shop-price.print-shop-price'
+    >;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface PluginContentReleasesRelease
   extends Struct.CollectionTypeSchema {
   collectionName: 'strapi_releases';
@@ -885,7 +1085,6 @@ export interface PluginUsersPermissionsUser
   };
   options: {
     draftAndPublish: false;
-    timestamps: true;
   };
   attributes: {
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
@@ -910,6 +1109,10 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    print_shop_id: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::print-shop.print-shop'
+    >;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
@@ -940,6 +1143,11 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::order-file.order-file': ApiOrderFileOrderFile;
+      'api::order.order': ApiOrderOrder;
+      'api::payment.payment': ApiPaymentPayment;
+      'api::print-shop-price.print-shop-price': ApiPrintShopPricePrintShopPrice;
+      'api::print-shop.print-shop': ApiPrintShopPrintShop;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

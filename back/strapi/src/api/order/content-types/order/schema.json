@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orders",
+  "info": {
+    "singularName": "order",
+    "pluralName": "orders",
+    "displayName": "Order"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "order_code": {
+      "type": "string",
+      "required": true
+    },
+    "status_code": {
+      "type": "enumeration",
+      "required": true,
+      "default": "uploaded",
+      "enum": [
+        "uploaded",
+        "paid",
+        "printing",
+        "ready",
+        "picked_up"
+      ]
+    },
+    "total_price": {
+      "type": "decimal",
+      "required": true
+    },
+    "customer_email": {
+      "type": "email",
+      "required": true
+    },
+    "customer_phone": {
+      "type": "string",
+      "required": true
+    },
+    "print_shop_id": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::print-shop.print-shop",
+      "inversedBy": "orders"
+    },
+    "order_files": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::order-file.order-file",
+      "mappedBy": "order_id"
+    }
+  }
+}
