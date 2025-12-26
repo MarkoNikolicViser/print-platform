@@ -119,7 +119,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ onFileUploaded })
 
       {!uploadedFile && (
         <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Box
               {...getRootProps()}
               sx={{
@@ -154,7 +154,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ onFileUploaded })
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Button
               variant="contained"
               color="secondary"
@@ -165,7 +165,10 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ onFileUploaded })
                 fontSize: "1rem",
                 fontWeight: 600,
               }}
-              onClick={() => document.querySelector('input[type="file"]')?.click()}
+              onClick={() => {
+                const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement | null
+                fileInput?.click();
+              }}
             >
               Upload fajl
             </Button>
@@ -240,7 +243,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ onFileUploaded })
             </Box>
 
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
                   <InsertDriveFileIcon sx={{ mr: 1, color: "primary.main" }} />
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
@@ -252,7 +255,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({ onFileUploaded })
                 </Typography>
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
                   Procenjeni broj strana: {uploadedFile.pageCount}
                 </Typography>

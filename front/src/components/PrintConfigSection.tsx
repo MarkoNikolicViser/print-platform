@@ -110,10 +110,10 @@ const PrintConfigSection: React.FC<PrintConfigSectionProps> = ({ fileData, onCon
 
       <Grid container spacing={4}>
         {/* Left Column - Configuration Options */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Grid container spacing={3}>
             {/* Color vs Black & White */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Card
                 sx={{
                   border: "2px solid",
@@ -176,7 +176,7 @@ const PrintConfigSection: React.FC<PrintConfigSectionProps> = ({ fileData, onCon
             </Grid>
 
             {/* Double-sided */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Card
                 sx={{
                   border: "2px solid",
@@ -239,7 +239,7 @@ const PrintConfigSection: React.FC<PrintConfigSectionProps> = ({ fileData, onCon
             </Grid>
 
             {/* Paper Type */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Card
                 sx={{
                   border: "2px solid",
@@ -315,7 +315,7 @@ const PrintConfigSection: React.FC<PrintConfigSectionProps> = ({ fileData, onCon
             </Grid>
 
             {/* Binding */}
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Card
                 sx={{
                   border: "2px solid",
@@ -405,7 +405,7 @@ const PrintConfigSection: React.FC<PrintConfigSectionProps> = ({ fileData, onCon
             </Grid>
 
             {/* Number of Copies */}
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Card
                 sx={{
                   border: "2px solid",
@@ -440,7 +440,7 @@ const PrintConfigSection: React.FC<PrintConfigSectionProps> = ({ fileData, onCon
         </Grid>
 
         {/* Right Column - Summary */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Card
             sx={{
               border: "3px solid",

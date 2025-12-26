@@ -86,7 +86,7 @@ const ShopSettings: React.FC = () => {
 
       <Grid container spacing={4}>
         {/* Basic Information */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <Card
             sx={{
               border: "2px solid",
@@ -99,7 +99,7 @@ const ShopSettings: React.FC = () => {
               </Typography>
 
               <Grid container spacing={2}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     label="Naziv štamparije"
@@ -108,7 +108,7 @@ const ShopSettings: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     label="Adresa"
@@ -117,7 +117,7 @@ const ShopSettings: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     label="Grad"
@@ -126,7 +126,7 @@ const ShopSettings: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     label="Telefon"
@@ -135,7 +135,7 @@ const ShopSettings: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     label="Email"
@@ -145,7 +145,7 @@ const ShopSettings: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     label="Radno vreme"
@@ -160,7 +160,7 @@ const ShopSettings: React.FC = () => {
         </Grid>
 
         {/* Services and Status */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card
             sx={{
               border: "2px solid",

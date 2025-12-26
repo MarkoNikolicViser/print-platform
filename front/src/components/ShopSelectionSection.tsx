@@ -180,7 +180,7 @@ const ShopSelectionSection: React.FC<ShopSelectionSectionProps> = ({ fileData, p
           const isSelected = selectedShop?.id === shop.id
 
           return (
-            <Grid item xs={12} md={6} key={shop.id}>
+            <Grid size={{ xs: 12, md: 6 }} key={shop.id}>
               <Card
                 sx={{
                   border: "2px solid",
@@ -269,7 +269,7 @@ const ShopSelectionSection: React.FC<ShopSelectionSectionProps> = ({ fileData, p
           </Typography>
 
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
                 Ukupna cena:
               </Typography>
@@ -277,7 +277,7 @@ const ShopSelectionSection: React.FC<ShopSelectionSectionProps> = ({ fileData, p
                 {strapiService.calculatePrintCost(selectedShop, fileData.pageCount, printOptions)} RSD
               </Typography>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
                 Detalji cene:
               </Typography>
@@ -336,7 +336,7 @@ const ShopSelectionSection: React.FC<ShopSelectionSectionProps> = ({ fileData, p
           </Typography>
 
           <Grid container spacing={2}>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Ime i prezime"
@@ -345,7 +345,7 @@ const ShopSelectionSection: React.FC<ShopSelectionSectionProps> = ({ fileData, p
                 required
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Email adresa"
@@ -355,7 +355,7 @@ const ShopSelectionSection: React.FC<ShopSelectionSectionProps> = ({ fileData, p
                 required
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 label="Broj telefona"

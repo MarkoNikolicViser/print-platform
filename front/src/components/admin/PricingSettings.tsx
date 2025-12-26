@@ -147,11 +147,13 @@ const PricingSettings: React.FC = () => {
                     fullWidth
                     label="Standardni papir (80g)"
                     type="number"
-                    step="0.1"
                     value={pricing.paperTypes.standard}
                     onChange={(e) => handleNestedChange("paperTypes", "standard", Number(e.target.value))}
                     InputProps={{
                       endAdornment: <InputAdornment position="end">× osnovna cena</InputAdornment>,
+                      inputProps: {
+                        step: "0.1"
+                      }
                     }}
                   />
                 </Grid>
@@ -161,11 +163,13 @@ const PricingSettings: React.FC = () => {
                     fullWidth
                     label="Premium papir (120g)"
                     type="number"
-                    step="0.1"
                     value={pricing.paperTypes.premium}
                     onChange={(e) => handleNestedChange("paperTypes", "premium", Number(e.target.value))}
                     InputProps={{
                       endAdornment: <InputAdornment position="end">× osnovna cena</InputAdornment>,
+                      inputProps: {
+                        step: "0.1"
+                      }
                     }}
                   />
                 </Grid>
@@ -175,11 +179,13 @@ const PricingSettings: React.FC = () => {
                     fullWidth
                     label="Foto papir"
                     type="number"
-                    step="0.1"
                     value={pricing.paperTypes.photo}
                     onChange={(e) => handleNestedChange("paperTypes", "photo", Number(e.target.value))}
                     InputProps={{
                       endAdornment: <InputAdornment position="end">× osnovna cena</InputAdornment>,
+                      inputProps: {
+                        step: "0.1"
+                      }
                     }}
                   />
                 </Grid>

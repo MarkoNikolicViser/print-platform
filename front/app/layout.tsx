@@ -5,7 +5,7 @@ import "./globals.css"
 export const metadata: Metadata = {
   title: "PrintSerbia - Online Štamparija",
   description: "Naručite štampanje online - bez čekanja u redu",
-    generator: 'v0.app'
+  generator: 'v0.app'
 }
 
 export default function RootLayout({
