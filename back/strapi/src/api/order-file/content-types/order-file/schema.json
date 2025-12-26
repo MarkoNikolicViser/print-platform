@@ -1,0 +1,41 @@
+{
+  "kind": "collectionType",
+  "collectionName": "order_files",
+  "info": {
+    "singularName": "order-file",
+    "pluralName": "order-files",
+    "displayName": "OrderFile"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "file_url": {
+      "type": "string",
+      "required": true,
+      "unique": false
+    },
+    "page_count": {
+      "type": "integer",
+      "required": true,
+      "default": 1
+    },
+    "copies": {
+      "type": "integer",
+      "required": true,
+      "default": 1
+    },
+    "color": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "order_id": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::order.order",
+      "inversedBy": "order_files"
+    }
+  }
+}
