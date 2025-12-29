@@ -138,6 +138,38 @@ class StrapiService {
     }
   }
 
+  async loginUser(identifier: string, password: string): Promise<{ jwt: string; user: User } | null> {
+    try {
+      const response: AxiosResponse = await this.api.post("/auth/local", {
+        identifier, // can be email or username
+        password,
+      });
+
+      // Strapi returns { jwt, user }
+      const { jwt, user } = response.data;
+
+      // Transform the user into your User type
+      const transformedUser: User = this.transformUser({
+        id: user.id,
+        attributes: {
+          email: user.email,
+          name: user.username || user.name,
+          role: user.app_role,
+          phone: user.phone,
+          address: user.address,
+          printHistory: user.printHistory || [],
+          createdAt: user.createdAt,
+        },
+      });
+
+      return { jwt, user };
+    } catch (error) {
+      console.error("Error logging in user:", error);
+      return null;
+    }
+  }
+
+
   async getUserByEmail(email: string): Promise<User | null> {
     try {
       const response: AxiosResponse = await this.api.get(`/users?filters[email][$eq]=${email}&populate=*`)

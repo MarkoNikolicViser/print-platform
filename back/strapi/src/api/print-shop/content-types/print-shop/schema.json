@@ -43,6 +43,10 @@
       "required": true,
       "default": false
     },
+    "work_hours": {
+      "type": "json",
+      "required": true
+    },
     "orders": {
       "type": "relation",
       "relation": "oneToMany",

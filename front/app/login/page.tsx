@@ -5,6 +5,8 @@ import type React from "react"
 import { useState } from "react"
 import { Box, Container, Paper, TextField, Button, Typography, Link, Alert, Tabs, Tab } from "@mui/material"
 import { useRouter } from "next/navigation"
+import { strapiService } from "@/src/services/strapiService"
+import { useMutation } from "@tanstack/react-query"
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -35,24 +37,53 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
-
-    // Simulate login
-    setTimeout(() => {
+  const loginMutation = useMutation({
+    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+      return strapiService.loginUser(email, password);
+    },
+    onSuccess: (data) => {
+      const { app_role, username, email } = data?.user
       localStorage.setItem(
         "user",
         JSON.stringify({
-          email: loginData.email,
-          name: "Korisnik",
+          email: email,
+          name: username,
+          role: app_role,
           orders: [],
         }),
       )
-      setLoading(false)
-      router.push("/profile")
-    }, 1000)
+      if (app_role === "shop") {
+        router.push("/admin");
+      } else {
+        router.push("/profile")
+      }
+      // toast("Uspesno logovanje", { type: "success" });
+      // Cookies.set("jwt", data?.jwt);
+      // navigate("/home");
+    },
+    onError: () => {
+      // toast("Greska", { type: "error" });
+    },
+  });
+
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    loginMutation.mutate({ email: loginData.email, password: loginData.password })
+
+    // Simulate login
+    // setTimeout(() => {
+    //   localStorage.setItem(
+    //     "user",
+    //     JSON.stringify({
+    //       email: loginData.email,
+    //       name: loginData.,
+    //       orders: [],
+    //     }),
+    //   )
+    //   setLoading(false)
+    //   router.push("/profile")
+    // }, 1000)
   }
 
   const handleRegister = async (e: React.FormEvent) => {
