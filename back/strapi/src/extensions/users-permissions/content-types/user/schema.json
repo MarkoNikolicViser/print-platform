@@ -70,6 +70,15 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::print-shop.print-shop"
+    },
+    "app_role": {
+      "type": "enumeration",
+      "required": true,
+      "default": "customer",
+      "enum": [
+        "customer",
+        "shop"
+      ]
     }
   }
 }
