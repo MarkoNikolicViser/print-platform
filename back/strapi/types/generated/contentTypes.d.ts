@@ -627,6 +627,7 @@ export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    work_hours: Schema.Attribute.JSON & Schema.Attribute.Required;
   };
 }
 
@@ -1087,6 +1088,9 @@ export interface PluginUsersPermissionsUser
     draftAndPublish: false;
   };
   attributes: {
+    app_role: Schema.Attribute.Enumeration<['customer', 'shop']> &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<'customer'>;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
