@@ -9,7 +9,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth"
-import { auth } from "../config/firebase"
+import { auth } from "../src/config/firebase"
 import type { User } from "../types"
 import { strapiService } from "../services/strapiService"
 
