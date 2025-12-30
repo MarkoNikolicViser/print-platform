@@ -34,6 +34,10 @@
       "relation": "manyToOne",
       "target": "api::print-shop.print-shop",
       "inversedBy": "print_shop_prices"
+    },
+    "spiral_page_number": {
+      "type": "integer",
+      "required": true
     }
   }
 }
