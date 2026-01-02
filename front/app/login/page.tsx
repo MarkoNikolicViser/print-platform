@@ -5,8 +5,8 @@ import type React from "react"
 import { useState } from "react"
 import { Box, Container, Paper, TextField, Button, Typography, Link, Alert, Tabs, Tab } from "@mui/material"
 import { useRouter } from "next/navigation"
-import { strapiService } from "@/src/services/strapiService"
 import { useMutation } from "@tanstack/react-query"
+import { strapiService } from "@/services/strapiService"
 
 interface TabPanelProps {
   children?: React.ReactNode
