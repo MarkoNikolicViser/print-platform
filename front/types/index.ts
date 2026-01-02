@@ -64,3 +64,25 @@ export interface User {
   printHistory: PrintJob[]
   createdAt: Date
 }
+
+export interface AddToCartPayload {
+  orderCode?: string
+  documentS3Key: string
+  fileName?: string
+  copies: number
+  color: "bw" | "color"
+  binding: "none" | "spiral" | "stapled"
+  pages?: number
+  price: number
+  customerEmail?: string
+  customerPhone?: string
+  printShopId: number
+}
+
+export interface Order {
+  id: string
+  order_code: string
+  status_code: string
+  total_price: number
+  order_items: any[]
+}

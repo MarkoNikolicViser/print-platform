@@ -463,44 +463,39 @@ export interface ApiArticleConfigArticleConfig
   };
 }
 
-export interface ApiOrderFileOrderFile extends Struct.CollectionTypeSchema {
-  collectionName: 'order_files';
+export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
+  collectionName: 'order_items';
   info: {
-    displayName: 'OrderFile';
-    pluralName: 'order-files';
-    singularName: 'order-file';
+    displayName: 'Order Item';
+    pluralName: 'order-items';
+    singularName: 'order-item';
   };
   options: {
     draftAndPublish: false;
   };
   attributes: {
-    both_sides: Schema.Attribute.Boolean &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<true>;
-    color: Schema.Attribute.Boolean &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<false>;
-    copies: Schema.Attribute.Integer &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<1>;
+    binding: Schema.Attribute.Enumeration<['none', 'spiral', 'stapled']> &
+      Schema.Attribute.Required;
+    color: Schema.Attribute.Enumeration<['bw', 'color']> &
+      Schema.Attribute.Required;
+    copies: Schema.Attribute.Integer & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    file_url: Schema.Attribute.String & Schema.Attribute.Required;
+    document_s3_key: Schema.Attribute.String & Schema.Attribute.Required;
+    file_name: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'api::order-file.order-file'
+      'api::order-item.order-item'
     > &
       Schema.Attribute.Private;
-    order_id: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
-    page_count: Schema.Attribute.Integer &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<1>;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    pages: Schema.Attribute.Integer;
+    price: Schema.Attribute.Decimal & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    spiral: Schema.Attribute.Boolean &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<false>;
+    status: Schema.Attribute.Enumeration<['pending', 'failed', 'printed']> &
+      Schema.Attribute.DefaultTo<'pending'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -527,9 +522,9 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;
     order_code: Schema.Attribute.String & Schema.Attribute.Required;
-    order_files: Schema.Attribute.Relation<
+    order_items: Schema.Attribute.Relation<
       'oneToMany',
-      'api::order-file.order-file'
+      'api::order-item.order-item'
     >;
     print_shop_id: Schema.Attribute.Relation<
       'manyToOne',
@@ -537,7 +532,16 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     >;
     publishedAt: Schema.Attribute.DateTime;
     status_code: Schema.Attribute.Enumeration<
-      ['uploaded', 'paid', 'printing', 'ready', 'picked_up']
+      [
+        'draft',
+        'uploaded',
+        'paid',
+        'printing',
+        'ready',
+        'picked_up',
+        'cancelled',
+        'expired',
+      ]
     > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'uploaded'>;
@@ -1188,7 +1192,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::article-config.article-config': ApiArticleConfigArticleConfig;
-      'api::order-file.order-file': ApiOrderFileOrderFile;
+      'api::order-item.order-item': ApiOrderItemOrderItem;
       'api::order.order': ApiOrderOrder;
       'api::payment.payment': ApiPaymentPayment;
       'api::print-shop-price.print-shop-price': ApiPrintShopPricePrintShopPrice;
