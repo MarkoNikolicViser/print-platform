@@ -36,6 +36,16 @@
       "relation": "manyToOne",
       "target": "api::order.order",
       "inversedBy": "order_files"
+    },
+    "both_sides": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "spiral": {
+      "type": "boolean",
+      "required": true,
+      "default": false
     }
   }
 }
