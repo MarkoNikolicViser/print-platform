@@ -57,6 +57,7 @@ export default function LoginPage() {
       } else {
         router.push("/profile")
       }
+      localStorage.setItem("jwt", data.jwt);
       // toast("Uspesno logovanje", { type: "success" });
       // Cookies.set("jwt", data?.jwt);
       // navigate("/home");

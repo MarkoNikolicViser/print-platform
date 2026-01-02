@@ -430,6 +430,39 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiArticleConfigArticleConfig
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'article_configs';
+  info: {
+    displayName: 'ArticleConfig';
+    pluralName: 'article-configs';
+    singularName: 'article-config';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    fee: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<15>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::article-config.article-config'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.Enumeration<['A4', 'A3']> &
+      Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiOrderFileOrderFile extends Struct.CollectionTypeSchema {
   collectionName: 'order_files';
   info: {
@@ -441,6 +474,9 @@ export interface ApiOrderFileOrderFile extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    both_sides: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<true>;
     color: Schema.Attribute.Boolean &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<false>;
@@ -462,6 +498,9 @@ export interface ApiOrderFileOrderFile extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<1>;
     publishedAt: Schema.Attribute.DateTime;
+    spiral: Schema.Attribute.Boolean &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<false>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -579,6 +618,7 @@ export interface ApiPrintShopPricePrintShopPrice
       'api::print-shop.print-shop'
     >;
     publishedAt: Schema.Attribute.DateTime;
+    spiral_page_number: Schema.Attribute.Integer & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1147,6 +1187,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::article-config.article-config': ApiArticleConfigArticleConfig;
       'api::order-file.order-file': ApiOrderFileOrderFile;
       'api::order.order': ApiOrderOrder;
       'api::payment.payment': ApiPaymentPayment;

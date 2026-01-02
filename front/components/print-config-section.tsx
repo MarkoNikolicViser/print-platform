@@ -136,7 +136,7 @@ export function PrintConfigSection() {
     { value: "none", label: "Bez povezivanja", price: "0 RSD" },
     { value: "staple", label: "Heftalica", price: "+20 RSD" },
     { value: "spiral", label: "Spiralno", price: "+50 RSD" },
-    { value: "thermal", label: "Termalno", price: "+100 RSD" },
+    // { value: "thermal", label: "Termalno", price: "+100 RSD" },
   ]
   return (
     <Card>
@@ -168,7 +168,7 @@ export function PrintConfigSection() {
             />
           </Grid>
           <Grid size={{ xs: 12, md: 6 }} >
-            <TextField
+            {/* <TextField
               label="Kopija po dokumentu"
               type="number"
               value={config.copies}
@@ -177,31 +177,32 @@ export function PrintConfigSection() {
               }
               inputProps={{ min: 1, max: 100 }}
               fullWidth
-            />
+            /> */}
+            {/* Paper Size */}
+            <FormControl fullWidth>
+              <InputLabel>Format papira</InputLabel>
+              <Select
+                value={config.paperSize}
+                onChange={(e) => updateConfig({ paperSize: e.target.value })}
+                label="Format papira"
+              >
+                {paperSizes.map((size) => (
+                  <MenuItem disabled={size.value !== 'a4'} key={size.value} value={size.value}>
+                    <Box display="flex" justifyContent="space-between" width="100%">
+                      <span>{size.label}</span>
+                      <Chip label={size.description} size="small" />
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
         </Grid>
 
-        {/* Paper Size */}
-        <FormControl fullWidth>
-          <InputLabel>Format papira</InputLabel>
-          <Select
-            value={config.paperSize}
-            onChange={(e) => updateConfig({ paperSize: e.target.value })}
-            label="Format papira"
-          >
-            {paperSizes.map((size) => (
-              <MenuItem key={size.value} value={size.value}>
-                <Box display="flex" justifyContent="space-between" width="100%">
-                  <span>{size.label}</span>
-                  <Chip label={size.description} size="small" />
-                </Box>
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+
 
         {/* Paper Type */}
-        <FormControl component="fieldset">
+        {/* <FormControl component="fieldset">
           <FormLabel component="legend">Tip papira</FormLabel>
           <RadioGroup
             value={config.paperType}
@@ -229,7 +230,7 @@ export function PrintConfigSection() {
               ))}
             </Grid>
           </RadioGroup>
-        </FormControl>
+        </FormControl> */}
 
         {/* Print Options */}
         <FormLabel component="legend">Opcije štampanja</FormLabel>

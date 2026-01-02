@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "article_configs",
+  "info": {
+    "singularName": "article-config",
+    "pluralName": "article-configs",
+    "displayName": "ArticleConfig"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "enumeration",
+      "required": true,
+      "enum": [
+        "A4",
+        "A3"
+      ]
+    },
+    "fee": {
+      "type": "decimal",
+      "required": true,
+      "default": 15
+    }
+  }
+}
