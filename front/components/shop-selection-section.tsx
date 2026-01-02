@@ -19,6 +19,11 @@ import {
   FormControl,
 } from "@mui/material";
 import { MapPin, Clock, Star, Phone, Navigation, Filter, Search } from "lucide-react"
+import { useQuery } from "@tanstack/react-query";
+import { strapiService } from "@/services/strapiService"
+import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
+import ErrorState from '../components/ui/error-state';
+
 
 interface Shop {
   id: number
@@ -124,6 +129,12 @@ export function ShopSelectionSection() {
   const [showMap, setShowMap] = useState(false)
   const router = useRouter()
 
+  const { data: copyShops, isLoading, error, isError } = useQuery({
+    queryKey: ["copyShops"],
+    queryFn: () => strapiService.getCopyShops(),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false
+  });
   // Listen for cost updates from print configuration
   useEffect(() => {
     const handleFileCalculated = (event: CustomEvent) => {
@@ -171,6 +182,8 @@ export function ShopSelectionSection() {
     // In a real app, you would pass this data through state management or URL params
     router.push("/checkout")
   }
+  if (isLoading) return <ShopSelectionSkeleton />
+  if (isError) return <ErrorState queryKey={["copyShops"]} message={error.message} />;
 
   return (
     <Card>

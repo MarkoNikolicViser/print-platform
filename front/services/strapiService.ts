@@ -25,11 +25,11 @@ class StrapiService {
 
   async getCopyShops(): Promise<CopyShop[]> {
     try {
-      const response: AxiosResponse = await this.api.get("/copy-shops?populate=*")
-      return response.data.data.map(this.transformCopyShop)
+      const response: AxiosResponse = await this.api.get("/print-shops?populate=*")
+      return response.data.data
     } catch (error) {
       console.error("Error fetching copy shops:", error)
-      return []
+      throw error;
     }
   }
 
