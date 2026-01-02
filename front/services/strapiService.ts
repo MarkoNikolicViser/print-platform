@@ -6,7 +6,7 @@ class StrapiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.REACT_APP_STRAPI_URL || "http://localhost:1337/api",
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:1337/api",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.REACT_APP_STRAPI_API_TOKEN || ""}`,
