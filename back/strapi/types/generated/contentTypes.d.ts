@@ -518,6 +518,17 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     customer_email: Schema.Attribute.Email & Schema.Attribute.Required;
     customer_phone: Schema.Attribute.String & Schema.Attribute.Required;
+    expires_at: Schema.Attribute.DateTime;
+    finish_code: Schema.Attribute.Enumeration<
+      [
+        'success',
+        'expired',
+        'user_cancelled',
+        'shop_cancelled',
+        'partial',
+        'error',
+      ]
+    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;

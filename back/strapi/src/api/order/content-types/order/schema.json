@@ -30,6 +30,17 @@
         "expired"
       ]
     },
+    "finish_code": {
+      "type": "enumeration",
+      "enum": [
+        "success",
+        "expired",
+        "user_cancelled",
+        "shop_cancelled",
+        "partial",
+        "error"
+      ]
+    },
     "total_price": {
       "type": "decimal",
       "required": true
@@ -53,6 +64,9 @@
       "relation": "oneToMany",
       "target": "api::order-item.order-item",
       "mappedBy": "order"
+    },
+    "expires_at": {
+      "type": "datetime"
     }
   }
 }
