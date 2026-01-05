@@ -1,0 +1,64 @@
+{
+    "kind": "collectionType",
+    "collectionName": "order_items",
+    "info": {
+        "singularName": "order-item",
+        "pluralName": "order-items",
+        "displayName": "Order Item"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "attributes": {
+        "order": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::order.order",
+            "inversedBy": "order_items"
+        },
+        "document_s3_key": {
+            "type": "string",
+            "required": true
+        },
+        "file_name": {
+            "type": "string"
+        },
+        "copies": {
+            "type": "integer",
+            "required": true
+        },
+        "color": {
+            "type": "enumeration",
+            "enum": [
+                "bw",
+                "color"
+            ],
+            "required": true
+        },
+        "binding": {
+            "type": "enumeration",
+            "enum": [
+                "none",
+                "spiral",
+                "stapled"
+            ],
+            "required": true
+        },
+        "pages": {
+            "type": "integer"
+        },
+        "price": {
+            "type": "decimal",
+            "required": true
+        },
+        "status": {
+            "type": "enumeration",
+            "enum": [
+                "pending",
+                "failed",
+                "printed"
+            ],
+            "default": "pending"
+        }
+    }
+}

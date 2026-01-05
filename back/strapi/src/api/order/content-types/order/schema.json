@@ -20,11 +20,25 @@
       "required": true,
       "default": "uploaded",
       "enum": [
+        "draft",
         "uploaded",
         "paid",
         "printing",
         "ready",
-        "picked_up"
+        "picked_up",
+        "cancelled",
+        "expired"
+      ]
+    },
+    "finish_code": {
+      "type": "enumeration",
+      "enum": [
+        "success",
+        "expired",
+        "user_cancelled",
+        "shop_cancelled",
+        "partial",
+        "error"
       ]
     },
     "total_price": {
@@ -45,11 +59,14 @@
       "target": "api::print-shop.print-shop",
       "inversedBy": "orders"
     },
-    "order_files": {
+    "order_items": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "api::order-file.order-file",
-      "mappedBy": "order_id"
+      "target": "api::order-item.order-item",
+      "mappedBy": "order"
+    },
+    "expires_at": {
+      "type": "datetime"
     }
   }
 }
