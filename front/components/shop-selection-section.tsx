@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { strapiService } from "@/services/strapiService"
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import ErrorState from '../components/ui/error-state';
+import { useAddToCart } from "../hooks/useAddToCart"
 
 
 interface Shop {
@@ -181,6 +182,37 @@ export function ShopSelectionSection() {
 
     // In a real app, you would pass this data through state management or URL params
     router.push("/checkout")
+  }
+
+  const { mutate, isPending } = useAddToCart()
+
+  const handleAddToCart = () => {
+    const orderCode = localStorage.getItem("order_code")
+    console.log(orderCode)
+    mutate({
+      // orderCode: orderCode || undefined,
+      // documentS3Key: job.s3Key,
+      // fileName: job.fileName,
+      // copies: job.copies,
+      // color: job.color,
+      // binding: job.binding,
+      // pages: job.pages,
+      // price: job.price,
+      // customerEmail: job.customerEmail,
+      // customerPhone: job.customerPhone,
+      // printShopId: job.printShopId,
+      orderCode: orderCode || undefined,
+      documentS3Key: "uploads/abc1236.pdf",
+      fileName: "seminarski-rad3.pdf",
+      copies: 1,
+      color: "color",
+      binding: "none",
+      pages: 12,
+      price: 180,
+      customerEmail: "test@mail.com",
+      customerPhone: "+38160123456",
+      printShopId: 1
+    })
   }
   if (isLoading) return <ShopSelectionSkeleton />
   if (isError) return <ErrorState queryKey={["copyShops"]} message={error.message} />;
@@ -387,17 +419,34 @@ export function ShopSelectionSection() {
                 </Typography>
               </Box>
 
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                disabled={!estimatedCost}
-                onClick={handleOrderClick}
-              >
-                {estimatedCost
-                  ? `Naruči i plati (${calculateShopPrice(selectedShopData)} RSD)`
-                  : "Prvo konfigurišite štampanje"}
-              </Button>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 6 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    disabled={!estimatedCost}
+                    onClick={handleOrderClick}
+                  >
+                    {estimatedCost
+                      ? `Naruči i plati (${calculateShopPrice(selectedShopData)} RSD)`
+                      : "Prvo konfigurišite štampanje"}
+                  </Button>
+                </Grid>
+
+                <Grid size={{ xs: 6 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    disabled={isPending}
+                    onClick={handleAddToCart}
+                  >
+                    Dodaj u korpu
+                  </Button>
+                </Grid>
+              </Grid>
+
             </CardContent>
           </Card>
         )}

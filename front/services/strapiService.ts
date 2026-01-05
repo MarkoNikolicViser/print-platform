@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse } from "axios"
-import type { PrintJob, CopyShop, User, PrintOptions } from "../types"
+import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order } from "../types"
 
 class StrapiService {
   private api: AxiosInstance
@@ -295,6 +295,29 @@ class StrapiService {
       return false
     }
   }
+  async addToCart(payload: AddToCartPayload): Promise<Order | null> {
+    try {
+      const response: AxiosResponse = await this.api.post("/orders/add-to-cart", {
+        order_code: payload.orderCode,
+        document_s3_key: payload.documentS3Key,
+        file_name: payload.fileName,
+        copies: payload.copies,
+        color: payload.color,
+        binding: payload.binding,
+        pages: payload.pages,
+        price: payload.price,
+        customer_email: payload.customerEmail,
+        customer_phone: payload.customerPhone,
+        print_shop_id: payload.printShopId,
+      })
+
+      return response.data.order
+    } catch (error) {
+      console.error("Error adding item to cart:", error)
+      return null
+    }
+  }
 }
+
 
 export const strapiService = new StrapiService()
