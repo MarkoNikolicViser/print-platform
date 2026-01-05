@@ -1,12 +1,12 @@
 import axios, { type AxiosInstance, type AxiosResponse } from "axios"
-import type { PrintJob, CopyShop, User, PrintOptions } from "../types"
+import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order } from "../types"
 
 class StrapiService {
   private api: AxiosInstance
 
   constructor() {
     this.api = axios.create({
-      baseURL: process.env.REACT_APP_STRAPI_URL || "http://localhost:1337/api",
+      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:1337/api",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.REACT_APP_STRAPI_API_TOKEN || ""}`,
@@ -25,11 +25,11 @@ class StrapiService {
 
   async getCopyShops(): Promise<CopyShop[]> {
     try {
-      const response: AxiosResponse = await this.api.get("/copy-shops?populate=*")
-      return response.data.data.map(this.transformCopyShop)
+      const response: AxiosResponse = await this.api.get("/print-shops?populate=*")
+      return response.data.data
     } catch (error) {
       console.error("Error fetching copy shops:", error)
-      return []
+      throw error;
     }
   }
 
@@ -295,6 +295,29 @@ class StrapiService {
       return false
     }
   }
+  async addToCart(payload: AddToCartPayload): Promise<Order | null> {
+    try {
+      const response: AxiosResponse = await this.api.post("/orders/add-to-cart", {
+        order_code: payload.orderCode,
+        document_s3_key: payload.documentS3Key,
+        file_name: payload.fileName,
+        copies: payload.copies,
+        color: payload.color,
+        binding: payload.binding,
+        pages: payload.pages,
+        price: payload.price,
+        customer_email: payload.customerEmail,
+        customer_phone: payload.customerPhone,
+        print_shop_id: payload.printShopId,
+      })
+
+      return response.data.order
+    } catch (error) {
+      console.error("Error adding item to cart:", error)
+      return null
+    }
+  }
 }
+
 
 export const strapiService = new StrapiService()

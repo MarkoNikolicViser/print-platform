@@ -430,38 +430,72 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiOrderFileOrderFile extends Struct.CollectionTypeSchema {
-  collectionName: 'order_files';
+export interface ApiArticleConfigArticleConfig
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'article_configs';
   info: {
-    displayName: 'OrderFile';
-    pluralName: 'order-files';
-    singularName: 'order-file';
+    displayName: 'ArticleConfig';
+    pluralName: 'article-configs';
+    singularName: 'article-config';
   };
   options: {
     draftAndPublish: false;
   };
   attributes: {
-    color: Schema.Attribute.Boolean &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<false>;
-    copies: Schema.Attribute.Integer &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<1>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    file_url: Schema.Attribute.String & Schema.Attribute.Required;
+    fee: Schema.Attribute.Decimal &
+      Schema.Attribute.Required &
+      Schema.Attribute.DefaultTo<15>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
-      'api::order-file.order-file'
+      'api::article-config.article-config'
     > &
       Schema.Attribute.Private;
-    order_id: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
-    page_count: Schema.Attribute.Integer &
-      Schema.Attribute.Required &
-      Schema.Attribute.DefaultTo<1>;
+    name: Schema.Attribute.Enumeration<['A4', 'A3']> &
+      Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
+  collectionName: 'order_items';
+  info: {
+    displayName: 'Order Item';
+    pluralName: 'order-items';
+    singularName: 'order-item';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    binding: Schema.Attribute.Enumeration<['none', 'spiral', 'stapled']> &
+      Schema.Attribute.Required;
+    color: Schema.Attribute.Enumeration<['bw', 'color']> &
+      Schema.Attribute.Required;
+    copies: Schema.Attribute.Integer & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    document_s3_key: Schema.Attribute.String & Schema.Attribute.Required;
+    file_name: Schema.Attribute.String;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::order-item.order-item'
+    > &
+      Schema.Attribute.Private;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
+    pages: Schema.Attribute.Integer;
+    price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    status: Schema.Attribute.Enumeration<['pending', 'failed', 'printed']> &
+      Schema.Attribute.DefaultTo<'pending'>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -484,13 +518,24 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     customer_email: Schema.Attribute.Email & Schema.Attribute.Required;
     customer_phone: Schema.Attribute.String & Schema.Attribute.Required;
+    expires_at: Schema.Attribute.DateTime;
+    finish_code: Schema.Attribute.Enumeration<
+      [
+        'success',
+        'expired',
+        'user_cancelled',
+        'shop_cancelled',
+        'partial',
+        'error',
+      ]
+    >;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::order.order'> &
       Schema.Attribute.Private;
     order_code: Schema.Attribute.String & Schema.Attribute.Required;
-    order_files: Schema.Attribute.Relation<
+    order_items: Schema.Attribute.Relation<
       'oneToMany',
-      'api::order-file.order-file'
+      'api::order-item.order-item'
     >;
     print_shop_id: Schema.Attribute.Relation<
       'manyToOne',
@@ -498,7 +543,16 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     >;
     publishedAt: Schema.Attribute.DateTime;
     status_code: Schema.Attribute.Enumeration<
-      ['uploaded', 'paid', 'printing', 'ready', 'picked_up']
+      [
+        'draft',
+        'uploaded',
+        'paid',
+        'printing',
+        'ready',
+        'picked_up',
+        'cancelled',
+        'expired',
+      ]
     > &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<'uploaded'>;
@@ -579,6 +633,7 @@ export interface ApiPrintShopPricePrintShopPrice
       'api::print-shop.print-shop'
     >;
     publishedAt: Schema.Attribute.DateTime;
+    spiral_page_number: Schema.Attribute.Integer & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1147,7 +1202,8 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
-      'api::order-file.order-file': ApiOrderFileOrderFile;
+      'api::article-config.article-config': ApiArticleConfigArticleConfig;
+      'api::order-item.order-item': ApiOrderItemOrderItem;
       'api::order.order': ApiOrderOrder;
       'api::payment.payment': ApiPaymentPayment;
       'api::print-shop-price.print-shop-price': ApiPrintShopPricePrintShopPrice;
