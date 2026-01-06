@@ -72,7 +72,15 @@ export function Header() {
         </Box>
 
         <Box display="flex" alignItems="center" gap={isMobile ? 0 : 2}>
-          {user ? (
+          <Button
+            variant="text"
+            size="small"
+            onClick={() => router.push("/login")}
+            startIcon={<User size={16} />}
+          >
+            {!isMobile && "Za kopirnice"}
+          </Button>
+          {/* {user ? (
             <>
               <Button
                 variant="text"
@@ -129,7 +137,7 @@ export function Header() {
                 {!isMobile && "Admin"}
               </Button>
             </>
-          )}
+          )} */}
         </Box>
       </Toolbar>
     </AppBar>

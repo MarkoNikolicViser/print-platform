@@ -7,6 +7,16 @@ module.exports = {
             config: {
                 auth: false
             }
+        },
+        {
+            method: 'POST',
+            path: '/orders/:orderId/accept',
+            handler: 'order.accept'
+        },
+        {
+            method: 'POST',
+            path: '/orders/:orderId/ready',
+            handler: 'order.markReady'
         }
     ]
 };

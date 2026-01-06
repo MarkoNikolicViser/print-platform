@@ -513,11 +513,14 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
+    completed_at: Schema.Attribute.DateTime;
+    completed_on_time: Schema.Attribute.Boolean;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     customer_email: Schema.Attribute.Email & Schema.Attribute.Required;
     customer_phone: Schema.Attribute.String & Schema.Attribute.Required;
+    estimated_completion_at: Schema.Attribute.DateTime;
     expires_at: Schema.Attribute.DateTime;
     finish_code: Schema.Attribute.Enumeration<
       [
@@ -672,6 +675,7 @@ export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
+    on_time_rate: Schema.Attribute.Decimal & Schema.Attribute.DefaultTo<1>;
     orders: Schema.Attribute.Relation<'oneToMany', 'api::order.order'>;
     phone: Schema.Attribute.String & Schema.Attribute.Unique;
     print_shop_prices: Schema.Attribute.Relation<
@@ -679,6 +683,8 @@ export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
       'api::print-shop-price.print-shop-price'
     >;
     publishedAt: Schema.Attribute.DateTime;
+    total_completed_orders: Schema.Attribute.Integer &
+      Schema.Attribute.DefaultTo<0>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

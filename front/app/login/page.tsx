@@ -141,13 +141,13 @@ export default function LoginPage() {
     <Container maxWidth="sm" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
         <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ color: "#1e3a8a", fontWeight: 600 }}>
-          Prijava
+          Prijava za kopirnice
         </Typography>
 
         <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} centered sx={{ mb: 2 }}>
-          <Tab label="Korisnik" />
+          <Tab label="Prijava" />
           <Tab label="Registracija" />
-          <Tab label="Administrator" />
+          {/* <Tab label="Administrator" /> */}
         </Tabs>
 
         {error && (
@@ -237,7 +237,7 @@ export default function LoginPage() {
           </Box>
         </TabPanel>
 
-        <TabPanel value={tabValue} index={2}>
+        {/* <TabPanel value={tabValue} index={2}>
           <Box component="form" onSubmit={handleAdminLogin}>
             <TextField
               fullWidth
@@ -269,7 +269,7 @@ export default function LoginPage() {
               {loading ? "Prijavljivanje..." : "Admin Prijava"}
             </Button>
           </Box>
-        </TabPanel>
+        </TabPanel> */}
 
         <Box sx={{ textAlign: "center", mt: 2 }}>
           <Link href="/" sx={{ color: "#1e3a8a" }}>
