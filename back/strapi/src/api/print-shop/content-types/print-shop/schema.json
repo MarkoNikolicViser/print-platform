@@ -47,6 +47,14 @@
       "type": "json",
       "required": true
     },
+    "on_time_rate": {
+      "type": "decimal",
+      "default": 1
+    },
+    "total_completed_orders": {
+      "type": "integer",
+      "default": 0
+    },
     "orders": {
       "type": "relation",
       "relation": "oneToMany",

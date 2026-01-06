@@ -107,6 +107,74 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
             order_code: populatedOrder.order_code,
             order: populatedOrder
         });
+    },
+    async accept(ctx) {
+        const { orderId } = ctx.params;
+        const { estimated_minutes } = ctx.request.body;
+
+        if (!estimated_minutes || estimated_minutes <= 0) {
+            return ctx.badRequest('Estimated minutes required');
+        }
+
+        const now = new Date();
+        const estimatedCompletion = new Date(
+            now.getTime() + estimated_minutes * 60 * 1000
+        );
+
+        const order = await strapi.db.query('api::order.order').update({
+            where: { id: orderId },
+            data: {
+                status_code: 'accepted',
+                estimated_completion_at: estimatedCompletion
+            }
+        });
+
+        ctx.send({ order });
+    },
+    async markReady(ctx) {
+        const { orderId } = ctx.params;
+
+        const order = await strapi.db.query('api::order.order').findOne({
+            where: { id: orderId },
+            populate: ['print_shop_id']
+        });
+
+        if (!order || !order.estimated_completion_at) {
+            return ctx.badRequest('Order not ready for completion');
+        }
+
+        const completedAt = new Date();
+        const completedOnTime =
+            completedAt <= new Date(order.estimated_completion_at);
+
+        // 1️⃣ Update order
+        await strapi.db.query('api::order.order').update({
+            where: { id: orderId },
+            data: {
+                status_code: 'ready',
+                completed_at: completedAt,
+                completed_on_time: completedOnTime
+            }
+        });
+
+        // 2️⃣ Update print shop stats
+        const shop = order.print_shop_id;
+
+        const total = shop.total_completed_orders + 1;
+        const onTime = completedOnTime ? 1 : 0;
+
+        const newRate =
+            (shop.on_time_rate * shop.total_completed_orders + onTime) / total;
+
+        await strapi.db.query('api::print-shop.print-shop').update({
+            where: { id: shop.id },
+            data: {
+                total_completed_orders: total,
+                on_time_rate: Number(newRate.toFixed(2))
+            }
+        });
+
+        ctx.send({ completedOnTime });
     }
 
 }));

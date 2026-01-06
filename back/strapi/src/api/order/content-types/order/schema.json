@@ -67,6 +67,15 @@
     },
     "expires_at": {
       "type": "datetime"
+    },
+    "estimated_completion_at": {
+      "type": "datetime"
+    },
+    "completed_at": {
+      "type": "datetime"
+    },
+    "completed_on_time": {
+      "type": "boolean"
     }
   }
 }
