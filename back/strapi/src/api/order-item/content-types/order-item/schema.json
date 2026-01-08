@@ -14,49 +14,58 @@
             "type": "relation",
             "relation": "manyToOne",
             "target": "api::order.order",
-            "inversedBy": "order_items"
+            "inversedBy": "order_items",
+            "required": true
         },
-        "document_s3_key": {
+        "product_template": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::product-template.product-template",
+            "required": true
+        },
+        "selected_options": {
+            "type": "json",
+            "required": true,
+            "description": "Opcije koje je korisnik izabrao (snapshot)"
+        },
+        "quantity": {
+            "type": "integer",
+            "required": true,
+            "min": 1
+        },
+        "unit_price": {
+            "type": "decimal",
+            "required": true,
+            "description": "Cena jednog komada u trenutku porudzbine"
+        },
+        "total_price": {
+            "type": "decimal",
+            "required": true,
+            "description": "unit_price * quantity"
+        },
+        "document_url": {
             "type": "string",
             "required": true
         },
-        "file_name": {
-            "type": "string"
+        "document_name": {
+            "type": "string",
+            "required": true
         },
-        "copies": {
+        "document_pages": {
             "type": "integer",
-            "required": true
+            "required": false
         },
-        "color": {
-            "type": "enumeration",
-            "enum": [
-                "bw",
-                "color"
-            ],
-            "required": true
+        "document_mime": {
+            "type": "string",
+            "required": false
         },
-        "binding": {
-            "type": "enumeration",
-            "enum": [
-                "none",
-                "spiral",
-                "stapled"
-            ],
-            "required": true
-        },
-        "pages": {
-            "type": "integer"
-        },
-        "price": {
-            "type": "decimal",
-            "required": true
-        },
-        "status": {
+        "status_code": {
             "type": "enumeration",
             "enum": [
                 "pending",
-                "failed",
-                "printed"
+                "printing",
+                "ready",
+                "cancelled"
             ],
             "default": "pending"
         }

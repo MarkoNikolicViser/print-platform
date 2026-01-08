@@ -474,28 +474,42 @@ export interface ApiOrderItemOrderItem extends Struct.CollectionTypeSchema {
     draftAndPublish: false;
   };
   attributes: {
-    binding: Schema.Attribute.Enumeration<['none', 'spiral', 'stapled']> &
-      Schema.Attribute.Required;
-    color: Schema.Attribute.Enumeration<['bw', 'color']> &
-      Schema.Attribute.Required;
-    copies: Schema.Attribute.Integer & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    document_s3_key: Schema.Attribute.String & Schema.Attribute.Required;
-    file_name: Schema.Attribute.String;
+    document_mime: Schema.Attribute.String;
+    document_name: Schema.Attribute.String & Schema.Attribute.Required;
+    document_pages: Schema.Attribute.Integer;
+    document_url: Schema.Attribute.String & Schema.Attribute.Required;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::order-item.order-item'
     > &
       Schema.Attribute.Private;
-    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'>;
-    pages: Schema.Attribute.Integer;
-    price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    order: Schema.Attribute.Relation<'manyToOne', 'api::order.order'> &
+      Schema.Attribute.Required;
+    product_template: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::product-template.product-template'
+    > &
+      Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    status: Schema.Attribute.Enumeration<['pending', 'failed', 'printed']> &
+    quantity: Schema.Attribute.Integer &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMax<
+        {
+          min: 1;
+        },
+        number
+      >;
+    selected_options: Schema.Attribute.JSON & Schema.Attribute.Required;
+    status_code: Schema.Attribute.Enumeration<
+      ['pending', 'printing', 'ready', 'cancelled']
+    > &
       Schema.Attribute.DefaultTo<'pending'>;
+    total_price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    unit_price: Schema.Attribute.Decimal & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -643,6 +657,48 @@ export interface ApiPrintShopPricePrintShopPrice
   };
 }
 
+export interface ApiPrintShopProductPricingPrintShopProductPricing
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'print_shop_product_pricings';
+  info: {
+    description: 'Cene proizvoda po kopirnici';
+    displayName: 'Print Shop Product Pricing';
+    pluralName: 'print-shop-product-pricings';
+    singularName: 'print-shop-product-pricing';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    base_price: Schema.Attribute.Decimal & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    is_active: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::print-shop-product-pricing.print-shop-product-pricing'
+    > &
+      Schema.Attribute.Private;
+    option_price_modifiers: Schema.Attribute.JSON & Schema.Attribute.Required;
+    print_shop: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::print-shop.print-shop'
+    > &
+      Schema.Attribute.Required;
+    product_template: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::product-template.product-template'
+    > &
+      Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
   collectionName: 'print_shops';
   info: {
@@ -689,6 +745,36 @@ export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     work_hours: Schema.Attribute.JSON & Schema.Attribute.Required;
+  };
+}
+
+export interface ApiProductTemplateProductTemplate
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'product_templates';
+  info: {
+    displayName: 'Product Template';
+    pluralName: 'product-templates';
+    singularName: 'product-template';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    allowed_options: Schema.Attribute.JSON & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::product-template.product-template'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String & Schema.Attribute.Required;
+    publishedAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -1213,7 +1299,9 @@ declare module '@strapi/strapi' {
       'api::order.order': ApiOrderOrder;
       'api::payment.payment': ApiPaymentPayment;
       'api::print-shop-price.print-shop-price': ApiPrintShopPricePrintShopPrice;
+      'api::print-shop-product-pricing.print-shop-product-pricing': ApiPrintShopProductPricingPrintShopProductPricing;
       'api::print-shop.print-shop': ApiPrintShopPrintShop;
+      'api::product-template.product-template': ApiProductTemplateProductTemplate;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

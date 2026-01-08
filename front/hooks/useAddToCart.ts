@@ -4,7 +4,7 @@ import type { AddToCartPayload, Order } from "../types"
 
 export function useAddToCart() {
     return useMutation({
-        mutationFn: async (payload: AddToCartPayload): Promise<Order> => {
+        mutationFn: async (payload: AddToCartPayload): Promise<string> => {
             const order = await strapiService.addToCart(payload)
             if (!order) {
                 throw new Error("Failed to add item to cart")
@@ -14,7 +14,7 @@ export function useAddToCart() {
 
         onSuccess: (order) => {
             // Persist order_code for next add-to-cart calls
-            localStorage.setItem("order_code", order.order_code)
+            localStorage.setItem("order_code", order)
         },
 
         onError: (error) => {

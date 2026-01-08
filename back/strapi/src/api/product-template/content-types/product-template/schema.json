@@ -1,0 +1,19 @@
+{
+    "kind": "collectionType",
+    "collectionName": "product_templates",
+    "info": {
+        "singularName": "product-template",
+        "pluralName": "product-templates",
+        "displayName": "Product Template"
+    },
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "allowed_options": {
+            "type": "json",
+            "required": true
+        }
+    }
+}

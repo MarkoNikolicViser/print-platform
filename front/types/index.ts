@@ -66,17 +66,20 @@ export interface User {
 }
 
 export interface AddToCartPayload {
-  orderCode?: string
-  documentS3Key: string
-  fileName?: string
-  copies: number
-  color: "bw" | "color"
-  binding: "none" | "spiral" | "stapled"
-  pages?: number
-  price: number
-  customerEmail?: string
-  customerPhone?: string
-  printShopId: number
+  order_code: string | undefined;
+  product_template_id: number;
+  selected_options: {
+    paper_size: string;
+    color: string;
+    binding: string;
+  };
+  quantity: number;
+  print_shop_id: number;
+  customer_email: string;
+  customer_phone: string;
+  document_url: string;
+  document_name: string;
+  document_pages: string;
 }
 
 export interface Order {

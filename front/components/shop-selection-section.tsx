@@ -188,31 +188,47 @@ export function ShopSelectionSection() {
 
   const handleAddToCart = () => {
     const orderCode = localStorage.getItem("order_code")
-    console.log(orderCode)
-    mutate({
-      // orderCode: orderCode || undefined,
-      // documentS3Key: job.s3Key,
-      // fileName: job.fileName,
-      // copies: job.copies,
-      // color: job.color,
-      // binding: job.binding,
-      // pages: job.pages,
-      // price: job.price,
-      // customerEmail: job.customerEmail,
-      // customerPhone: job.customerPhone,
-      // printShopId: job.printShopId,
-      orderCode: orderCode || undefined,
-      documentS3Key: "uploads/abc1236.pdf",
-      fileName: "seminarski-rad3.pdf",
-      copies: 1,
-      color: "color",
-      binding: "none",
-      pages: 12,
-      price: 180,
-      customerEmail: "test@mail.com",
-      customerPhone: "+38160123456",
-      printShopId: 1
-    })
+    const payload = {
+      "order_code": orderCode || undefined,
+      "product_template_id": 1,
+      "selected_options": {
+        "paper_size": "A4",
+        "color": "color",
+        "binding": "spiral"
+      },
+      "quantity": 20,
+      "print_shop_id": 1,
+      "customer_email": "test@mail.com",
+      "customer_phone": "+38160123456",
+      "document_url": "/test.pdf",
+      "document_name": "test",
+      "document_pages": "4"
+    }
+    mutate(payload)
+    // mutate({
+    //   // orderCode: orderCode || undefined,
+    //   // documentS3Key: job.s3Key,
+    //   // fileName: job.fileName,
+    //   // copies: job.copies,
+    //   // color: job.color,
+    //   // binding: job.binding,
+    //   // pages: job.pages,
+    //   // price: job.price,
+    //   // customerEmail: job.customerEmail,
+    //   // customerPhone: job.customerPhone,
+    //   // printShopId: job.printShopId,
+    //   orderCode: orderCode || undefined,
+    //   documentS3Key: "uploads/abc1236.pdf",
+    //   fileName: "seminarski-rad3.pdf",
+    //   copies: 1,
+    //   color: "color",
+    //   binding: "none",
+    //   pages: 12,
+    //   price: 180,
+    //   customerEmail: "test@mail.com",
+    //   customerPhone: "+38160123456",
+    //   printShopId: 1
+    // })
   }
   if (isLoading) return <ShopSelectionSkeleton />
   if (isError) return <ErrorState queryKey={["copyShops"]} message={error.message} />;
