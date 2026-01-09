@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse } from "axios"
-import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order } from "../types"
+import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order, ProductTemplate } from "../types"
 
 class StrapiService {
   private api: AxiosInstance
@@ -317,6 +317,23 @@ class StrapiService {
       return null
     }
   }
+  async getProductTemplatesByMime(documentMime: string) {
+    try {
+      const response = await this.api.get(
+        "/product-templates/by-mime",
+        {
+          params: {
+            document_mime: documentMime,
+          },
+        }
+      )
+      return response.data.data
+    } catch (error) {
+      console.error("Error fetching product templates by mime:", error)
+      return []
+    }
+  }
+
 }
 
 

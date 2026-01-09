@@ -89,3 +89,9 @@ export interface Order {
   total_price: number
   order_items: any[]
 }
+export interface ProductTemplate {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+}

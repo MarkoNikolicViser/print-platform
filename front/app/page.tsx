@@ -1,6 +1,7 @@
 import { FileUploadSection } from "@/components/file-upload-section"
 import { PrintConfigSection } from "@/components/print-config-section"
 import { ShopSelectionSection } from "@/components/shop-selection-section"
+import { PrintTypeSelector } from "@/components/print-type-selector"
 import { Header } from "@/components/header"
 
 
@@ -17,6 +18,7 @@ export default function HomePage() {
           </div>
 
           <FileUploadSection />
+          {/* <PrintTypeSelector /> */}
           <PrintConfigSection />
           <ShopSelectionSection />
         </div>

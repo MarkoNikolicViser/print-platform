@@ -16,6 +16,7 @@ import {
   Paper,
 } from "@mui/material";
 import { Upload, FileText, CheckCircle, AlertCircle, X } from "lucide-react";
+import { PrintTypeSelector } from "./print-type-selector";
 
 interface FileInfo {
   name: string;
@@ -268,6 +269,7 @@ export function FileUploadSection() {
             <strong>Maksimalna veličina:</strong> 50MB po fajlu
           </Typography>
         </Box>
+        <PrintTypeSelector fileUploaded={Boolean(selectedFile)} documentMime='image/jpeg' />
       </CardContent>
     </Card>
   );

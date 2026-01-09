@@ -2,7 +2,7 @@
 
 module.exports = {
     async findByMime(ctx) {
-        const { document_mime } = ctx.request.body;
+        const { document_mime } = ctx.query;
 
         if (!document_mime) {
             return ctx.badRequest('document_mime is required');
@@ -16,9 +16,11 @@ module.exports = {
                         $contains: document_mime,
                     },
                 },
-                select: ['id', 'name', 'description', 'icon'],
+                select: ['id', 'name', 'description', 'icon', 'allowed_options'],
             });
 
-        ctx.send(templates);
+        ctx.send({
+            data: templates,
+        });
     },
 };

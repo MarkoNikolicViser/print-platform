@@ -11,6 +11,19 @@
             "type": "string",
             "required": true
         },
+        "description": {
+            "type": "string",
+            "required": false
+        },
+        "icon": {
+            "type": "string",
+            "required": true
+        },
+        "supported_mime": {
+            "type": "json",
+            "required": true,
+            "description": "Lista dozvoljenih MIME tipova fajlova"
+        },
         "allowed_options": {
             "type": "json",
             "required": true
