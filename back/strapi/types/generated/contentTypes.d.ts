@@ -744,7 +744,7 @@ export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    work_hours: Schema.Attribute.JSON & Schema.Attribute.Required;
+    working_hours: Schema.Attribute.JSON & Schema.Attribute.Required;
   };
 }
 

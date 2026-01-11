@@ -23,12 +23,28 @@ class StrapiService {
     )
   }
 
-  async getCopyShops(): Promise<CopyShop[]> {
+
+  async getCopyShops(
+    productTemplateId?: number,
+    numberOfPages?: number,
+    quantity?: number,
+    selectedOptions?: string
+  ): Promise<CopyShop[]> {
     try {
-      const response: AxiosResponse = await this.api.get("/print-shops?populate=*")
-      return response.data.data
+      // Build params object only with defined values
+      const params: Record<string, any> = {};
+      if (productTemplateId !== undefined) params.productTemplateId = productTemplateId;
+      if (numberOfPages !== undefined) params.numberOfPages = numberOfPages;
+      if (quantity !== undefined) params.quantity = quantity;
+      if (selectedOptions !== undefined) params.selectedOptions = selectedOptions;
+
+      const response: AxiosResponse<CopyShop[]> = await this.api.get("/print-shops", {
+        params,
+      });
+
+      return response.data;
     } catch (error) {
-      console.error("Error fetching copy shops:", error)
+      console.error("Error fetching copy shops:", error);
       throw error;
     }
   }

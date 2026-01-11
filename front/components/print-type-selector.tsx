@@ -16,6 +16,7 @@ import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import CheckroomIcon from "@mui/icons-material/Checkroom";
 import { useEffect, useState, ReactElement } from "react";
 import { useProductTemplatesByMime } from "../hooks/useProductTemplatesByMime";
+import { usePrintContext } from "@/context/PrintContext";
 
 /* ---------------- ICON MAP ---------------- */
 
@@ -48,6 +49,7 @@ type Template = {
     name: string;
     description: string;
     icon: IconKey;
+    allowed_options?: any;
 };
 
 /* ---------------- DUMMY DATA ---------------- */
@@ -111,7 +113,7 @@ export function PrintTypeSelector({
     fileUploaded,
     documentMime,
 }: Props) {
-    const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+    const { selectedTemplate, setSelectedTemplate } = usePrintContext();
 
     const {
         data: templates = [],
@@ -119,6 +121,13 @@ export function PrintTypeSelector({
     } = useProductTemplatesByMime(
         documentMime, fileUploaded
     );
+
+    // useEffect(() => {
+    //     if (!fileUploaded) {
+    //         return
+    //     }
+    //     setSelectedTemplate({id:1})
+    // }, [fileUploaded])
 
     const showSkeletons = fileUploaded && isLoading;
     const templatesToRender = !fileUploaded
@@ -141,7 +150,7 @@ export function PrintTypeSelector({
                     </Grid>
                 ))
                 : templatesToRender.map((template) => {
-                    const isSelected = selectedTemplate === template.id;
+                    const isSelected = selectedTemplate?.id === template.id;
 
                     return (
                         <Grid size={{ xs: 12, sm: 6, md: 4 }} key={template.id}>
@@ -157,7 +166,7 @@ export function PrintTypeSelector({
                             >
                                 <CardActionArea
                                     disabled={!fileUploaded}
-                                    onClick={() => setSelectedTemplate(template.id)}
+                                    onClick={() => setSelectedTemplate({ id: template.id, allowedOptions: template?.allowed_options })}
                                 >
                                     <CardContent sx={{ textAlign: "center" }}>
                                         {iconMap[template.icon] ?? (

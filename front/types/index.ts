@@ -94,4 +94,5 @@ export interface ProductTemplate {
   name: string;
   description: string;
   icon: string;
+  allowed_options?: any
 }

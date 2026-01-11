@@ -1,12 +1,11 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react";
 import {
   Card,
   CardHeader,
   CardContent,
   Typography,
-  TextField,
   Grid,
   FormControl,
   InputLabel,
@@ -18,66 +17,127 @@ import {
   Radio,
   Checkbox,
   Box,
-} from "@mui/material"
+} from "@mui/material";
+import { usePrintContext } from "@/context/PrintContext";
 
 interface OptionField {
-  type: "number" | "select" | "radio" | "checkbox"
-  default: any
-  min?: number
-  max?: number
-  options?: { value: string; label: string }[]
+  type: "number" | "select" | "radio" | "checkbox";
+  default: any;
+  min?: number;
+  max?: number;
+  options?: { value: string; label: string }[];
 }
 
 interface AllowedOptions {
-  [key: string]: OptionField
+  [key: string]: OptionField;
 }
 
 interface PrintConfigSectionProps {
-  allowedOptions: AllowedOptions
-}
-const allowedOptions = {
-  quantity: { type: "number", min: 1, max: 1000, default: 1 },
-  paperSize: {
-    type: "select", options: [
-      { value: "a4", label: "A4 (210×297mm)" },
-      { value: "a3", label: "A3 (297×420mm)" }
-    ], default: "a4"
-  },
-  paperType: {
-    type: "radio", options: [
-      { value: "standard", label: "Standard (80g)" },
-      { value: "premium", label: "Premium (120g)" }
-    ], default: "standard"
-  },
-  isColor: { type: "checkbox", default: false },
-  isDoubleSided: { type: "checkbox", default: false },
-  binding: {
-    type: "radio", options: [
-      { value: "none", label: "Bez povezivanja" },
-      { value: "staple", label: "Heftalica" }
-    ], default: "none"
-  }
+  allowedOptions: AllowedOptions;
+  file: File | null; // 👈 add file prop
 }
 
+const allowedOptions: AllowedOptions = {
+  quantity: { type: "number", min: 1, max: 1000, default: 1 },
+
+  "paper_size": {
+    "type": "select",
+    "options": [
+      {
+        value: "a4",
+        label: "A4 (210×297mm)"
+      },
+      {
+        value: "a3",
+        label: "A3 (297×420mm)"
+      }
+    ],
+    "default": "a4"
+  },
+  "color": {
+    "type": "select",
+    "options": [
+      {
+        value: "bw",
+        label: "crno/belo"
+      },
+      {
+        value: "color",
+        label: "u boji"
+      }
+    ],
+    "default": "bw"
+  },
+  "binding": {
+    "type": "select",
+    "options": [
+      {
+        value: "none",
+        label: "bez"
+      },
+      {
+        value: "spiral",
+        label: "spirala"
+      },
+      {
+        value: "staple",
+        label: "heftalica"
+      }
+    ],
+    "default": "none"
+  },
+  "doubleSided": {
+    "type": "select",
+    "options": [
+      {
+        value: true,
+        label: "obostrano"
+      },
+      {
+        value: false,
+        label: "jednostrano"
+      }
+    ],
+    "default": true
+  }
+};
 
 export function PrintConfigSection() {
-  const initialConfig = Object.keys(allowedOptions).reduce((acc, key) => {
-    acc[key] = allowedOptions[key].default
-    return acc
-  }, {} as Record<string, any>)
+  const { file, selectedTemplate, printConfig, setPrintConfig } = usePrintContext();
+  const [initialConfig, setInitialConfig] = useState(Object.keys(allowedOptions).reduce((acc, key) => {
+    acc[key] = allowedOptions[key]?.default;
+    return acc;
+  }, {} as Record<string, any>))
 
-  const [config, setConfig] = useState(initialConfig)
-
+  // const [printConfig, setConfig] = useState(initialConfig);
+  useEffect(() => { setPrintConfig(initialConfig) }, [])
   const updateConfig = (key: string, value: any) => {
-    setConfig((prev) => ({ ...prev, [key]: value }))
-  }
+    setPrintConfig((prev) => ({ ...prev, [key]: value }));
+  };
+  useEffect(() => {
+    if (!selectedTemplate) {
+      return
+    }
+    const temp = Object?.keys(selectedTemplate?.allowedOptions)?.reduce((acc, key) => {
+      acc[key] = selectedTemplate?.allowedOptions[key]?.default;
+      return acc;
+    }, {} as Record<string, any>)
+    setInitialConfig(temp)
+    setPrintConfig(temp)
+  }, [selectedTemplate])
+
+  const disabled = !file || !selectedTemplate; // 👈 disable if file is empty
 
   return (
     <Card>
       <CardHeader
         title={
-          <Typography variant="h6" color="primary" sx={{ textTransform: "uppercase", fontWeight: "bold" }}>
-            Konfigurišite štampanje
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{ textTransform: "uppercase", fontWeight: "bold" }}
+          >
+            2. Konfigurišite štampanje
           </Typography>
         }
         subheader={
@@ -86,72 +146,76 @@ export function PrintConfigSection() {
           </Typography>
         }
       />
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      <CardContent
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          opacity: disabled ? 0.5 : 1, // 👈 visual feedback
+          pointerEvents: disabled ? "none" : "auto", // 👈 block interaction
+        }}
+      >
         <Grid container spacing={2}>
-          {Object.entries(allowedOptions).map(([key, field]) => (
-            <Grid size={{ xs: 12, md: 6 }} key={key}>
-              {field.type === "number" && (
-                <TextField
-                  label={key}
-                  type="number"
-                  value={config[key]}
-                  onChange={(e) => updateConfig(key, Math.max(field.min || 0, Math.min(field.max || Infinity, Number(e.target.value))))}
-                  inputProps={{ min: field.min, max: field.max }}
-                  fullWidth
-                />
-              )}
+          {selectedTemplate &&
+            Object.entries(selectedTemplate.allowedOptions).map(([key, field]) => (
+              <Grid size={{ xs: 12, md: 6 }} key={key}>
+                {field.type === "select" && field.options && (
+                  <FormControl fullWidth disabled={disabled}>
+                    <InputLabel>{key}</InputLabel>
+                    <Select
+                      value={printConfig[key] ?? field.default} // safety
+                      onChange={(e) => updateConfig(key, e.target.value)}
+                      label={key}
+                    >
+                      {field.options.map((opt) => (
+                        <MenuItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
 
-              {field.type === "select" && field.options && (
-                <FormControl fullWidth>
-                  <InputLabel>{key}</InputLabel>
-                  <Select
-                    value={config[key]}
-                    onChange={(e) => updateConfig(key, e.target.value)}
+                {field.type === "radio" && field.options && (
+                  <FormControl component="fieldset" disabled={disabled}>
+                    <FormLabel>{key}</FormLabel>
+                    <RadioGroup
+                      value={printConfig[key] ?? field.default}
+                      onChange={(e) => updateConfig(key, e.target.value)}
+                    >
+                      {field.options.map((opt) => (
+                        <FormControlLabel
+                          key={opt.value}
+                          value={opt.value}
+                          control={<Radio />}
+                          label={opt.label}
+                        />
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                )}
+
+                {field.type === "checkbox" && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={!!printConfig[key]}
+                        onChange={(e) => updateConfig(key, e.target.checked)}
+                        disabled={disabled}
+                      />
+                    }
                     label={key}
-                  >
-                    {field.options.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-
-              {field.type === "radio" && field.options && (
-                <FormControl component="fieldset">
-                  <FormLabel component="legend">{key}</FormLabel>
-                  <RadioGroup
-                    value={config[key]}
-                    onChange={(e) => updateConfig(key, e.target.value)}
-                  >
-                    {field.options.map((opt) => (
-                      <FormControlLabel key={opt.value} value={opt.value} control={<Radio />} label={opt.label} />
-                    ))}
-                  </RadioGroup>
-                </FormControl>
-              )}
-
-              {field.type === "checkbox" && (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={config[key]}
-                      onChange={(e) => updateConfig(key, e.target.checked)}
-                    />
-                  }
-                  label={key}
-                />
-              )}
-            </Grid>
-          ))}
+                  />
+                )}
+              </Grid>
+            ))}
         </Grid>
-
+        {/* 
         <Box mt={2}>
           <Typography variant="body2">Trenutna konfiguracija:</Typography>
-          <pre>{JSON.stringify(config, null, 2)}</pre>
-        </Box>
+          <pre>{JSON.stringify(printConfig, null, 2)}</pre>
+        </Box> */}
       </CardContent>
     </Card>
-  )
+  );
 }
