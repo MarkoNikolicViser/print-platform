@@ -161,11 +161,11 @@ export function PrintConfigSection() {
               <Grid size={{ xs: 12, md: 6 }} key={key}>
                 {field.type === "select" && field.options && (
                   <FormControl fullWidth disabled={disabled}>
-                    <InputLabel>{key}</InputLabel>
+                    <InputLabel>{field.label}</InputLabel>
                     <Select
                       value={printConfig[key] ?? field.default} // safety
                       onChange={(e) => updateConfig(key, e.target.value)}
-                      label={key}
+                      label={field.label}
                     >
                       {field.options.map((opt) => (
                         <MenuItem key={opt.value} value={opt.value}>
@@ -204,17 +204,17 @@ export function PrintConfigSection() {
                         disabled={disabled}
                       />
                     }
-                    label={key}
+                    label={field.label}
                   />
                 )}
               </Grid>
             ))}
         </Grid>
-        {/* 
+
         <Box mt={2}>
           <Typography variant="body2">Trenutna konfiguracija:</Typography>
           <pre>{JSON.stringify(printConfig, null, 2)}</pre>
-        </Box> */}
+        </Box>
       </CardContent>
     </Card>
   );

@@ -35,7 +35,7 @@ export function FileUploadSection() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const allowedTypes = [".pdf", ".doc", ".docx", ".txt"];
+  const allowedTypes = [".pdf", ".doc", ".docx", ".txt", ".jpg"];
   const maxFileSize = 50 * 1024 * 1024;
 
   /* ---------------- utils ---------------- */

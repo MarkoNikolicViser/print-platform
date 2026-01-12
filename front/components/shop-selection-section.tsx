@@ -14,7 +14,6 @@ import {
   Grid,
   Box,
   Chip,
-  IconButton,
   InputLabel,
   FormControl,
 } from "@mui/material";
@@ -123,7 +122,7 @@ const mockShops: Shop[] = [
 
 export function ShopSelectionSection() {
   const { file, selectedTemplate, printConfig } = usePrintContext();
-  const disabled = !file;
+  const disabled = !file || !selectedTemplate;
   const [selectedShop, setSelectedShop] = useState<number | null>(null)
   const [email, setEmail] = useState("")
   const [sortBy, setSortBy] = useState<"distance" | "price" | "rating">("distance")
@@ -193,7 +192,7 @@ export function ShopSelectionSection() {
     return Math.round(estimatedCost * multiplier)
   }
 
-  const selectedShopData = selectedShop ? mockShops.find((s) => s.id === selectedShop) : null
+  const selectedShopData = selectedShop ? copyShops?.find((s) => s.id === selectedShop) : null
 
   const handleOrderClick = () => {
     if (!selectedShopData || !estimatedCost) return
@@ -208,45 +207,17 @@ export function ShopSelectionSection() {
     const orderCode = localStorage.getItem("order_code")
     const payload = {
       "order_code": orderCode || undefined,
-      "product_template_id": 1,
-      "selected_options": {
-        "paper_size": "A4",
-        "color": "color",
-        "binding": "spiral"
-      },
-      "quantity": 20,
-      "print_shop_id": 1,
-      "customer_email": "test@mail.com",
-      "customer_phone": "+38160123456",
+      "product_template_id": selectedTemplate?.id,
+      "selected_options": memoizedConfig,
+      "quantity": 2,
+      "print_shop_id": selectedShop,
+      "customer_email": email,
       "document_url": "/test.pdf",
       "document_name": "test",
-      "document_pages": "4"
+      "document_pages": "4",
+      "document_mime": file?.type
     }
     mutate(payload)
-    // mutate({
-    //   // orderCode: orderCode || undefined,
-    //   // documentS3Key: job.s3Key,
-    //   // fileName: job.fileName,
-    //   // copies: job.copies,
-    //   // color: job.color,
-    //   // binding: job.binding,
-    //   // pages: job.pages,
-    //   // price: job.price,
-    //   // customerEmail: job.customerEmail,
-    //   // customerPhone: job.customerPhone,
-    //   // printShopId: job.printShopId,
-    //   orderCode: orderCode || undefined,
-    //   documentS3Key: "uploads/abc1236.pdf",
-    //   fileName: "seminarski-rad3.pdf",
-    //   copies: 1,
-    //   color: "color",
-    //   binding: "none",
-    //   pages: 12,
-    //   price: 180,
-    //   customerEmail: "test@mail.com",
-    //   customerPhone: "+38160123456",
-    //   printShopId: 1
-    // })
   }
   if (isLoading) return <ShopSelectionSkeleton />
   if (isError) return <ErrorState queryKey={["copyShops"]} message={error.message} />;
@@ -336,7 +307,7 @@ export function ShopSelectionSection() {
         {/* Shop List */}
         {!showMap && (
           <Box display="flex" flexDirection="column" gap={2}>
-            {copyShops.length === 0 ? (
+            {copyShops?.length === 0 ? (
               <Card sx={{ p: 4, textAlign: "center" }}>
                 <Filter size={32} color="#888" style={{ marginBottom: 8 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -344,7 +315,7 @@ export function ShopSelectionSection() {
                 </Typography>
               </Card>
             ) : (
-              copyShops.map((shop) => (
+              copyShops?.map((shop) => (
                 <Card
                   key={shop.id}
                   variant="outlined"
@@ -391,8 +362,8 @@ export function ShopSelectionSection() {
                         </Typography>
                       </Box>
                       <Box textAlign="right" ml={2}>
-                        {shop.total_price ? <Typography variant="h6" color="primary">
-                          {shop.total_price} RSD
+                        {shop?.total_price ? <Typography variant="h6" color="primary">
+                          {shop?.total_price} RSD
                         </Typography> : null}
                         {/* <Typography variant="caption" color="text.secondary">
                           {estimatedCost ? "za ovaj posao" : "osnovna cena"}
@@ -424,13 +395,12 @@ export function ShopSelectionSection() {
                   <Typography variant="body2" color="text.secondary">
                     {selectedShopData.address}, {selectedShopData.city}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">Tel: {selectedShopData.phone}</Typography>
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }} >
                   <Typography variant="subtitle2" color="primary">Detalji:</Typography>
-                  <Typography variant="body2">Udaljenost: {selectedShopData.distance} km</Typography>
-                  <Typography variant="body2">Vreme pripreme: {selectedShopData.estimatedTime}</Typography>
-                  <Typography variant="body2">Ocena: {selectedShopData.rating}/5 ⭐</Typography>
+                  <Typography variant="body2">Udaljenost: calculate this km</Typography>
+                  <Typography variant="body2">Vreme pripreme: not awailable for now</Typography>
+                  <Typography variant="body2">Ocena: not available for now</Typography>
                 </Grid>
               </Grid>
 

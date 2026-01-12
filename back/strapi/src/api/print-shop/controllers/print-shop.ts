@@ -1,4 +1,5 @@
 'use strict';
+import { calculatePrice } from '../../pricing/services/pricing';
 
 
 async function getTemplatesByShopIds(shopIds) {
@@ -195,36 +196,42 @@ module.exports = {
         const shopIds = pricings.map((p) => p.print_shop.id);
         const templateMap = await getTemplatesByShopIds(shopIds);
 
-        return pricings.map((pricing) => {
-            let unit = Number(pricing.base_price);
+        return await Promise.all(
+            pricings.map(async (pricing) => {
+                const pages = Number(numberOfPages) || 1;
+                const qty = Number(quantity) || 1;
 
-            for (const [key, rawValue] of Object.entries(parsedOptions)) {
-                const value = String(rawValue);
-                const modifier =
-                    pricing.option_price_modifiers?.[key]?.[value];
+                const calculated = await calculatePrice({
+                    printShopId: pricing.print_shop.id,
+                    productTemplate: pricing.product_template,
+                    pricing: {
+                        rules: pricing.rules,
+                    },
+                    document: {
+                        pages,
+                    },
+                    options: parsedOptions,
+                });
 
-                if (modifier !== undefined) {
-                    unit += Number(modifier);
-                }
-            }
+                const totalPrice =
+                    (Number(pricing.base_price) + calculated) * qty;
 
-            const pages = Number(numberOfPages) || 1;
-            const qty = Number(quantity) || 1;
+                const workingTime = getTodayWorkingTime(
+                    pricing.print_shop.working_hours
+                );
 
-            const workingTime = getTodayWorkingTime(
-                pricing.print_shop.working_hours
-            );
+                return {
+                    id: pricing.print_shop.id,
+                    name: pricing.print_shop.name,
+                    city: pricing.print_shop.city,
+                    email: pricing.print_shop.email,
+                    address: pricing.print_shop.address,
+                    total_price: totalPrice,
+                    templates: templateMap[pricing.print_shop.id] || [],
+                    ...workingTime,
+                };
+            })
+        );
 
-            return {
-                id: pricing.print_shop.id,
-                name: pricing.print_shop.name,
-                city: pricing.print_shop.city,
-                email: pricing.print_shop.email,
-                address: pricing.print_shop.address,
-                total_price: unit * qty * pages,
-                templates: templateMap[pricing.print_shop.id] || [],
-                ...workingTime,
-            };
-        });
     },
 };
