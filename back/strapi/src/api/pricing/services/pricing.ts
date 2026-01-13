@@ -1,22 +1,42 @@
-export type PricingRule =
+export type TemplateOption =
     | {
         pricing_type: 'enum';
-        values: Record<string, number>;
+        component_type: 'select';
+        options: { value: string }[];
     }
     | {
         pricing_type: 'boolean';
-        values: Record<'true' | 'false', number>;
+        component_type: 'checkbox';
     }
     | {
         pricing_type: 'number';
-        price_per_unit: number;
+        component_type: 'number';
+        min?: number;
+        max?: number;
     }
     | {
         pricing_type: 'per_page';
-        price_per_page: number;
+        component_type: 'hidden';
     }
     | {
         pricing_type: 'range';
+        component_type: 'hidden';
+    };
+
+export interface ProductTemplate {
+    allowed_options: Record<string, TemplateOption>;
+}
+export type PricingRule =
+    | {
+        values: Record<string, number>;
+    }
+    | {
+        price_per_unit: number;
+    }
+    | {
+        price_per_page: number;
+    }
+    | {
         ranges: {
             from: number;
             to: number;
@@ -27,79 +47,76 @@ export type PricingRule =
 export interface PricingConfig {
     rules: Record<string, PricingRule>;
 }
-
 export interface DocumentMeta {
     pages: number;
 }
 
 export interface CalculatePriceInput {
     printShopId: number;
-    productTemplate: any;
+    productTemplate: ProductTemplate;
     pricing: PricingConfig;
     document: DocumentMeta;
-    options: Record<string, any>;
+    options: Record<string, unknown>;
 }
-
 export async function calculatePrice({
     pricing,
+    productTemplate,
     document,
     options,
 }: CalculatePriceInput): Promise<number> {
     let total = 0;
-    for (const [optionKey, optionValue] of Object.entries(options)) {
-        const rule = pricing.rules?.[optionKey];
 
-        if (!rule) {
-            console.warn(`❌ No rule for option: ${optionKey}`);
-            continue;
-        }
+    const templateOptions = productTemplate.allowed_options;
 
-        if (!rule.pricing_type) {
-            console.warn(`❌ Missing pricing_type for: ${optionKey}`, rule);
-            continue;
-        }
+    for (const [key, rawValue] of Object.entries(options)) {
+        const templateRule = templateOptions[key];
+        const pricingRule = pricing.rules[key];
 
-        console.log('✔ PRICING:', optionKey, rule.pricing_type, optionValue);
+        if (!templateRule || !pricingRule) continue;
 
-        for (const [optionKey, optionValue] of Object.entries(options)) {
-            const rule = pricing.rules?.[optionKey];
-            if (!rule) continue;
+        switch (templateRule.pricing_type) {
+            case 'enum': {
+                const value = String(rawValue);
+                const rule = pricingRule as { values: Record<string, number> };
+                total += rule.values?.[value] ?? 0;
+                break;
+            }
 
-            switch (rule.pricing_type) {
-                case 'enum':
-                    total += Number(rule.values[String(optionValue)] || 0);
-                    break;
+            case 'boolean': {
+                const value = String(Boolean(rawValue));
+                const rule = pricingRule as {
+                    values: Record<'true' | 'false', number>;
+                };
+                total += rule.values?.[value] ?? 0;
+                break;
+            }
 
-                case 'boolean':
-                    total += Number(
-                        rule.values[String(Boolean(optionValue)) as 'true' | 'false'] || 0
-                    );
-                    break;
+            case 'number': {
+                const rule = pricingRule as { price_per_unit: number };
+                total += rule.price_per_unit * Number(rawValue || 0);
+                break;
+            }
 
-                case 'number':
-                    total += Number(rule.price_per_unit || 0) * Number(optionValue || 0);
-                    break;
+            case 'per_page': {
+                const rule = pricingRule as { price_per_page: number };
+                total += rule.price_per_page * (document.pages || 0);
+                break;
+            }
 
-                case 'per_page':
-                    total +=
-                        Number(rule.price_per_page || 0) *
-                        Number(document.pages || 0);
-                    break;
-
-                case 'range': {
-                    const match = rule.ranges.find(
-                        (r) =>
-                            document.pages >= r.from &&
-                            document.pages <= r.to
-                    );
-
-                    if (match) {
-                        total += Number(match.price);
-                    }
-                    break;
-                }
+            case 'range': {
+                const rule = pricingRule as {
+                    ranges: { from: number; to: number; price: number }[];
+                };
+                const match = rule.ranges.find(
+                    r =>
+                        document.pages >= r.from &&
+                        document.pages <= r.to
+                );
+                if (match) total += match.price;
+                break;
             }
         }
-
-        return total;
     }
+
+    return total;
+}

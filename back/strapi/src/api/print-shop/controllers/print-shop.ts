@@ -68,7 +68,6 @@ function getTodayWorkingTime(workingHours) {
 
     const todayKey = daysMap[new Date().getDay()];
     const today = workingHours[todayKey];
-
     if (!today || !today.from || !today.to) {
         return {
             working_time_today: '',
@@ -86,9 +85,7 @@ function getTodayWorkingTime(workingHours) {
 
     const toTime = new Date(now);
     toTime.setHours(toH, toM, 0, 0);
-
     const isOpenNow = now >= fromTime && now <= toTime;
-
     return {
         working_time_today: `${today.from} - ${today.to}`,
         is_open_today: true,
@@ -190,7 +187,11 @@ module.exports = {
                             'working_hours',
                         ],
                     },
+                    product_template: {
+                        select: ['id', 'name', 'allowed_options'],
+                    },
                 },
+
             });
 
         const shopIds = pricings.map((p) => p.print_shop.id);
@@ -200,12 +201,11 @@ module.exports = {
             pricings.map(async (pricing) => {
                 const pages = Number(numberOfPages) || 1;
                 const qty = Number(quantity) || 1;
-
                 const calculated = await calculatePrice({
                     printShopId: pricing.print_shop.id,
                     productTemplate: pricing.product_template,
                     pricing: {
-                        rules: pricing.rules,
+                        rules: pricing.option_price_modifiers,
                     },
                     document: {
                         pages,
