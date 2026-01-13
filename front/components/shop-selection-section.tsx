@@ -25,6 +25,39 @@ import ErrorState from '../components/ui/error-state';
 import { useAddToCart } from "../hooks/useAddToCart"
 import { usePrintContext } from "@/context/PrintContext";
 
+type SortBy = "distance" | "price" | "rating"
+
+interface ApiShop {
+  id: number
+  name: string
+  address: string
+  city: string
+
+  // UI koristi ovo
+  templates: string[]
+
+  is_open_now: boolean
+  working_time_today: string | null
+
+  total_price?: number
+}
+
+interface FileCalculatedDetail {
+  estimatedCost: number
+}
+
+interface AddToCartPayload {
+  order_code?: string
+  product_template_id?: number
+  selected_options: string
+  quantity: number
+  print_shop_id: number | null
+  customer_email: string
+  document_url: string
+  document_name: string
+  document_pages: string
+  document_mime?: string
+}
 
 interface Shop {
   id: number
@@ -40,6 +73,7 @@ interface Shop {
   services: string[]
   workingHours: string
   coordinates: { lat: number; lng: number }
+  total_price?: number
 }
 
 const mockShops: Shop[] = [
@@ -124,22 +158,23 @@ export function ShopSelectionSection() {
   const { file, selectedTemplate, printConfig } = usePrintContext();
   const disabled = !file || !selectedTemplate;
   const [selectedShop, setSelectedShop] = useState<number | null>(null)
-  const [email, setEmail] = useState("")
-  const [sortBy, setSortBy] = useState<"distance" | "price" | "rating">("distance")
+  const [email, setEmail] = useState<string>("")
+  const [sortBy, setSortBy] = useState<SortBy>("distance")
   const [filterCity, setFilterCity] = useState<string>("all")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [estimatedCost, setEstimatedCost] = useState(0)
-  const [showMap, setShowMap] = useState(false)
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [estimatedCost, setEstimatedCost] = useState<number>(0)
+  const [showMap, setShowMap] = useState<boolean>(false)
+
   const router = useRouter()
 
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
 
   const {
-    data: copyShops,
+    data: copyShops = [],
     isLoading,
     error,
     isError,
-  } = useQuery({
+  } = useQuery<ApiShop[], Error>({
     queryKey: ["copyShops", memoizedConfig],
     queryFn: () =>
       !selectedTemplate
@@ -155,12 +190,22 @@ export function ShopSelectionSection() {
 
   // Listen for cost updates from print configuration
   useEffect(() => {
-    const handleFileCalculated = (event: CustomEvent) => {
+    const handleFileCalculated = (
+      event: CustomEvent<FileCalculatedDetail>
+    ) => {
       setEstimatedCost(event.detail.estimatedCost || 0)
     }
 
-    window.addEventListener("fileCalculated", handleFileCalculated as EventListener)
-    return () => window.removeEventListener("fileCalculated", handleFileCalculated as EventListener)
+    window.addEventListener(
+      "fileCalculated",
+      handleFileCalculated as EventListener
+    )
+
+    return () =>
+      window.removeEventListener(
+        "fileCalculated",
+        handleFileCalculated as EventListener
+      )
   }, [])
 
   const cities = ["all", ...Array.from(new Set(mockShops.map((shop) => shop.city)))]
@@ -186,13 +231,16 @@ export function ShopSelectionSection() {
       }
     })
 
-  const calculateShopPrice = (shop: Shop): number => {
+  const calculateShopPrice = (shop: ApiShop): number => {
     if (!estimatedCost) return 0
-    const multiplier = shop.basePrice / 10 // Base price per RSD
-    return Math.round(estimatedCost * multiplier)
+    return shop.total_price ?? 0
   }
 
-  const selectedShopData = selectedShop ? copyShops?.find((s) => s.id === selectedShop) : null
+
+  const selectedShopData: ApiShop | null =
+    selectedShop && copyShops
+      ? copyShops.find((s) => s.id === selectedShop) ?? null
+      : null
 
   const handleOrderClick = () => {
     if (!selectedShopData || !estimatedCost) return
@@ -205,7 +253,7 @@ export function ShopSelectionSection() {
 
   const handleAddToCart = () => {
     const orderCode = localStorage.getItem("order_code")
-    const payload = {
+    const payload: AddToCartPayload = {
       "order_code": orderCode || undefined,
       "product_template_id": selectedTemplate?.id,
       "selected_options": memoizedConfig,

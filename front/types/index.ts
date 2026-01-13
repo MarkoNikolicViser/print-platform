@@ -22,21 +22,18 @@ export interface PrintOptions {
 }
 
 export interface CopyShop {
-  id: string
+  id: number
   name: string
   address: string
   city: string
-  phone: string
-  email: string
-  coordinates: {
-    lat: number
-    lng: number
-  }
-  pricing: ShopPricing
-  services: string[]
-  workingHours: string
-  rating: number
-  isActive: boolean
+
+  // UI koristi ovo
+  templates: string[]
+
+  is_open_now: boolean
+  working_time_today: string | null
+
+  total_price?: number
 }
 
 export interface ShopPricing {
@@ -66,20 +63,16 @@ export interface User {
 }
 
 export interface AddToCartPayload {
-  order_code: string | undefined;
-  product_template_id: number;
-  selected_options: {
-    paper_size: string;
-    color: string;
-    binding: string;
-  };
-  quantity: number;
-  print_shop_id: number;
-  customer_email: string;
-  customer_phone: string;
-  document_url: string;
-  document_name: string;
-  document_pages: string;
+  order_code?: string
+  product_template_id?: number
+  selected_options: string
+  quantity: number
+  print_shop_id: number | null
+  customer_email: string
+  document_url: string
+  document_name: string
+  document_pages: string
+  document_mime?: string
 }
 
 export interface Order {

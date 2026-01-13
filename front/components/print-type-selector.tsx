@@ -169,10 +169,7 @@ export function PrintTypeSelector({
                                     onClick={() => setSelectedTemplate({ id: template.id, allowedOptions: template?.allowed_options })}
                                 >
                                     <CardContent sx={{ textAlign: "center" }}>
-                                        {iconMap[template.icon] ?? (
-                                            <DescriptionIcon fontSize="large" />
-                                        )}
-
+                                        {iconMap[template.icon as IconKey] ?? <DescriptionIcon fontSize="large" />}
                                         <Typography variant="h6" mt={1}>
                                             {template.name}
                                         </Typography>

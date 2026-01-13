@@ -209,26 +209,6 @@ class StrapiService {
     }
   }
 
-  calculatePrintCost(shop: CopyShop, pageCount: number, options: PrintOptions): number {
-    const basePrice = options.colorPrinting ? shop.pricing.color : shop.pricing.blackWhite
-    let totalCost = basePrice * pageCount * options.copies
-
-    // Apply double-sided discount
-    if (options.doubleSided) {
-      totalCost *= 1 - shop.pricing.doubleSidedDiscount / 100
-    }
-
-    // Apply paper type multiplier
-    totalCost *= shop.pricing.paperTypes[options.paperType]
-
-    // Add binding cost
-    if (options.binding !== "none") {
-      totalCost += shop.pricing.binding[options.binding]
-    }
-
-    return Math.round(totalCost * 100) / 100 // Round to 2 decimal places
-  }
-
   private transformCopyShop(data: any): CopyShop {
     return {
       id: data.id.toString(),

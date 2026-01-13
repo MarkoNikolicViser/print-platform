@@ -26,6 +26,7 @@ interface OptionField {
   min?: number;
   max?: number;
   options?: { value: string; label: string }[];
+  label?: string;
 }
 
 interface AllowedOptions {
@@ -90,11 +91,11 @@ const allowedOptions: AllowedOptions = {
     "type": "select",
     "options": [
       {
-        value: true,
+        value: 'true',
         label: "obostrano"
       },
       {
-        value: false,
+        value: 'false',
         label: "jednostrano"
       }
     ],
@@ -112,7 +113,7 @@ export function PrintConfigSection() {
   // const [printConfig, setConfig] = useState(initialConfig);
   useEffect(() => { setPrintConfig(initialConfig) }, [])
   const updateConfig = (key: string, value: any) => {
-    setPrintConfig((prev) => ({ ...prev, [key]: value }));
+    setPrintConfig((prev: any) => ({ ...prev, [key]: value }));
   };
   useEffect(() => {
     if (!selectedTemplate) {
@@ -157,7 +158,7 @@ export function PrintConfigSection() {
       >
         <Grid container spacing={2}>
           {selectedTemplate &&
-            Object.entries(selectedTemplate.allowedOptions).map(([key, field]) => (
+            (Object.entries(selectedTemplate.allowedOptions) as [string, OptionField][]).map(([key, field]) => (
               <Grid size={{ xs: 12, md: 6 }} key={key}>
                 {field.type === "select" && field.options && (
                   <FormControl fullWidth disabled={disabled}>
