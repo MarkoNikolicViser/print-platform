@@ -29,89 +29,10 @@ interface OptionField {
   label?: string;
 }
 
-interface AllowedOptions {
-  [key: string]: OptionField;
-}
-
-interface PrintConfigSectionProps {
-  allowedOptions: AllowedOptions;
-  file: File | null; // 👈 add file prop
-}
-
-const allowedOptions: AllowedOptions = {
-  quantity: { type: "number", min: 1, max: 1000, default: 1 },
-
-  "paper_size": {
-    "type": "select",
-    "options": [
-      {
-        value: "a4",
-        label: "A4 (210×297mm)"
-      },
-      {
-        value: "a3",
-        label: "A3 (297×420mm)"
-      }
-    ],
-    "default": "a4"
-  },
-  "color": {
-    "type": "select",
-    "options": [
-      {
-        value: "bw",
-        label: "crno/belo"
-      },
-      {
-        value: "color",
-        label: "u boji"
-      }
-    ],
-    "default": "bw"
-  },
-  "binding": {
-    "type": "select",
-    "options": [
-      {
-        value: "none",
-        label: "bez"
-      },
-      {
-        value: "spiral",
-        label: "spirala"
-      },
-      {
-        value: "staple",
-        label: "heftalica"
-      }
-    ],
-    "default": "none"
-  },
-  "doubleSided": {
-    "type": "select",
-    "options": [
-      {
-        value: 'true',
-        label: "obostrano"
-      },
-      {
-        value: 'false',
-        label: "jednostrano"
-      }
-    ],
-    "default": true
-  }
-};
 
 export function PrintConfigSection() {
   const { file, selectedTemplate, printConfig, setPrintConfig } = usePrintContext();
-  const [initialConfig, setInitialConfig] = useState(Object.keys(allowedOptions).reduce((acc, key) => {
-    acc[key] = allowedOptions[key]?.default;
-    return acc;
-  }, {} as Record<string, any>))
 
-  // const [printConfig, setConfig] = useState(initialConfig);
-  useEffect(() => { setPrintConfig(initialConfig) }, [])
   const updateConfig = (key: string, value: any) => {
     setPrintConfig((prev: any) => ({ ...prev, [key]: value }));
   };
@@ -123,10 +44,8 @@ export function PrintConfigSection() {
       acc[key] = selectedTemplate?.allowedOptions[key]?.default;
       return acc;
     }, {} as Record<string, any>)
-    setInitialConfig(temp)
     setPrintConfig(temp)
   }, [selectedTemplate])
-
   const disabled = !file || !selectedTemplate; // 👈 disable if file is empty
 
   return (
@@ -157,7 +76,7 @@ export function PrintConfigSection() {
         }}
       >
         <Grid container spacing={2}>
-          {selectedTemplate &&
+          {selectedTemplate && printConfig &&
             (Object.entries(selectedTemplate.allowedOptions) as [string, OptionField][]).map(([key, field]) => (
               <Grid size={{ xs: 12, md: 6 }} key={key}>
                 {field.type === "select" && field.options && (
@@ -177,7 +96,7 @@ export function PrintConfigSection() {
                   </FormControl>
                 )}
 
-                {field.type === "radio" && field.options && (
+                {field.type === "radio" && field.options && printConfig && (
                   <FormControl component="fieldset" disabled={disabled}>
                     <FormLabel>{key}</FormLabel>
                     <RadioGroup
@@ -196,7 +115,7 @@ export function PrintConfigSection() {
                   </FormControl>
                 )}
 
-                {field.type === "checkbox" && (
+                {field.type === "checkbox" && printConfig && (
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -212,10 +131,10 @@ export function PrintConfigSection() {
             ))}
         </Grid>
 
-        <Box mt={2}>
+        {printConfig ? <Box mt={2}>
           <Typography variant="body2">Trenutna konfiguracija:</Typography>
           <pre>{JSON.stringify(printConfig, null, 2)}</pre>
-        </Box>
+        </Box> : null}
       </CardContent>
     </Card>
   );

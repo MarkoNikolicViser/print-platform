@@ -7,7 +7,6 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton,
   Button,
   Box,
   Avatar,
@@ -79,7 +78,7 @@ export function Header() {
             sx={{ cursor: "pointer" }}
             onClick={() => router.push("/")}
           >
-            PrintSerbia
+            Go2Copy
           </Typography>
         </Box>
 
@@ -93,64 +92,6 @@ export function Header() {
             {!isMobile && "Za kopirnice"}
           </Button>
           <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push("/cart")} />
-          {/* {user ? (
-            <>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/profile")}
-                startIcon={<User size={16} />}
-              >
-                {!isMobile && user.name}
-              </Button>
-              <Button
-                variant="text"
-                size="small"
-                onClick={handleLogout}
-                startIcon={<LogOut size={16} />}
-              >
-                {!isMobile && "Odjavi se"}
-              </Button>
-            </>
-          ) : admin ? (
-            <>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/admin")}
-                startIcon={<Settings size={16} />}
-              >
-                {!isMobile && admin.shopName}
-              </Button>
-              <Button
-                variant="text"
-                size="small"
-                onClick={handleLogout}
-                startIcon={<LogOut size={16} />}
-              >
-                {!isMobile && "Odjavi se"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/login")}
-                startIcon={<User size={16} />}
-              >
-                {!isMobile && "Prijavi se"}
-              </Button>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/login")}
-                startIcon={<Settings size={16} />}
-              >
-                {!isMobile && "Admin"}
-              </Button>
-            </>
-          )} */}
         </Box>
       </Toolbar>
     </AppBar>

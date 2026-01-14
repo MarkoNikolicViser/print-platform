@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, IconButton, Chip } from "@mui/material";
+import { IconButton, Chip } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 interface CartButtonProps {
@@ -14,9 +14,9 @@ export default function CartButton({ quantity, onClick }: CartButtonProps) {
             color="primary"
             onClick={onClick}
             sx={{ position: "relative" }}
+            disabled={!quantity || quantity < 1}
         >
             <ShoppingCartIcon />
-
             {/* Chip overlay for quantity */}
             {quantity > 0 && (
                 <Chip

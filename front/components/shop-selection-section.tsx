@@ -32,13 +32,9 @@ interface ApiShop {
   name: string
   address: string
   city: string
-
-  // UI koristi ovo
   templates: string[]
-
   is_open_today: boolean
   working_time_today: string | null
-
   total_price?: number
 }
 
@@ -52,7 +48,6 @@ interface AddToCartPayload {
   selected_options: string
   quantity: number
   print_shop_id: number | null
-  customer_email: string
   document_url: string
   document_name: string
   document_pages: string
@@ -168,7 +163,7 @@ export function ShopSelectionSection() {
 
 
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
-
+  console.log(memoizedConfig)
   const {
     data: copyShops = [],
     isLoading,
@@ -246,7 +241,6 @@ export function ShopSelectionSection() {
       "selected_options": memoizedConfig,
       "quantity": 1,
       "print_shop_id": selectedShop,
-      // "customer_email": email,
       "document_url": "/test.pdf",
       "document_name": "test",
       "document_pages": "3",
@@ -326,7 +320,7 @@ export function ShopSelectionSection() {
                 Ovde bi se prikazala mapa sa lokacijama štamparija
               </Typography>
               <Grid container spacing={2}>
-                {copyShops?.map((shop) => (
+                {copyShops?.map((shop: ApiShop) => (
                   <Grid size={{ xs: 12, md: 4 }} key={shop.id}>
                     <Box p={2} border={1} borderRadius={2}>
                       <Typography variant="body1">{shop.name}</Typography>
@@ -350,7 +344,7 @@ export function ShopSelectionSection() {
                 </Typography>
               </Card>
             ) : (
-              copyShops?.map((shop) => (
+              copyShops?.map((shop: ApiShop) => (
                 <Card
                   key={shop.id}
                   variant="outlined"
@@ -438,12 +432,12 @@ export function ShopSelectionSection() {
                     variant="contained"
                     color="primary"
                     fullWidth
-                    onClick={() => router.push('/checkout')}
+                    onClick={() => { handleAddToCart(); router.push('/checkout') }}
                   >
                     {/* {estimatedCost
                       ? `Naruči i plati (${calculateShopPrice(selectedShopData)} RSD)`
                       : "Prvo konfigurišite štampanje"} */}
-                    Poruci odmah
+                    Plati i poruci odmah
                   </Button>
                 </Grid>
 

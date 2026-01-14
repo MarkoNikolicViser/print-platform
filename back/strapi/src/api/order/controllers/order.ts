@@ -138,9 +138,8 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
         // 9️⃣ Recalc total_price ordera odmah
         const items = await strapi.db.query('api::order-item.order-item').findMany({
             where: { order: order.id },
-            select: ['total_price'],
+            select: ['id', 'total_price'],
         });
-
         const orderTotal = items.reduce((sum, i) => sum + Number(i.total_price || 0), 0);
 
         await strapi.db.query('api::order.order').update({

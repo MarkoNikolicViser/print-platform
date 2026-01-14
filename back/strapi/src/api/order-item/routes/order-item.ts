@@ -10,5 +10,11 @@ module.exports = {
                 auth: false,
             },
         },
+        {
+            method: 'GET',
+            path: '/order/:orderId/items',
+            handler: 'order-item.itemsByOrder',
+        },
+
     ],
 };

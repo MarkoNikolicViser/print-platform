@@ -14,7 +14,7 @@ import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import ImageIcon from "@mui/icons-material/Image";
 import LocalCafeIcon from "@mui/icons-material/LocalCafe";
 import CheckroomIcon from "@mui/icons-material/Checkroom";
-import { useEffect, useState, ReactElement } from "react";
+import { useEffect, ReactElement } from "react";
 import { useProductTemplatesByMime } from "../hooks/useProductTemplatesByMime";
 import { usePrintContext } from "@/context/PrintContext";
 

@@ -16,7 +16,7 @@ import {
   Paper,
   Chip,
 } from "@mui/material";
-import { Upload, FileText, CheckCircle, AlertCircle, X } from "lucide-react";
+import { Upload, FileText, AlertCircle, X } from "lucide-react";
 import { PrintTypeSelector } from "./print-type-selector";
 import { usePrintContext } from "@/context/PrintContext";
 
