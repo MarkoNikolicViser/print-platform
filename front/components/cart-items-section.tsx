@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useOrderItems } from '../hooks/useOrderItems'
 import ShopSelectionSkeleton from './ui/shop-selection-skeleton';
 import ErrorState from './ui/error-state';
-
+import { OrderItemsEditor } from '../components/uiTestCartComponent'
 
 type CartItem = {
     id: number;
@@ -169,11 +169,12 @@ export default function CartItemsSection() {
             </Card>
         ))}
     </Stack> */}
-            {orderItems ? <Box mt={2}>
+            {/* {orderItems ? <Box mt={2}>
                 <Typography variant="body2">TO DO // create fields instead of this:</Typography>
                 <pre>{JSON.stringify(orderItems, null, 2)}</pre>
             </Box> : null}
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 3 }} /> */}
+            <OrderItemsEditor />
 
             <Box
                 display="flex"
