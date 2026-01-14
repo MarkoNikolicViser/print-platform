@@ -109,28 +109,28 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
             productTemplate: pricingConfig.product_template,
             pricing: { rules: pricingConfig.option_price_modifiers },
             document: { pages },
-            options,
+            options: parsedOptions,
         });
 
-        if (unitPrice === 0) {
-            return ctx.badRequest('Price calculation failed: check options and pricing rules');
-        }
-
+        // if (unitPrice === 0) {
+        //     return ctx.badRequest('Price calculation failed: check options and pricing rules');
+        // }
         const qty = Number(quantity) || 1;
-        const totalItemPrice = unitPrice * qty;
+        const unitBasePrice = Number(pricingConfig.base_price) + unitPrice
+        const totalItemPrice = unitBasePrice * qty;
 
         // 8️⃣ Kreiraj order item
         await strapi.db.query('api::order-item.order-item').create({
             data: {
                 order: order.id,
                 product_template: product_template_id,
-                selected_options: options,
+                selected_options: parsedOptions,
                 quantity: qty,
                 document_url,
                 document_name,
                 document_pages: pages,
                 document_mime,
-                unit_price: unitPrice,
+                unit_price: unitBasePrice,
                 total_price: totalItemPrice,
             },
         });

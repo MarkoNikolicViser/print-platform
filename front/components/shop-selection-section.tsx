@@ -158,14 +158,14 @@ export function ShopSelectionSection() {
   const { file, selectedTemplate, printConfig } = usePrintContext();
   const disabled = !file || !selectedTemplate;
   const [selectedShop, setSelectedShop] = useState<number | null>(null)
-  const [email, setEmail] = useState<string>("")
   const [sortBy, setSortBy] = useState<SortBy>("distance")
   const [filterCity, setFilterCity] = useState<string>("all")
   const [searchTerm, setSearchTerm] = useState<string>("")
-  const [estimatedCost, setEstimatedCost] = useState<number>(0)
   const [showMap, setShowMap] = useState<boolean>(false)
+  const { mutate, isPending } = useAddToCart()
 
   const router = useRouter()
+
 
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
 
@@ -193,7 +193,7 @@ export function ShopSelectionSection() {
     const handleFileCalculated = (
       event: CustomEvent<FileCalculatedDetail>
     ) => {
-      setEstimatedCost(event.detail.estimatedCost || 0)
+      // setEstimatedCost(event.detail.estimatedCost || 0)
     }
 
     window.addEventListener(
@@ -231,25 +231,12 @@ export function ShopSelectionSection() {
       }
     })
 
-  const calculateShopPrice = (shop: ApiShop): number => {
-    if (!estimatedCost) return 0
-    return shop.total_price ?? 0
-  }
-
 
   const selectedShopData: ApiShop | null =
     selectedShop && copyShops
       ? copyShops.find((s) => s.id === selectedShop) ?? null
       : null
 
-  const handleOrderClick = () => {
-    if (!selectedShopData || !estimatedCost) return
-
-    // In a real app, you would pass this data through state management or URL params
-    router.push("/checkout")
-  }
-
-  const { mutate, isPending } = useAddToCart()
 
   const handleAddToCart = () => {
     const orderCode = localStorage.getItem("order_code")
@@ -257,12 +244,12 @@ export function ShopSelectionSection() {
       "order_code": orderCode || undefined,
       "product_template_id": selectedTemplate?.id,
       "selected_options": memoizedConfig,
-      "quantity": 2,
+      "quantity": 1,
       "print_shop_id": selectedShop,
-      "customer_email": email,
+      // "customer_email": email,
       "document_url": "/test.pdf",
       "document_name": "test",
-      "document_pages": "4",
+      "document_pages": "3",
       "document_mime": file?.type
     }
     mutate(payload)
@@ -395,10 +382,6 @@ export function ShopSelectionSection() {
                             <Star size={14} color="#facc15" />
                             <Typography variant="caption">not available for now</Typography>
                           </Box>
-                          {/* <Box display="flex" alignItems="center" gap={1}>
-                            <Phone size={14} />
-                            <Typography variant="caption">{shop.phone}</Typography>
-                          </Box> */}
                         </Box>
                         <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
                           {shop?.templates.map((service: string) => (
@@ -407,15 +390,13 @@ export function ShopSelectionSection() {
                         </Box>
                         <Typography variant="caption" color="text.secondary" mt={1}>
                           Radno vreme: {shop.is_open_today ? shop.working_time_today : 'Neradan dan'}
+                          {/* //TO DO - disable if not working with is_open_now */}
                         </Typography>
                       </Box>
                       <Box textAlign="right" ml={2}>
                         {shop?.total_price ? <Typography variant="h6" color="primary">
                           {shop?.total_price} RSD
                         </Typography> : null}
-                        {/* <Typography variant="caption" color="text.secondary">
-                          {estimatedCost ? "za ovaj posao" : "osnovna cena"}
-                        </Typography> */}
                       </Box>
                     </Box>
                   </CardContent>
@@ -451,42 +432,18 @@ export function ShopSelectionSection() {
                   <Typography variant="body2">Ocena: not available for now</Typography>
                 </Grid>
               </Grid>
-
-              {estimatedCost > 0 && (
-                <Box p={2} border={1} borderRadius={2} borderColor="primary.main" bgcolor="background.paper">
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="body1" fontWeight="medium">Ukupna cena:</Typography>
-                    <Typography variant="h6" color="primary">{calculateShopPrice(selectedShopData)} RSD</Typography>
-                  </Box>
-                </Box>
-              )}
-
-              <Box display="flex" flexDirection="column" gap={1}>
-                <TextField
-                  label="Email za obaveštenja (opciono)"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="vasa.email@example.com"
-                  fullWidth
-                />
-                <Typography variant="caption" color="text.secondary">
-                  Poslaćemo vam email kada bude gotovo štampanje
-                </Typography>
-              </Box>
-
               <Grid container spacing={2}>
                 <Grid size={{ xs: 6 }}>
                   <Button
                     variant="contained"
                     color="primary"
                     fullWidth
-                    disabled={!estimatedCost}
-                    onClick={handleOrderClick}
+                    onClick={() => router.push('/checkout')}
                   >
-                    {estimatedCost
+                    {/* {estimatedCost
                       ? `Naruči i plati (${calculateShopPrice(selectedShopData)} RSD)`
-                      : "Prvo konfigurišite štampanje"}
+                      : "Prvo konfigurišite štampanje"} */}
+                    Poruci odmah
                   </Button>
                 </Grid>
 

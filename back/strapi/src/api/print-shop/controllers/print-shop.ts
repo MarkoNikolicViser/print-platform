@@ -219,7 +219,6 @@ module.exports = {
                 const workingTime = getTodayWorkingTime(
                     pricing.print_shop.working_hours
                 );
-
                 return {
                     id: pricing.print_shop.id,
                     name: pricing.print_shop.name,
