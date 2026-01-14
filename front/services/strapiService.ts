@@ -329,7 +329,21 @@ class StrapiService {
       return []
     }
   }
+  async getCartItemCount(orderId: string) {
+    try {
+      const response = await this.api.get(
+        `/orders/${orderId}/items/count`
+      )
 
+      return response.data
+    } catch (error) {
+      console.error("Error fetching cart item count:", error)
+      return {
+        orderId,
+        count: 0,
+      }
+    }
+  }
 }
 
 

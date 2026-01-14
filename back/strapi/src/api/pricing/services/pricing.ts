@@ -65,7 +65,6 @@ export async function calculatePrice({
     options,
 }: CalculatePriceInput): Promise<number> {
     let total = 0;
-
     const templateOptions = productTemplate.allowed_options;
 
     for (const [key, rawValue] of Object.entries(options)) {
@@ -83,7 +82,8 @@ export async function calculatePrice({
             }
 
             case 'boolean': {
-                const value = String(Boolean(rawValue));
+                const value =
+                    rawValue === true || rawValue === 'true' ? 'true' : 'false';
                 const rule = pricingRule as {
                     values: Record<'true' | 'false', number>;
                 };
@@ -104,10 +104,17 @@ export async function calculatePrice({
             }
 
             case 'range': {
-                const rule = pricingRule as {
-                    ranges: { from: number; to: number; price: number }[];
-                };
-                const match = rule.ranges.find(
+                const selected = String(rawValue); // 'none' | 'spiral' | 'staple'
+
+                const rule = pricingRule as Record<
+                    string,
+                    { ranges?: { from: number; to: number; price: number }[] }
+                >;
+
+                const ranges = rule[selected]?.ranges;
+                if (!Array.isArray(ranges)) break;
+
+                const match = ranges.find(
                     r =>
                         document.pages >= r.from &&
                         document.pages <= r.to

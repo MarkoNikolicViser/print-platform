@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCartItemCount } from "../hooks/useCartItemCount";
 import {
   AppBar,
   Toolbar,
@@ -14,15 +15,26 @@ import {
   useTheme,
 } from "@mui/material";
 import { User, Settings, LogOut } from "lucide-react";
+import CartButton from './ui/CartButton'
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
   const [admin, setAdmin] = useState<any>(null);
+  const [orderId, setOrderId] = useState<string | undefined>(undefined)
+
   const router = useRouter();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // hides text on md and smaller
 
+  useEffect(() => {
+    const stored = localStorage.getItem("order_code")
+    if (stored) {
+      setOrderId(String(stored))
+    }
+  }, [])
+
+  const { data: cartCounter } = useCartItemCount(orderId)
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const adminData = localStorage.getItem("admin");
@@ -80,6 +92,7 @@ export function Header() {
           >
             {!isMobile && "Za kopirnice"}
           </Button>
+          <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push("/cart")} />
           {/* {user ? (
             <>
               <Button

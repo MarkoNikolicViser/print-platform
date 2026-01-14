@@ -36,7 +36,7 @@ interface ApiShop {
   // UI koristi ovo
   templates: string[]
 
-  is_open_now: boolean
+  is_open_today: boolean
   working_time_today: string | null
 
   total_price?: number
@@ -406,7 +406,7 @@ export function ShopSelectionSection() {
                           ))}
                         </Box>
                         <Typography variant="caption" color="text.secondary" mt={1}>
-                          Radno vreme: {shop.is_open_now ? shop.working_time_today : 'Neradan dan'}
+                          Radno vreme: {shop.is_open_today ? shop.working_time_today : 'Neradan dan'}
                         </Typography>
                       </Box>
                       <Box textAlign="right" ml={2}>
