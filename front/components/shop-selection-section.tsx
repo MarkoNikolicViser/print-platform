@@ -150,7 +150,7 @@ const mockShops: Shop[] = [
 ]
 
 export function ShopSelectionSection() {
-  const { file, selectedTemplate, printConfig } = usePrintContext();
+  const { file, selectedTemplate, printConfig, quantity } = usePrintContext();
   const disabled = !file || !selectedTemplate;
   const [selectedShop, setSelectedShop] = useState<number | null>(null)
   const [sortBy, setSortBy] = useState<SortBy>("distance")
@@ -163,21 +163,20 @@ export function ShopSelectionSection() {
 
 
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
-  console.log(memoizedConfig)
   const {
     data: copyShops = [],
     isLoading,
     error,
     isError,
   } = useQuery<ApiShop[], Error>({
-    queryKey: ["copyShops", memoizedConfig],
+    queryKey: ["copyShops", memoizedConfig, quantity],
     queryFn: () =>
       !selectedTemplate
         ? strapiService.getCopyShops()
         : strapiService.getCopyShops(
           selectedTemplate?.id,
           3,
-          1,
+          quantity,
           memoizedConfig
         ),
     refetchOnWindowFocus: false,
@@ -239,7 +238,7 @@ export function ShopSelectionSection() {
       "order_code": orderCode || undefined,
       "product_template_id": selectedTemplate?.id,
       "selected_options": memoizedConfig,
-      "quantity": 1,
+      "quantity": quantity,
       "print_shop_id": selectedShop,
       "document_url": "/test.pdf",
       "document_name": "test",

@@ -20,6 +20,8 @@ type PrintContextType = {
     setSelectedTemplate: Dispatch<SetStateAction<SelectedTemplate | null>>;
     printConfig: any;
     setPrintConfig: any;
+    quantity: number;
+    setQuantity: Dispatch<SetStateAction<number>>;
 };
 
 
@@ -31,10 +33,11 @@ export function PrintProvider({ children }: { children: ReactNode }) {
     const [file, setFile] = useState<File | null>(null);
     const [selectedTemplate, setSelectedTemplate] = useState<SelectedTemplate | null>(null);
     const [printConfig, setPrintConfig] = useState(null);
+    const [quantity, setQuantity] = useState(1)
 
     return (
         <PrintContext.Provider
-            value={{ file, setFile, selectedTemplate, setSelectedTemplate, printConfig, setPrintConfig }}
+            value={{ file, setFile, selectedTemplate, setSelectedTemplate, printConfig, setPrintConfig, quantity, setQuantity }}
         >
             {children}
         </PrintContext.Provider>

@@ -112,9 +112,6 @@ export default function CartItemsSection() {
 
     return (
         <Box maxWidth="md" mx="auto" mt={4} px={2}>
-            <Typography variant="h4" gutterBottom>
-                Your Cart
-            </Typography>
 
             {/* <Stack spacing={2}>
         {items.map((item) => (

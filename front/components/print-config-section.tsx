@@ -17,8 +17,12 @@ import {
   Radio,
   Checkbox,
   Box,
+  TextField,
+  IconButton,
 } from "@mui/material";
 import { usePrintContext } from "@/context/PrintContext";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 interface OptionField {
   type: "number" | "select" | "radio" | "checkbox";
@@ -31,8 +35,7 @@ interface OptionField {
 
 
 export function PrintConfigSection() {
-  const { file, selectedTemplate, printConfig, setPrintConfig } = usePrintContext();
-
+  const { file, selectedTemplate, printConfig, setPrintConfig, quantity, setQuantity } = usePrintContext();
   const updateConfig = (key: string, value: any) => {
     setPrintConfig((prev: any) => ({ ...prev, [key]: value }));
   };
@@ -76,6 +79,21 @@ export function PrintConfigSection() {
         }}
       >
         <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            {printConfig && (
+              <FormControl fullWidth disabled={disabled}>
+                <InputLabel>Broj primeraka</InputLabel>
+                <Select
+                  value={quantity} // safety
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  label={'Broj Primeraka'}
+                >                  {[...Array(10)].map((_, i) => (
+                  <MenuItem key={i + 1} value={i + 1}>{i + 1}</MenuItem>
+                ))}
+                </Select>
+              </FormControl>
+            )}
+          </Grid>
           {selectedTemplate && printConfig &&
             (Object.entries(selectedTemplate.allowedOptions) as [string, OptionField][]).map(([key, field]) => (
               <Grid size={{ xs: 12, md: 6 }} key={key}>
@@ -98,7 +116,7 @@ export function PrintConfigSection() {
 
                 {field.type === "radio" && field.options && printConfig && (
                   <FormControl component="fieldset" disabled={disabled}>
-                    <FormLabel>{key}</FormLabel>
+                    <FormLabel>{field.label}</FormLabel>
                     <RadioGroup
                       value={printConfig[key] ?? field.default}
                       onChange={(e) => updateConfig(key, e.target.value)}

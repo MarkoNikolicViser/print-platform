@@ -10,11 +10,21 @@ module.exports = {
 
         const order = await strapi.db.query('api::order.order').findOne({
             where: { order_code: orderId, status_code: 'draft' },
-            populate: { order_items: true }, // ✅ populate relation
+            populate: { order_items: true },
         });
 
         if (!order) {
             return ctx.notFound('Order not found');
+        }
+
+        const { isOrderExpired } = strapi.service('api::order-item.order-item');
+
+        if (isOrderExpired(order)) {
+            ctx.status = 410;
+            return ctx.send({
+                message: 'Order has expired',
+                expired: true,
+            });
         }
 
         const count = order.order_items?.length || 0;
@@ -29,14 +39,21 @@ module.exports = {
             return ctx.badRequest('orderId is required');
         }
 
-        // 🔍 Fetch the order
         const order = await strapi.db.query('api::order.order').findOne({
             where: {
                 order_code: orderId,
-                status_code: 'draft', // adjust if needed
+                status_code: 'draft',
             },
             populate: {
-                order_items: true, // fetch all related items
+                order_items: {
+                    populate: {
+                        print_shop_product_pricing: {
+                            populate: {
+                                template: true,
+                            },
+                        },
+                    },
+                },
             },
         });
 
@@ -44,15 +61,42 @@ module.exports = {
             return ctx.notFound('Order not found');
         }
 
-        const items = order.order_items || [];
-        const count = items.length;
-        const total = order.total_price; // already stored on order
+        const { isOrderExpired } = strapi.service('api::order-item.order-item');
 
-        return ctx.send({
-            orderId,
-            count,
-            total,
-            items,
-        });
+        if (isOrderExpired(order)) {
+            ctx.status = 410;
+            return ctx.send({
+                message: 'Order has expired',
+                expired: true,
+            });
+        }
+
+        const items = order.order_items || [];
+
+        return ctx.send(
+            items.map(item => ({
+                id: item.id,
+                documentId: item.documentId,
+                selected_options: item.selected_options,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+                total_price: item.total_price,
+                document_url: item.document_url,
+                document_name: item.document_name,
+                document_pages: item.document_pages,
+                document_mime: item.document_mime,
+                status_code: item.status_code,
+                createdAt: item.createdAt,
+                updatedAt: item.updatedAt,
+                product_template: item.product_template && {
+                    id: item.product_template.id,
+                    name: item.product_template.name,
+                    description: item.product_template.description,
+                    icon: item.product_template.icon,
+                    supported_mime: item.product_template.supported_mime,
+                    allowed_options: item.product_template.allowed_options,
+                },
+            }))
+        );
     },
 };
