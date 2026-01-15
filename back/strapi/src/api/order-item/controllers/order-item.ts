@@ -47,10 +47,14 @@ module.exports = {
             populate: {
                 order_items: {
                     populate: {
-                        print_shop_product_pricing: {
-                            populate: {
-                                template: true,
-                            },
+                        product_template: {
+                            select: [
+                                'id',
+                                'name',
+                                'icon',
+                                'allowed_options',
+                                'supported_mime',
+                            ],
                         },
                     },
                 },
@@ -73,8 +77,12 @@ module.exports = {
 
         const items = order.order_items || [];
 
-        return ctx.send(
-            items.map(item => ({
+        return ctx.send({
+            orderId,
+            count: items.length,
+            total: order.total_price,
+            expiresAt: order.expires_at,
+            items: items.map(item => ({
                 id: item.id,
                 documentId: item.documentId,
                 selected_options: item.selected_options,
@@ -88,6 +96,7 @@ module.exports = {
                 status_code: item.status_code,
                 createdAt: item.createdAt,
                 updatedAt: item.updatedAt,
+                allowed_options: item.product_template?.allowed_options || {},
                 product_template: item.product_template && {
                     id: item.product_template.id,
                     name: item.product_template.name,
@@ -97,6 +106,7 @@ module.exports = {
                     allowed_options: item.product_template.allowed_options,
                 },
             }))
+        }
         );
     },
 };
