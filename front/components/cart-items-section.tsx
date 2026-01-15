@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useOrderItems } from '../hooks/useOrderItems'
-import ShopSelectionSkeleton from './ui/shop-selection-skeleton';
+import { OrderItemsSkeleton } from './ui/OrderItemsSkeleton';
 import ErrorState from './ui/error-state';
 import { OrderItemsEditor } from '../components/uiTestCartComponent'
 import { renderOptionField } from '../components/ui/DynamicRenderOfFields'
@@ -184,8 +184,8 @@ export default function CartItemsSection() {
         // 🔗 kasnije (debounce):
         // mutateUpdateCopies({ itemId: id, copies: newCopies })
     };
-    if (isLoading) return <ShopSelectionSkeleton />;
-    if (isError) return <ErrorState queryKey={["copyShops"]} message={error.message} />;
+    if (isLoading || !orderId) return <OrderItemsSkeleton />;
+    if (isError) return <ErrorState queryKey={["order-items"]} message={error.message} />;
 
     return (
         <Box maxWidth="md" mx="auto" mt={4} px={2}>
@@ -203,11 +203,11 @@ export default function CartItemsSection() {
                 </Stack>
 
                 <Stack spacing={2}>
-                    {orderItems?.items.map((item) => (
+                    {orderItems?.items?.map((item) => (
                         <Paper key={item.id} variant="outlined" sx={{ p: 2 }}>
                             <Grid container spacing={2} alignItems="center">
                                 {/* Header / info */}
-                                <Grid item xs={12} md={4}>
+                                <Grid size={{ xs: 12, md: 4 }}>
                                     <Typography variant="subtitle1" fontWeight={600}>
                                         {item.document_name} ({item.document_pages} str.)
                                     </Typography>
@@ -227,10 +227,10 @@ export default function CartItemsSection() {
                                 </Grid>
 
                                 {/* Editors */}
-                                <Grid item xs={12} md={8}>
+                                <Grid size={{ xs: 12, md: 8 }}>
                                     <Grid container spacing={2}>
                                         {Object.entries(item.allowed_options).map(([key, option]) => (
-                                            <Grid item xs={12} sm={6} md={3} key={key}>
+                                            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={key}>
                                                 {renderOptionField(
                                                     item,
                                                     key as keyof SelectedOptions,
