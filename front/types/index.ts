@@ -89,3 +89,29 @@ export interface ProductTemplate {
   icon: string;
   allowed_options?: any
 }
+type AllowedOptionType = 'select' | 'radio' | 'number';
+
+interface AllowedOptionBase {
+  type: AllowedOptionType;
+  label: string;
+  pricing_type: 'enum' | 'boolean' | 'number' | 'range';
+  required?: boolean;
+  default?: any;
+}
+
+interface AllowedOptionSelect extends AllowedOptionBase {
+  type: 'select' | 'radio';
+  options: { value: any; label: string }[];
+}
+
+interface AllowedOptionNumber extends AllowedOptionBase {
+  type: 'number';
+  min?: number;
+  max?: number;
+}
+
+type AllowedOption =
+  | AllowedOptionSelect
+  | AllowedOptionNumber;
+
+type AllowedOptionsMap = Record<keyof SelectedOptions, AllowedOption>;
