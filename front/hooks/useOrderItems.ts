@@ -17,6 +17,6 @@ export function useOrderItems(
         enabled: enabled && !!orderId,
         staleTime: 60 * 1000, // 1 min (može i kraće)
         gcTime: 5 * 60 * 1000,
-        refetchOnWindowFocus: false,
+        refetchOnWindowFocus: false
     })
 }

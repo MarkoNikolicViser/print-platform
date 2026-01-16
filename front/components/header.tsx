@@ -17,23 +17,19 @@ import { User, Settings, LogOut } from "lucide-react";
 import CartButton from './ui/CartButton'
 
 export function Header() {
+  const initialOrderId = typeof window !== "undefined" ? localStorage.getItem("order_code") ?? undefined : undefined
+  const [orderId, setOrderId] = useState<string | undefined>(initialOrderId)
   const [user, setUser] = useState<any>(null);
   const [admin, setAdmin] = useState<any>(null);
-  const [orderId, setOrderId] = useState<string | undefined>(undefined)
 
   const router = useRouter();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // hides text on md and smaller
 
-  useEffect(() => {
-    const stored = localStorage.getItem("order_code")
-    if (stored) {
-      setOrderId(String(stored))
-    }
-  }, [])
 
   const { data: cartCounter } = useCartItemCount(orderId)
+
   useEffect(() => {
     const userData = localStorage.getItem("user");
     const adminData = localStorage.getItem("admin");

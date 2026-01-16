@@ -14,9 +14,16 @@ export function useAddToCart() {
             return order
         },
 
-        onSuccess: (order) => {
-            queryClient.invalidateQueries({ queryKey: ["cart-item-count"] })
-            localStorage.setItem("order_code", order)
+        onSuccess: ({ order_code, cart_count }) => {
+            localStorage.setItem("order_code", order_code)
+
+            queryClient.setQueryData(
+                ["cart-item-count", order_code],
+                {
+                    orderId: order_code,
+                    count: cart_count,
+                }
+            )
         },
 
         onError: (error) => {

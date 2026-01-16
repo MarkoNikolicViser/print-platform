@@ -77,7 +77,7 @@ const items =
 export default function CartItemsSection() {
     const [orderId, setOrderId] = useState<string | undefined>(undefined)
     const { data: orderItems, isLoading, isError, error } = useOrderItems(orderId)
-
+    const router = useRouter()
     const [edited, setEdited] = React.useState<OrderItem[]>(() => structuredClone(items));
     const [dirty, setDirty] = React.useState(false);
 
@@ -138,7 +138,12 @@ export default function CartItemsSection() {
         setDirty(false);
     };
 
-    const router = useRouter()
+    useEffect(() => {
+        if (error?.status === 410) {
+            router.push('/')
+        }
+        //TODO maybe add a notif for cart expiration
+    }, [isError])
     useEffect(() => {
         const stored = localStorage.getItem("order_code")
         if (stored) {

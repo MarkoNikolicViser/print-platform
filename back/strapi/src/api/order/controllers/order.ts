@@ -59,7 +59,7 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
             });
         }
 
-        // 3️⃣ Učitaj pricing config sa product template i print shop
+        // 3️⃣ Pricing config
         const pricingConfig = await strapi.db
             .query('api::print-shop-product-pricing.print-shop-product-pricing')
             .findOne({
@@ -78,8 +78,8 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
             return ctx.badRequest('Pricing not configured for this product');
         }
 
-        // 4️⃣ Parse selected_options ako je string
-        let parsedOptions: Record<string, any> = {};
+        // 4️⃣ Parse options
+        let parsedOptions = {};
         if (selected_options) {
             try {
                 parsedOptions =
@@ -91,19 +91,19 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
             }
         }
 
-        // 5️⃣ Filtriraj samo validne options
-        const options: Record<string, any> = {};
+        // 5️⃣ Filtriraj validne options
         const templateOptions = pricingConfig.product_template.allowed_options || {};
+        const options = {};
         for (const key of Object.keys(templateOptions)) {
             if (parsedOptions[key] !== undefined) {
                 options[key] = parsedOptions[key];
             }
         }
 
-        // 6️⃣ Sigurno document pages
+        // 6️⃣ Pages
         const pages = Number(document_pages) || 1;
 
-        // 7️⃣ Izračunaj unit price
+        // 7️⃣ Price
         const unitPrice = await calculatePrice({
             printShopId: print_shop_id,
             productTemplate: pricingConfig.product_template,
@@ -112,11 +112,8 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
             options: parsedOptions,
         });
 
-        // if (unitPrice === 0) {
-        //     return ctx.badRequest('Price calculation failed: check options and pricing rules');
-        // }
         const qty = Number(quantity) || 1;
-        const unitBasePrice = Number(pricingConfig.base_price) + unitPrice
+        const unitBasePrice = Number(pricingConfig.base_price) + unitPrice;
         const totalItemPrice = unitBasePrice * qty;
 
         // 8️⃣ Kreiraj order item
@@ -135,26 +132,33 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
             },
         });
 
-        // 9️⃣ Recalc total_price ordera odmah
+        // 9️⃣ Učitaj sve stavke (OVDE dobijamo i cart count)
         const items = await strapi.db.query('api::order-item.order-item').findMany({
             where: { order: order.id },
             select: ['id', 'total_price'],
         });
-        const orderTotal = items.reduce((sum, i) => sum + Number(i.total_price || 0), 0);
+
+        const orderTotal = items.reduce(
+            (sum, i) => sum + Number(i.total_price || 0),
+            0
+        );
+
+        const cartCount = items.length;
 
         await strapi.db.query('api::order.order').update({
             where: { id: order.id },
             data: { total_price: orderTotal },
         });
 
+        // 🔟 RESPONSE
         ctx.send({
             order_code: order.order_code,
-            unit_price: unitPrice,
-            total_price: totalItemPrice,
+            cart_count: cartCount,
+            unit_price: unitBasePrice,
+            item_total_price: totalItemPrice,
             order_total: orderTotal,
         });
     },
-
     async accept(ctx) {
         const { orderId } = ctx.params;
         const { estimated_minutes } = ctx.request.body;

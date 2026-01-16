@@ -69,8 +69,7 @@ module.exports = {
 
         if (isOrderExpired(order)) {
             ctx.status = 410;
-            return ctx.send({
-                message: 'Order has expired',
+            ctx.throw(410, 'Order has expired', {
                 expired: true,
             });
         }

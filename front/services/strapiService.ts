@@ -307,7 +307,7 @@ class StrapiService {
         // customer_phone: payload.customerPhone,
         // print_shop_id: payload.printShopId,
       })
-      return response.data.order_code
+      return response.data
     } catch (error) {
       console.error("Error adding item to cart:", error)
       return null
@@ -352,11 +352,8 @@ class StrapiService {
 
       return response.data
     } catch (error) {
-      console.error("Error fetching cart item count:", error)
-      return {
-        orderId,
-        count: 0,
-      }
+      console.error("Error fetching cart items:", error)
+      throw error
     }
   }
 }
