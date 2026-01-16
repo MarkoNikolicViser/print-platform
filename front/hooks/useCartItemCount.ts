@@ -6,7 +6,7 @@ export function useCartItemCount(
     enabled: boolean = true
 ) {
     return useQuery<{ orderId: string, count: number }>({
-        queryKey: ["cart-item-count", orderId],
+        queryKey: ["cart-item-count"],
         queryFn: () => {
             if (!orderId) {
                 throw new Error("orderId is required")

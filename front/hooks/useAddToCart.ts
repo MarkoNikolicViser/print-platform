@@ -18,7 +18,7 @@ export function useAddToCart() {
             localStorage.setItem("order_code", order_code)
 
             queryClient.setQueryData(
-                ["cart-item-count", order_code],
+                ["cart-item-count"],
                 {
                     orderId: order_code,
                     count: cart_count,
