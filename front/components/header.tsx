@@ -64,7 +64,7 @@ export function Header() {
               color="primary.contrastText"
               fontWeight="bold"
             >
-              PS
+              G2C
             </Typography>
           </Avatar>
           <Typography

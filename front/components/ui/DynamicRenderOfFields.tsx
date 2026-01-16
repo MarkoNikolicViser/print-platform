@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import {
     FormControl,
@@ -10,10 +11,17 @@ import {
     Switch,
     FormControlLabel,
 } from '@mui/material';
+import { OrderItem, AllowedOption, SelectedOptions } from '@/types';
+
 export const renderOptionField = (
     item: OrderItem,
     optionKey: keyof SelectedOptions,
-    option: AllowedOption
+    option: AllowedOption,
+    handleOptionChange: <K extends keyof SelectedOptions>(
+        itemId: number,
+        key: K,
+        value: SelectedOptions[K]
+    ) => void
 ) => {
     const value = item.selected_options[optionKey];
 
@@ -24,13 +32,13 @@ export const renderOptionField = (
                     <InputLabel>{option.label}</InputLabel>
                     <Select
                         label={option.label}
-                        value={value}
+                        value={value ?? ''}
                         onChange={(e) =>
                             handleOptionChange(item.id, optionKey, e.target.value as any)
                         }
                     >
-                        {option.options.map((opt) => (
-                            <MenuItem key={String(opt.value)} value={opt.value}>
+                        {option.options?.map((opt) => (
+                            <MenuItem key={String(opt.value)} value={String(opt.value)}>
                                 {opt.label}
                             </MenuItem>
                         ))}
@@ -45,7 +53,7 @@ export const renderOptionField = (
                         {option.label}
                     </Typography>
                     <Stack direction="row" spacing={1}>
-                        {option.options.map((opt) => (
+                        {option.options?.map((opt) => (
                             <FormControlLabel
                                 key={String(opt.value)}
                                 control={
@@ -69,7 +77,7 @@ export const renderOptionField = (
                     label={option.label}
                     type="number"
                     size="small"
-                    value={value}
+                    value={Number(value ?? option.min ?? 1)}
                     inputProps={{
                         min: option.min,
                         max: option.max,
@@ -79,7 +87,7 @@ export const renderOptionField = (
                         handleOptionChange(
                             item.id,
                             optionKey,
-                            Math.max(option.min ?? 1, Number(e.target.value))
+                            Math.max(option.min ?? 1, Number(e.target.value)) as any
                         )
                     }
                     fullWidth

@@ -24,6 +24,7 @@ export function useAddToCart() {
                     count: cart_count,
                 }
             )
+            queryClient.invalidateQueries('order-items')
         },
 
         onError: (error) => {

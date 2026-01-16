@@ -1,111 +1,55 @@
+
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
-    Box,
-    Card,
-    CardContent,
-    Typography,
-    Grid,
-    Divider,
-    Button,
-    Stack,
-    IconButton,
-    Paper,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Switch,
-    FormControlLabel,
-    TextField,
+    Box, Typography, Grid, Divider, Button, Stack, Paper,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useOrderItems } from '../hooks/useOrderItems'
+import { useOrderItems } from '../hooks/useOrderItems';
 import { OrderItemsSkeleton } from './ui/OrderItemsSkeleton';
 import ErrorState from './ui/error-state';
-import { OrderItemsEditor } from '../components/uiTestCartComponent'
-import { renderOptionField } from '../components/ui/DynamicRenderOfFields'
-type CartItem = {
-    id: number;
-    file_name: string;
-    pages: number;
-    copies: number;
-    color: string;
-    binding: string;
-    price: number;
-};
-const items =
-    [
-        {
-            id: 10,
-            documentId: 'mpj6xhvt865sev2fmzxdp7ik',
-            selected_options: { paper_size: 'a4', color: 'bw', binding: 'none', doubleSided: true, copies: 1 },
-            quantity: 1,
-            unit_price: 10,
-            total_price: 10,
-            document_url: '/test.pdf',
-            document_name: 'test',
-            document_pages: 3,
-            document_mime: 'application/pdf',
-            status_code: 'pending',
-            createdAt: '2026-01-14T20:37:36.589Z',
-            updatedAt: '2026-01-14T20:37:36.589Z',
-            publishedAt: '2026-01-14T20:37:36.590Z',
-            locale: null,
-        },
-        {
-            id: 11,
-            documentId: 'mpj6xhvt865sev2fmzxdp7ik',
-            selected_options: { paper_size: 'a4', color: 'bw', binding: 'none', doubleSided: true, copies: 1 },
-            quantity: 1,
-            unit_price: 10,
-            total_price: 10,
-            document_url: '/test.pdf',
-            document_name: 'test',
-            document_pages: 3,
-            document_mime: 'application/pdf',
-            status_code: 'pending',
-            createdAt: '2026-01-14T20:37:36.589Z',
-            updatedAt: '2026-01-14T20:37:36.589Z',
-            publishedAt: '2026-01-14T20:37:36.590Z',
-            locale: null,
-        },
-        // ...the rest of your items
-    ];
+import { renderOptionField } from '../components/ui/DynamicRenderOfFields';
+import { OrderItem, SelectedOptions, AllowedOption } from '@/types';
+import { useDirtyCart } from '../hooks/useDirtyCart';
 
 export default function CartItemsSection() {
-    const [orderId, setOrderId] = useState<string | undefined>(undefined)
-    const { data: orderItems, isLoading, isError, error } = useOrderItems(orderId)
-    const router = useRouter()
-    const [edited, setEdited] = React.useState<OrderItem[]>(() => structuredClone(items));
-    const [dirty, setDirty] = React.useState(false);
+    const router = useRouter();
+    const [orderId, setOrderId] = React.useState<string | undefined>(undefined);
 
-    // Recompute totals if a priceFn is provided
-    const withComputedTotals = React.useMemo(() => {
-        // if (!priceFn) return edited;
-        return edited.map((it) => ({
-            ...it,
-            total_price: 0,
-        }));
-    }, [edited]);
+    const { data: orderItems, isLoading, isError, error } = useOrderItems(orderId);
 
-    const grandTotal = React.useMemo(
-        () => withComputedTotals.reduce((acc, it) => acc + Number(it.total_price || 0), 0),
-        [withComputedTotals]
+    // keep a local editable copy sourced from server data
+    const serverItems = React.useMemo(
+        () => (orderItems?.items as OrderItem[]) ?? [],
+        [orderItems]
     );
-    const currencyFmt = new Intl.NumberFormat('sr-RS', {
+    const [edited, setEdited] = React.useState<OrderItem[]>([]);
+
+    // Init edited when serverItems arrive
+    React.useEffect(() => {
+        if (serverItems.length > 0) {
+            setEdited(structuredClone(serverItems));
+        }
+    }, [serverItems]);
+
+    // Dirty/patch tracking
+    const { dirty, patch, changed, reset } = useDirtyCart(serverItems, edited);
+
+    // Currency formatter (RSD)
+    const currencyFmt = React.useMemo(() => new Intl.NumberFormat('sr-RS', {
         style: 'currency',
         currency: 'RSD',
         minimumFractionDigits: 2,
-    });
+    }), []);
+
     const handleOptionChange = <K extends keyof SelectedOptions>(
         itemId: number,
         key: K,
         value: SelectedOptions[K]
     ) => {
-        setEdited((prev) =>
-            prev.map((it) =>
+        setEdited(prev =>
+            prev.map(it =>
                 it.id === itemId
                     ? {
                         ...it,
@@ -117,80 +61,53 @@ export default function CartItemsSection() {
                     : it
             )
         );
-        setDirty(true);
     };
 
-    // const handleCopiesChange = (itemId: number, raw: string) => {
-    //     // Ensure integer >= 1
-    //     const parsed = Math.max(1, Math.floor(Number(raw) || 1));
-    //     handleOptionChange(itemId, 'copies', parsed);
-    // };
+    const handleQuantityChange = (itemId: number, newQty: number) => {
+        if (newQty < 1) return;
+        setEdited(prev =>
+            prev.map(it => (it.id === itemId ? { ...it, quantity: newQty } : it))
+        );
+    };
+
+    const handleRemove = (id: number) => {
+        setEdited(prev => prev.filter(it => it.id !== id));
+    };
 
     const resetChanges = () => {
-        setEdited(structuredClone(items));
-        setDirty(false);
-        onChange?.(items);
+        // discard edits and go back to latest server snapshot
+        setEdited(structuredClone(serverItems));
+        // Also accepts server snapshot as clean
+        reset();
     };
 
-    const saveChanges = () => {
-        const payload = withComputedTotals;
-        onSave?.(payload);
-        setDirty(false);
+    const saveChanges = async () => {
+        if (!dirty) return;
+
+        // Example: your API can accept update/remove/add in one go,
+        // or you may need to call separate endpoints.
+        // Replace this with your mutations:
+        // await api.patchCart(orderId!, patch);
+
+        console.log('PATCH payload', patch);
+
+        // After successful save, accept current as clean
+        reset();
     };
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (error?.status === 410) {
-            router.push('/')
+            router.push('/');
         }
-        //TODO maybe add a notif for cart expiration
-    }, [isError])
-    useEffect(() => {
-        const stored = localStorage.getItem("order_code")
-        if (stored) {
-            setOrderId(String(stored))
-        }
-    }, [])
+    }, [isError, error, router]);
 
-    // 🧮 total calculation
-    const totalPrice = items.reduce(
-        (sum, item) => sum + item.price,
-        0
-    );
+    React.useEffect(() => {
+        const stored = localStorage.getItem('order_code');
+        if (stored) setOrderId(String(stored));
+    }, []);
 
-    // 🗑️ remove item
-    const handleRemove = (id: number) => {
-        setItems((prev) => prev.filter((item) => item.id !== id));
-
-        // 🔗 kasnije:
-        // mutateRemoveItem({ itemId: id })
-    };
-
-    // 🔁 change copies
-    const handleCopiesChange = (
-        id: number,
-        newCopies: number
-    ) => {
-        if (newCopies < 1) return;
-
-        setItems((prev) =>
-            prev.map((item) =>
-                item.id === id
-                    ? {
-                        ...item,
-                        copies: newCopies,
-                        price: Math.round(
-                            (item.price / item.copies) * newCopies
-                        ),
-                    }
-                    : item
-            )
-        );
-
-        // 🔗 kasnije (debounce):
-        // mutateUpdateCopies({ itemId: id, copies: newCopies })
-    };
     if (isLoading || !orderId) return <OrderItemsSkeleton />;
-    if (isError) return <ErrorState queryKey={["order-items"]} message={error.message} />;
+    if (isError) return <ErrorState queryKey={['order-items']} message={error.message} />;
 
     return (
         <Box maxWidth="md" mx="auto" mt={4} px={2}>
@@ -207,12 +124,19 @@ export default function CartItemsSection() {
                     </Stack>
                 </Stack>
 
+                {/* show what changed (optional) */}
+                {dirty && changed.length > 0 && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                        Izmenjeno: {changed.join(', ')}
+                    </Typography>
+                )}
+
                 <Stack spacing={2}>
-                    {orderItems?.items?.map((item) => (
+                    {edited.map((item) => (
                         <Paper key={item.id} variant="outlined" sx={{ p: 2 }}>
                             <Grid container spacing={2} alignItems="center">
                                 {/* Header / info */}
-                                <Grid size={{ xs: 12, md: 4 }}>
+                                <Grid size={{ xs: 12, md: 4 }} >
                                     <Typography variant="subtitle1" fontWeight={600}>
                                         {item.document_name} ({item.document_pages} str.)
                                     </Typography>
@@ -223,28 +147,57 @@ export default function CartItemsSection() {
                                         Jedinična cena: <b>{currencyFmt.format(Number(item.unit_price))}</b>
                                     </Typography>
                                     <Typography variant="body2">
-                                        Ukupno za ovu stavku:{' '}
-                                        <b>{currencyFmt.format(Number(item.total_price))}</b>
+                                        Ukupno za ovu stavku: <b>{currencyFmt.format(Number(item.total_price))}</b>
                                     </Typography>
                                     <Typography variant="caption" color="text.secondary">
                                         Status: {item.status_code}
                                     </Typography>
+
+                                    {/* Quantity (example) */}
+                                    {/* You can replace with your MUI numeric control */}
+                                    <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() => handleQuantityChange(item.id, Math.max(1, item.quantity - 1))}
+                                        >
+                                            −
+                                        </Button>
+                                        <Typography variant="body2" sx={{ alignSelf: 'center' }}>
+                                            Količina: {item.quantity}
+                                        </Typography>
+                                        <Button
+                                            size="small"
+                                            variant="outlined"
+                                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                                        >
+                                            +
+                                        </Button>
+                                        <Button
+                                            size="small"
+                                            color="error"
+                                            onClick={() => handleRemove(item.id)}
+                                            sx={{ ml: 'auto' }}
+                                        >
+                                            Ukloni
+                                        </Button>
+                                    </Stack>
                                 </Grid>
 
                                 {/* Editors */}
                                 <Grid size={{ xs: 12, md: 8 }}>
                                     <Grid container spacing={2}>
-                                        {Object.entries(item.allowed_options).map(([key, option]) => (
+                                        {Object.entries(item.allowed_options || {}).map(([key, option]) => (
                                             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={key}>
                                                 {renderOptionField(
                                                     item,
                                                     key as keyof SelectedOptions,
-                                                    option as AllowedOption
+                                                    option as AllowedOption,
+                                                    handleOptionChange
                                                 )}
                                             </Grid>
                                         ))}
                                     </Grid>
-
                                 </Grid>
                             </Grid>
 
@@ -260,7 +213,7 @@ export default function CartItemsSection() {
                 <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
                     <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Typography variant="subtitle1" fontWeight={600}>Ukupan iznos</Typography>
-                        <Typography variant="h6">{currencyFmt.format(orderItems?.total)}</Typography>
+                        <Typography variant="h6">{currencyFmt.format(Number(orderItems?.total ?? 0))}</Typography>
                     </Stack>
                 </Paper>
             </Box>
@@ -271,5 +224,5 @@ export default function CartItemsSection() {
                 </Button>
             </Box>
         </Box>
-    )
+    );
 }

@@ -110,8 +110,39 @@ interface AllowedOptionNumber extends AllowedOptionBase {
   max?: number;
 }
 
-type AllowedOption =
-  | AllowedOptionSelect
-  | AllowedOptionNumber;
 
-type AllowedOptionsMap = Record<keyof SelectedOptions, AllowedOption>;
+export type SelectedOptions = {
+  paper_size?: string;
+  color?: string;
+  binding?: string;
+  doubleSided?: boolean;
+  copies?: number;
+  // add any other option keys here
+  [k: string]: any;
+};
+
+export type AllowedOption = {
+  type: 'select' | 'radio' | 'number';
+  label: string;
+  options?: { label: string; value: string | number | boolean }[];
+  min?: number;
+  max?: number;
+};
+
+export type OrderItem = {
+  id: number;
+  documentId: string;
+  document_name: string;
+  document_pages: number;
+  document_mime: string;
+  unit_price: number | string;
+  total_price: number | string;
+  quantity: number;
+  selected_options: SelectedOptions;
+  allowed_options: Record<string, AllowedOption>;
+  status_code: string;
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string;
+  locale?: string | null;
+};
