@@ -1,18 +1,25 @@
-
-// useDirtyCart.ts
 import * as React from 'react';
 import { OrderItem } from '../types';
 import { diffCartById } from '../helpers/cartDiff';
 
-export function useDirtyCart(initialItems: OrderItem[], editedItems: OrderItem[]) {
-    const initialRef = React.useRef<OrderItem[]>([]);
-    const initialized = React.useRef(false);
+function ids(items: OrderItem[]) {
+    return items.map(i => i.id).sort().join(',');
+}
 
-    // Set initial only when the "server" data changes for the first time (or after accept/reset):
+export function useDirtyCart(
+    initialItems: OrderItem[],
+    editedItems: OrderItem[],
+) {
+    const initialRef = React.useRef<OrderItem[]>([]);
+    const prevServerIds = React.useRef<string | null>(null);
+
+    // Sync initialRef when SERVER state structurally changes
     React.useEffect(() => {
-        if (!initialized.current) {
+        const nextIds = ids(initialItems);
+
+        if (prevServerIds.current !== nextIds) {
             initialRef.current = structuredClone(initialItems);
-            initialized.current = true;
+            prevServerIds.current = nextIds;
         }
     }, [initialItems]);
 
@@ -21,15 +28,21 @@ export function useDirtyCart(initialItems: OrderItem[], editedItems: OrderItem[]
         [editedItems],
     );
 
-    const reset = React.useCallback(() => {
-        // accept current as clean
-        initialRef.current = structuredClone(editedItems);
-    }, [editedItems]);
-
+    const reset = React.useCallback(
+        (next?: OrderItem[]) => {
+            initialRef.current = structuredClone(next ?? editedItems);
+        },
+        [editedItems]
+    );
     const hardResetToServer = React.useCallback(() => {
-        // discard edits and go back to server initial
         initialRef.current = structuredClone(initialItems);
+        prevServerIds.current = ids(initialItems);
     }, [initialItems]);
 
-    return { ...result, reset, hardResetToServer, initial: initialRef.current };
+    return {
+        ...result,
+        reset,
+        hardResetToServer,
+        initial: initialRef.current,
+    };
 }

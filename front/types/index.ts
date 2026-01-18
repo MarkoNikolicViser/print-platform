@@ -146,3 +146,24 @@ export type OrderItem = {
   publishedAt?: string;
   locale?: string | null;
 };
+export interface SyncCartPayload {
+  order_code: string;
+  updated?: Array<{
+    id: number;
+    selected_options?: Record<string, any>;
+    quantity?: number;
+  }>;
+  created?: Array<{
+    file_id?: number;
+    product_template?: number;
+    selected_options?: Record<string, any>;
+    quantity?: number;
+  }>;
+  deletedIds?: number[];
+}
+
+export interface SyncCartResponse {
+  order_code: string;
+  cart_count: number;
+  order_total: number;
+}

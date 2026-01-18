@@ -5,18 +5,16 @@ export function useOrderItems(
     orderId?: string,
     enabled: boolean = true
 ) {
-    return useQuery<{ orderId: string, count: number }>({
-        queryKey: ["order-items", orderId],
+    return useQuery({
+        queryKey: ["order-items"],
         queryFn: () => {
-            if (!orderId) {
-                throw new Error("orderId is required")
-            }
-
+            if (!orderId) throw new Error("orderId is required")
             return strapiService.getOrderItems(orderId)
         },
-        enabled: enabled && !!orderId,
-        staleTime: 60 * 1000, // 1 min (može i kraće)
+        enabled: !!orderId && enabled,
+        staleTime: 60 * 1000,
         gcTime: 5 * 60 * 1000,
-        refetchOnWindowFocus: false
-    })
+        refetchOnWindowFocus: false,
+    });
+
 }

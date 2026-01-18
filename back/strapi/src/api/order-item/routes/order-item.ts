@@ -15,6 +15,13 @@ module.exports = {
             path: '/order/:orderId/items',
             handler: 'order-item.itemsByOrder',
         },
-
+        {
+            method: 'PUT',
+            path: '/order/sync',
+            handler: 'order-item.sync',
+            config: {
+                auth: false,
+            },
+        }
     ],
 };

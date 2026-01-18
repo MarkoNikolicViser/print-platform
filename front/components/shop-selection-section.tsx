@@ -157,7 +157,7 @@ export function ShopSelectionSection() {
   const [filterCity, setFilterCity] = useState<string>("all")
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [showMap, setShowMap] = useState<boolean>(false)
-  const { mutate, isPending } = useAddToCart()
+  const { mutate: addToCart, isPending } = useAddToCart()
 
   const router = useRouter()
 
@@ -241,11 +241,11 @@ export function ShopSelectionSection() {
       "quantity": quantity,
       "print_shop_id": selectedShop,
       "document_url": "/test.pdf",
-      "document_name": "test",
+      "document_name": file?.name,
       "document_pages": "3",
       "document_mime": file?.type
     }
-    mutate(payload)
+    addToCart(payload)
   }
   if (isLoading) return <ShopSelectionSkeleton />
   if (isError) return <ErrorState queryKey={["copyShops"]} message={error.message} />;

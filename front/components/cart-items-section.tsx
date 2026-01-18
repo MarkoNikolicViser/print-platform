@@ -12,10 +12,14 @@ import ErrorState from './ui/error-state';
 import { renderOptionField } from '../components/ui/DynamicRenderOfFields';
 import { OrderItem, SelectedOptions, AllowedOption } from '@/types';
 import { useDirtyCart } from '../hooks/useDirtyCart';
+import { useSyncCart } from '../hooks/useSyncCart';
+
 
 export default function CartItemsSection() {
     const router = useRouter();
     const [orderId, setOrderId] = React.useState<string | undefined>(undefined);
+    const { mutate: syncCart, isLoading: isLoadingSync } = useSyncCart()
+
 
     const { data: orderItems, isLoading, isError, error } = useOrderItems(orderId);
 
@@ -75,24 +79,22 @@ export default function CartItemsSection() {
     };
 
     const resetChanges = () => {
-        // discard edits and go back to latest server snapshot
-        setEdited(structuredClone(serverItems));
-        // Also accepts server snapshot as clean
-        reset();
+        const snapshot = structuredClone(serverItems);
+        setEdited(snapshot);
+        reset(snapshot);
     };
+
 
     const saveChanges = async () => {
         if (!dirty) return;
 
-        // Example: your API can accept update/remove/add in one go,
-        // or you may need to call separate endpoints.
-        // Replace this with your mutations:
-        // await api.patchCart(orderId!, patch);
-
-        console.log('PATCH payload', patch);
-
-        // After successful save, accept current as clean
-        reset();
+        syncCart({
+            order_code: orderId,
+            updated: patch.update,
+            created: patch?.add || [],
+            deletedIds: patch.remove,
+        })
+        reset(structuredClone(edited))
     };
 
     React.useEffect(() => {
@@ -106,7 +108,9 @@ export default function CartItemsSection() {
         if (stored) setOrderId(String(stored));
     }, []);
 
-    if (isLoading || !orderId) return <OrderItemsSkeleton />;
+    const isReady = edited.length > 0 || serverItems.length === 0;
+
+    if (isLoading || !orderId || !isReady) return <OrderItemsSkeleton />;
     if (isError) return <ErrorState queryKey={['order-items']} message={error.message} />;
 
     return (
@@ -118,7 +122,8 @@ export default function CartItemsSection() {
                         <Button variant="outlined" onClick={resetChanges} disabled={!dirty}>
                             Poništi izmene
                         </Button>
-                        <Button variant="contained" onClick={saveChanges} disabled={!dirty}>
+                        <Button
+                            variant="contained" onClick={saveChanges} disabled={!dirty || isLoadingSync}>
                             Sačuvaj izmene
                         </Button>
                     </Stack>
@@ -141,7 +146,10 @@ export default function CartItemsSection() {
                                         {item.document_name} ({item.document_pages} str.)
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        ID: {item.documentId} • MIME: {item.document_mime}
+                                        • TIP: {item.document_mime}
+                                    </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        • Usluga: {item.product_template.description}
                                     </Typography>
                                     <Typography variant="body2" sx={{ mt: 1 }}>
                                         Jedinična cena: <b>{currencyFmt.format(Number(item.unit_price))}</b>
@@ -149,9 +157,9 @@ export default function CartItemsSection() {
                                     <Typography variant="body2">
                                         Ukupno za ovu stavku: <b>{currencyFmt.format(Number(item.total_price))}</b>
                                     </Typography>
-                                    <Typography variant="caption" color="text.secondary">
+                                    {/* <Typography variant="caption" color="text.secondary">
                                         Status: {item.status_code}
-                                    </Typography>
+                                    </Typography> */}
 
                                     {/* Quantity (example) */}
                                     {/* You can replace with your MUI numeric control */}
@@ -163,7 +171,7 @@ export default function CartItemsSection() {
                                         >
                                             −
                                         </Button>
-                                        <Typography variant="body2" sx={{ alignSelf: 'center' }}>
+                                        <Typography variant="body2" sx={{ alignSelf: 'center', whiteSpace: 'nowrap' }}>
                                             Količina: {item.quantity}
                                         </Typography>
                                         <Button
@@ -200,12 +208,12 @@ export default function CartItemsSection() {
                                     </Grid>
                                 </Grid>
                             </Grid>
-
+                            {/* 
                             <Divider sx={{ my: 2 }} />
 
                             <Typography variant="body2" color="text.secondary">
                                 Napomena: Izmena opcija ne menja cenu osim ako obezbedite <code>priceFn</code>.
-                            </Typography>
+                            </Typography> */}
                         </Paper>
                     ))}
                 </Stack>
@@ -218,10 +226,27 @@ export default function CartItemsSection() {
                 </Paper>
             </Box>
 
-            <Box mt={4} display="flex" justifyContent="flex-end">
-                <Button onClick={() => router.push('/checkout')} variant="contained" size="large">
-                    Proceed to Checkout
-                </Button>
+            <Box mt={4}>
+                <Stack direction="row" spacing={2} justifyContent="flex-end" alignItems="center">
+                    {dirty && (
+                        <Typography
+                            variant="body2"
+                            color="warning.main"
+                            sx={{ maxWidth: 260, textAlign: 'right' }}
+                        >
+                            Sačuvajte ili poništite izmene pre nastavka na plaćanje.
+                        </Typography>
+                    )}
+
+                    <Button
+                        onClick={() => router.push('/checkout')}
+                        variant="contained"
+                        size="large"
+                        disabled={dirty}
+                    >
+                        Plaćanje
+                    </Button>
+                </Stack>
             </Box>
         </Box>
     );

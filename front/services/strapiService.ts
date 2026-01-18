@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse } from "axios"
-import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order, ProductTemplate } from "../types"
+import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order, ProductTemplate, SyncCartPayload, SyncCartResponse } from "../types"
 
 class StrapiService {
   private api: AxiosInstance
@@ -354,6 +354,15 @@ class StrapiService {
     } catch (error) {
       console.error("Error fetching cart items:", error)
       throw error
+    }
+  }
+  async syncCart(payload: SyncCartPayload): Promise<SyncCartResponse> {
+    try {
+      const response = await this.api.put('/order/sync', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error syncing cart:', error);
+      throw error;
     }
   }
 }
