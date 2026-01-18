@@ -8,16 +8,17 @@ module.exports = {
             return ctx.badRequest('document_mime is required');
         }
 
-        const templates = await strapi.db
-            .query('api::product-template.product-template')
-            .findMany({
-                where: {
+        const templates = await strapi.entityService.findMany(
+            'api::product-template.product-template',
+            {
+                filters: {
                     supported_mime: {
                         $contains: [document_mime],
                     },
                 },
-                select: ['id', 'name', 'description', 'icon', 'allowed_options'],
-            });
+                fields: ['id', 'name', 'description', 'icon', 'allowed_options'],
+            }
+        );
 
         ctx.send({ data: templates });
     },
