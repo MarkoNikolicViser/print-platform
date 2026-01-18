@@ -17,6 +17,21 @@ module.exports = {
             method: 'POST',
             path: '/orders/:orderId/ready',
             handler: 'order.markReady'
+        },
+        {
+            method: 'POST',
+            path: '/checkout/success',
+            handler: 'checkout.success'
+        },
+        {
+            method: 'GET',
+            path: '/shop-panel/orders',
+            handler: 'shop-panel.list'
+        },
+        {
+            method: 'POST',
+            path: '/shop-panel/order-item',
+            handler: 'shop-panel.updateItem'
         }
     ]
 };

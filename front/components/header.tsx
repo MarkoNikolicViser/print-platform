@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCartItemCount } from "../hooks/useCartItemCount";
 import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton,
   Button,
   Box,
   Avatar,
@@ -14,14 +14,21 @@ import {
   useTheme,
 } from "@mui/material";
 import { User, Settings, LogOut } from "lucide-react";
+import CartButton from './ui/CartButton'
 
 export function Header() {
+  const initialOrderId = typeof window !== "undefined" ? localStorage.getItem("order_code") ?? undefined : undefined
+  const [orderId, setOrderId] = useState<string | undefined>(initialOrderId)
   const [user, setUser] = useState<any>(null);
   const [admin, setAdmin] = useState<any>(null);
+
   const router = useRouter();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md")); // hides text on md and smaller
+
+
+  const { data: cartCounter } = useCartItemCount(orderId)
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -57,7 +64,7 @@ export function Header() {
               color="primary.contrastText"
               fontWeight="bold"
             >
-              PS
+              G2C
             </Typography>
           </Avatar>
           <Typography
@@ -67,7 +74,7 @@ export function Header() {
             sx={{ cursor: "pointer" }}
             onClick={() => router.push("/")}
           >
-            PrintSerbia
+            Go2Copy
           </Typography>
         </Box>
 
@@ -80,64 +87,7 @@ export function Header() {
           >
             {!isMobile && "Za kopirnice"}
           </Button>
-          {/* {user ? (
-            <>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/profile")}
-                startIcon={<User size={16} />}
-              >
-                {!isMobile && user.name}
-              </Button>
-              <Button
-                variant="text"
-                size="small"
-                onClick={handleLogout}
-                startIcon={<LogOut size={16} />}
-              >
-                {!isMobile && "Odjavi se"}
-              </Button>
-            </>
-          ) : admin ? (
-            <>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/admin")}
-                startIcon={<Settings size={16} />}
-              >
-                {!isMobile && admin.shopName}
-              </Button>
-              <Button
-                variant="text"
-                size="small"
-                onClick={handleLogout}
-                startIcon={<LogOut size={16} />}
-              >
-                {!isMobile && "Odjavi se"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/login")}
-                startIcon={<User size={16} />}
-              >
-                {!isMobile && "Prijavi se"}
-              </Button>
-              <Button
-                variant="text"
-                size="small"
-                onClick={() => router.push("/login")}
-                startIcon={<Settings size={16} />}
-              >
-                {!isMobile && "Admin"}
-              </Button>
-            </>
-          )} */}
+          <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push("/cart")} />
         </Box>
       </Toolbar>
     </AppBar>

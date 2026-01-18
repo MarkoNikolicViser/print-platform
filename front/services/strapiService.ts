@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse } from "axios"
-import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order } from "../types"
+import type { PrintJob, CopyShop, User, PrintOptions, AddToCartPayload, Order, ProductTemplate, SyncCartPayload, SyncCartResponse } from "../types"
 
 class StrapiService {
   private api: AxiosInstance
@@ -23,12 +23,28 @@ class StrapiService {
     )
   }
 
-  async getCopyShops(): Promise<CopyShop[]> {
+
+  async getCopyShops(
+    productTemplateId?: number,
+    numberOfPages?: number,
+    quantity?: number,
+    selectedOptions?: string
+  ): Promise<CopyShop[]> {
     try {
-      const response: AxiosResponse = await this.api.get("/print-shops?populate=*")
-      return response.data.data
+      // Build params object only with defined values
+      const params: Record<string, any> = {};
+      if (productTemplateId !== undefined) params.productTemplateId = productTemplateId;
+      if (numberOfPages !== undefined) params.numberOfPages = numberOfPages;
+      if (quantity !== undefined) params.quantity = quantity;
+      if (selectedOptions !== undefined) params.selectedOptions = selectedOptions;
+
+      const response: AxiosResponse<CopyShop[]> = await this.api.get("/print-shops", {
+        params,
+      });
+
+      return response.data;
     } catch (error) {
-      console.error("Error fetching copy shops:", error)
+      console.error("Error fetching copy shops:", error);
       throw error;
     }
   }
@@ -193,26 +209,6 @@ class StrapiService {
     }
   }
 
-  calculatePrintCost(shop: CopyShop, pageCount: number, options: PrintOptions): number {
-    const basePrice = options.colorPrinting ? shop.pricing.color : shop.pricing.blackWhite
-    let totalCost = basePrice * pageCount * options.copies
-
-    // Apply double-sided discount
-    if (options.doubleSided) {
-      totalCost *= 1 - shop.pricing.doubleSidedDiscount / 100
-    }
-
-    // Apply paper type multiplier
-    totalCost *= shop.pricing.paperTypes[options.paperType]
-
-    // Add binding cost
-    if (options.binding !== "none") {
-      totalCost += shop.pricing.binding[options.binding]
-    }
-
-    return Math.round(totalCost * 100) / 100 // Round to 2 decimal places
-  }
-
   private transformCopyShop(data: any): CopyShop {
     return {
       id: data.id.toString(),
@@ -295,26 +291,78 @@ class StrapiService {
       return false
     }
   }
-  async addToCart(payload: AddToCartPayload): Promise<Order | null> {
+  async addToCart(payload: AddToCartPayload): Promise<string | null> {
     try {
       const response: AxiosResponse = await this.api.post("/orders/add-to-cart", {
-        order_code: payload.orderCode,
-        document_s3_key: payload.documentS3Key,
-        file_name: payload.fileName,
-        copies: payload.copies,
-        color: payload.color,
-        binding: payload.binding,
-        pages: payload.pages,
-        price: payload.price,
-        customer_email: payload.customerEmail,
-        customer_phone: payload.customerPhone,
-        print_shop_id: payload.printShopId,
+        ...payload
+        // order_code: payload.orderCode,
+        // document_s3_key: payload.documentS3Key,
+        // file_name: payload.fileName,
+        // copies: payload.copies,
+        // color: payload.color,
+        // binding: payload.binding,
+        // pages: payload.pages,
+        // price: payload.price,
+        // customer_email: payload.customerEmail,
+        // customer_phone: payload.customerPhone,
+        // print_shop_id: payload.printShopId,
       })
-
-      return response.data.order
+      return response.data
     } catch (error) {
       console.error("Error adding item to cart:", error)
       return null
+    }
+  }
+  async getProductTemplatesByMime(documentMime: string) {
+    try {
+      const response = await this.api.get(
+        "/product-templates/by-mime",
+        {
+          params: {
+            document_mime: documentMime,
+          },
+        }
+      )
+      return response.data.data
+    } catch (error) {
+      console.error("Error fetching product templates by mime:", error)
+      return []
+    }
+  }
+  async getCartItemCount(orderId: string) {
+    try {
+      const response = await this.api.get(
+        `/orders/${orderId}/items/count`
+      )
+
+      return response.data
+    } catch (error) {
+      console.error("Error fetching cart item count:", error)
+      return {
+        orderId,
+        count: 0,
+      }
+    }
+  }
+  async getOrderItems(orderId: string) {
+    try {
+      const response = await this.api.get(
+        `/order/${orderId}/items`
+      )
+
+      return response.data
+    } catch (error) {
+      console.error("Error fetching cart items:", error)
+      throw error
+    }
+  }
+  async syncCart(payload: SyncCartPayload): Promise<SyncCartResponse> {
+    try {
+      const response = await this.api.put('/order/sync', payload);
+      return response.data;
+    } catch (error) {
+      console.error('Error syncing cart:', error);
+      throw error;
     }
   }
 }

@@ -51,7 +51,7 @@
     },
     "customer_phone": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "print_shop_id": {
       "type": "relation",

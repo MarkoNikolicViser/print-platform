@@ -43,7 +43,7 @@
       "required": true,
       "default": false
     },
-    "work_hours": {
+    "working_hours": {
       "type": "json",
       "required": true
     },
