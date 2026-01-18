@@ -2,10 +2,11 @@
 
 module.exports = {
     async findByMime(ctx) {
+        strapi.log.info('findByMime handler executed');
         const { document_mime } = ctx.query;
 
-        if (!document_mime) {
-            return ctx.badRequest('document_mime is required');
+        if (!document_mime || typeof document_mime !== 'string') {
+            return ctx.badRequest('document_mime is required and must be string');
         }
 
         const templates = await strapi.entityService.findMany(
