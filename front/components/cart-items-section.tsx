@@ -13,6 +13,7 @@ import { renderOptionField } from '../components/ui/DynamicRenderOfFields';
 import { OrderItem, SelectedOptions, AllowedOption } from '@/types';
 import { useDirtyCart } from '../hooks/useDirtyCart';
 import { useSyncCart } from '../hooks/useSyncCart';
+import { toast } from 'react-toastify';
 
 
 export default function CartItemsSection() {
@@ -99,6 +100,9 @@ export default function CartItemsSection() {
 
     React.useEffect(() => {
         if (error?.status === 410) {
+            toast(`Istekla je korpa`, {
+                type: "error",
+            });
             router.push('/');
         }
     }, [isError, error, router]);

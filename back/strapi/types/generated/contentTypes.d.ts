@@ -532,7 +532,7 @@ export interface ApiOrderOrder extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    customer_email: Schema.Attribute.Email & Schema.Attribute.Required;
+    customer_email: Schema.Attribute.Email;
     customer_phone: Schema.Attribute.String;
     estimated_completion_at: Schema.Attribute.DateTime;
     expires_at: Schema.Attribute.DateTime;
@@ -774,7 +774,7 @@ export interface ApiProductTemplateProductTemplate
       Schema.Attribute.Private;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    supported_mime: Schema.Attribute.JSON & Schema.Attribute.Required;
+    supported_mime: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;

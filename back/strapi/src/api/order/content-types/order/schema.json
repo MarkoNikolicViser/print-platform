@@ -46,8 +46,7 @@
       "required": true
     },
     "customer_email": {
-      "type": "email",
-      "required": true
+      "type": "email"
     },
     "customer_phone": {
       "type": "string",

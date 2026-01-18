@@ -55,7 +55,7 @@ module.exports = createCoreController('api::order.order', ({ strapi }) => ({
                     status_code: 'draft',
                     total_price: 0,
                     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
-                    print_shop: print_shop_id,
+                    print_shop_id: print_shop_id,
                     customer_email,
                     customer_phone,
                 },
