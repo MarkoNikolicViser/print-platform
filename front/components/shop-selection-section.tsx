@@ -16,8 +16,10 @@ import {
   Chip,
   InputLabel,
   FormControl,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { MapPin, Clock, Star, Phone, Navigation, Filter, Search } from "lucide-react"
+import { MapPin, Clock, Star, Phone, Navigation, Filter, Search, EuroIcon } from "lucide-react"
 import { useQuery } from "@tanstack/react-query";
 import { strapiService } from "@/services/strapiService"
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
@@ -161,6 +163,8 @@ export function ShopSelectionSection() {
 
   const router = useRouter()
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
   const {
@@ -296,13 +300,13 @@ export function ShopSelectionSection() {
 
         <Box display="flex" gap={2}>
           <Button variant={sortBy === "distance" ? "contained" : "outlined"} onClick={() => setSortBy("distance")} size="small" startIcon={<MapPin size={16} />}>
-            Najbliže
+            {!isMobile && 'Najbliže'}
           </Button>
-          <Button variant={sortBy === "price" ? "contained" : "outlined"} onClick={() => setSortBy("price")} size="small">
-            Najjeftinije
+          <Button variant={sortBy === "price" ? "contained" : "outlined"} onClick={() => setSortBy("price")} size="small" startIcon={<EuroIcon size={16} />}>
+            {!isMobile && 'Najjeftinije'}
           </Button>
           <Button variant={sortBy === "rating" ? "contained" : "outlined"} onClick={() => setSortBy("rating")} size="small" startIcon={<Star size={16} />}>
-            Najbolje ocenjene
+            {!isMobile && 'Najbolje ocenjene'}
           </Button>
           <Button variant="outlined" onClick={() => setShowMap(!showMap)} size="small" startIcon={<Navigation size={16} />}>
             {showMap ? "Lista" : "Mapa"}
