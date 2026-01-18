@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import {
   Card,
@@ -14,7 +14,6 @@ import {
   Grid,
   Box,
   Chip,
-  IconButton,
   InputLabel,
   FormControl,
 } from "@mui/material";
@@ -24,7 +23,36 @@ import { strapiService } from "@/services/strapiService"
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import ErrorState from '../components/ui/error-state';
 import { useAddToCart } from "../hooks/useAddToCart"
+import { usePrintContext } from "@/context/PrintContext";
 
+type SortBy = "distance" | "price" | "rating"
+
+interface ApiShop {
+  id: number
+  name: string
+  address: string
+  city: string
+  templates: string[]
+  is_open_today: boolean
+  working_time_today: string | null
+  total_price?: number
+}
+
+interface FileCalculatedDetail {
+  estimatedCost: number
+}
+
+interface AddToCartPayload {
+  order_code?: string
+  product_template_id?: number
+  selected_options: string
+  quantity: number
+  print_shop_id: number | null
+  document_url: string
+  document_name: string
+  document_pages: string
+  document_mime?: string
+}
 
 interface Shop {
   id: number
@@ -40,6 +68,7 @@ interface Shop {
   services: string[]
   workingHours: string
   coordinates: { lat: number; lng: number }
+  total_price?: number
 }
 
 const mockShops: Shop[] = [
@@ -121,29 +150,56 @@ const mockShops: Shop[] = [
 ]
 
 export function ShopSelectionSection() {
+  const { file, selectedTemplate, printConfig, quantity } = usePrintContext();
+  const disabled = !file || !selectedTemplate;
   const [selectedShop, setSelectedShop] = useState<number | null>(null)
-  const [email, setEmail] = useState("")
-  const [sortBy, setSortBy] = useState<"distance" | "price" | "rating">("distance")
+  const [sortBy, setSortBy] = useState<SortBy>("distance")
   const [filterCity, setFilterCity] = useState<string>("all")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [estimatedCost, setEstimatedCost] = useState(0)
-  const [showMap, setShowMap] = useState(false)
+  const [searchTerm, setSearchTerm] = useState<string>("")
+  const [showMap, setShowMap] = useState<boolean>(false)
+  const { mutate: addToCart, isPending } = useAddToCart()
+
   const router = useRouter()
 
-  const { data: copyShops, isLoading, error, isError } = useQuery({
-    queryKey: ["copyShops"],
-    queryFn: () => strapiService.getCopyShops(),
-    staleTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: false
+
+  const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
+  const {
+    data: copyShops = [],
+    isLoading,
+    error,
+    isError,
+  } = useQuery<ApiShop[], Error>({
+    queryKey: ["copyShops", memoizedConfig, quantity],
+    queryFn: () =>
+      !selectedTemplate
+        ? strapiService.getCopyShops()
+        : strapiService.getCopyShops(
+          selectedTemplate?.id,
+          3,
+          quantity,
+          memoizedConfig
+        ),
+    refetchOnWindowFocus: false,
   });
+
   // Listen for cost updates from print configuration
   useEffect(() => {
-    const handleFileCalculated = (event: CustomEvent) => {
-      setEstimatedCost(event.detail.estimatedCost || 0)
+    const handleFileCalculated = (
+      event: CustomEvent<FileCalculatedDetail>
+    ) => {
+      // setEstimatedCost(event.detail.estimatedCost || 0)
     }
 
-    window.addEventListener("fileCalculated", handleFileCalculated as EventListener)
-    return () => window.removeEventListener("fileCalculated", handleFileCalculated as EventListener)
+    window.addEventListener(
+      "fileCalculated",
+      handleFileCalculated as EventListener
+    )
+
+    return () =>
+      window.removeEventListener(
+        "fileCalculated",
+        handleFileCalculated as EventListener
+      )
   }, [])
 
   const cities = ["all", ...Array.from(new Set(mockShops.map((shop) => shop.city)))]
@@ -169,50 +225,27 @@ export function ShopSelectionSection() {
       }
     })
 
-  const calculateShopPrice = (shop: Shop): number => {
-    if (!estimatedCost) return 0
-    const multiplier = shop.basePrice / 10 // Base price per RSD
-    return Math.round(estimatedCost * multiplier)
-  }
 
-  const selectedShopData = selectedShop ? mockShops.find((s) => s.id === selectedShop) : null
+  const selectedShopData: ApiShop | null =
+    selectedShop && copyShops
+      ? copyShops.find((s) => s.id === selectedShop) ?? null
+      : null
 
-  const handleOrderClick = () => {
-    if (!selectedShopData || !estimatedCost) return
-
-    // In a real app, you would pass this data through state management or URL params
-    router.push("/checkout")
-  }
-
-  const { mutate, isPending } = useAddToCart()
 
   const handleAddToCart = () => {
     const orderCode = localStorage.getItem("order_code")
-    console.log(orderCode)
-    mutate({
-      // orderCode: orderCode || undefined,
-      // documentS3Key: job.s3Key,
-      // fileName: job.fileName,
-      // copies: job.copies,
-      // color: job.color,
-      // binding: job.binding,
-      // pages: job.pages,
-      // price: job.price,
-      // customerEmail: job.customerEmail,
-      // customerPhone: job.customerPhone,
-      // printShopId: job.printShopId,
-      orderCode: orderCode || undefined,
-      documentS3Key: "uploads/abc1236.pdf",
-      fileName: "seminarski-rad3.pdf",
-      copies: 1,
-      color: "color",
-      binding: "none",
-      pages: 12,
-      price: 180,
-      customerEmail: "test@mail.com",
-      customerPhone: "+38160123456",
-      printShopId: 1
-    })
+    const payload: AddToCartPayload = {
+      "order_code": orderCode || undefined,
+      "product_template_id": selectedTemplate?.id,
+      "selected_options": memoizedConfig,
+      "quantity": quantity,
+      "print_shop_id": selectedShop,
+      "document_url": "/test.pdf",
+      "document_name": file?.name,
+      "document_pages": "3",
+      "document_mime": file?.type
+    }
+    addToCart(payload)
   }
   if (isLoading) return <ShopSelectionSkeleton />
   if (isError) return <ErrorState queryKey={["copyShops"]} message={error.message} />;
@@ -222,7 +255,7 @@ export function ShopSelectionSection() {
       <CardHeader
         title={
           <Typography variant="h6" color="primary" sx={{ textTransform: "uppercase", fontWeight: "bold" }}>
-            Korak 3: Izaberite štampariju
+            3. Izaberite štampariju
           </Typography>
         }
         subheader={
@@ -231,7 +264,11 @@ export function ShopSelectionSection() {
           </Typography>
         }
       />
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      <CardContent sx={{
+        display: "flex", flexDirection: "column", gap: 4,
+        opacity: disabled ? 0.5 : 1,
+        pointerEvents: disabled ? "none" : "auto"
+      }}>
         {/* Filters and Search */}
         <Box display="flex" flexWrap="wrap" gap={2}>
           <Box flex={1} minWidth={200} position="relative">
@@ -282,7 +319,7 @@ export function ShopSelectionSection() {
                 Ovde bi se prikazala mapa sa lokacijama štamparija
               </Typography>
               <Grid container spacing={2}>
-                {filteredAndSortedShops.slice(0, 3).map((shop) => (
+                {copyShops?.map((shop: ApiShop) => (
                   <Grid size={{ xs: 12, md: 4 }} key={shop.id}>
                     <Box p={2} border={1} borderRadius={2}>
                       <Typography variant="body1">{shop.name}</Typography>
@@ -298,7 +335,7 @@ export function ShopSelectionSection() {
         {/* Shop List */}
         {!showMap && (
           <Box display="flex" flexDirection="column" gap={2}>
-            {filteredAndSortedShops.length === 0 ? (
+            {copyShops?.length === 0 ? (
               <Card sx={{ p: 4, textAlign: "center" }}>
                 <Filter size={32} color="#888" style={{ marginBottom: 8 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -306,7 +343,7 @@ export function ShopSelectionSection() {
                 </Typography>
               </Card>
             ) : (
-              filteredAndSortedShops.map((shop) => (
+              copyShops?.map((shop: ApiShop) => (
                 <Card
                   key={shop.id}
                   variant="outlined"
@@ -328,37 +365,31 @@ export function ShopSelectionSection() {
                         <Box display="flex" flexWrap="wrap" gap={2} mt={1}>
                           <Box display="flex" alignItems="center" gap={1}>
                             <MapPin size={14} />
-                            <Typography variant="caption">{shop.distance} km</Typography>
+                            <Typography variant="caption">calculate this km</Typography>
                           </Box>
                           <Box display="flex" alignItems="center" gap={1}>
                             <Clock size={14} />
-                            <Typography variant="caption">{shop.estimatedTime}</Typography>
+                            <Typography variant="caption">calculate this</Typography>
                           </Box>
                           <Box display="flex" alignItems="center" gap={1}>
                             <Star size={14} color="#facc15" />
-                            <Typography variant="caption">{shop.rating} ({shop.reviewCount})</Typography>
-                          </Box>
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <Phone size={14} />
-                            <Typography variant="caption">{shop.phone}</Typography>
+                            <Typography variant="caption">not available for now</Typography>
                           </Box>
                         </Box>
                         <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
-                          {shop.services.map((service) => (
+                          {shop?.templates.map((service: string) => (
                             <Chip key={service} label={service} size="small" variant="outlined" />
                           ))}
                         </Box>
                         <Typography variant="caption" color="text.secondary" mt={1}>
-                          Radno vreme: {shop.workingHours}
+                          Radno vreme: {shop.is_open_today ? shop.working_time_today : 'Neradan dan'}
+                          {/* //TO DO - disable if not working with is_open_now */}
                         </Typography>
                       </Box>
                       <Box textAlign="right" ml={2}>
-                        <Typography variant="h6" color="primary">
-                          {estimatedCost ? `${calculateShopPrice(shop)} RSD` : `${shop.basePrice} RSD/str`}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {estimatedCost ? "za ovaj posao" : "osnovna cena"}
-                        </Typography>
+                        {shop?.total_price ? <Typography variant="h6" color="primary">
+                          {shop?.total_price} RSD
+                        </Typography> : null}
                       </Box>
                     </Box>
                   </CardContent>
@@ -386,51 +417,26 @@ export function ShopSelectionSection() {
                   <Typography variant="body2" color="text.secondary">
                     {selectedShopData.address}, {selectedShopData.city}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">Tel: {selectedShopData.phone}</Typography>
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }} >
                   <Typography variant="subtitle2" color="primary">Detalji:</Typography>
-                  <Typography variant="body2">Udaljenost: {selectedShopData.distance} km</Typography>
-                  <Typography variant="body2">Vreme pripreme: {selectedShopData.estimatedTime}</Typography>
-                  <Typography variant="body2">Ocena: {selectedShopData.rating}/5 ⭐</Typography>
+                  <Typography variant="body2">Udaljenost: calculate this km</Typography>
+                  <Typography variant="body2">Vreme pripreme: not awailable for now</Typography>
+                  <Typography variant="body2">Ocena: not available for now</Typography>
                 </Grid>
               </Grid>
-
-              {estimatedCost > 0 && (
-                <Box p={2} border={1} borderRadius={2} borderColor="primary.main" bgcolor="background.paper">
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="body1" fontWeight="medium">Ukupna cena:</Typography>
-                    <Typography variant="h6" color="primary">{calculateShopPrice(selectedShopData)} RSD</Typography>
-                  </Box>
-                </Box>
-              )}
-
-              <Box display="flex" flexDirection="column" gap={1}>
-                <TextField
-                  label="Email za obaveštenja (opciono)"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="vasa.email@example.com"
-                  fullWidth
-                />
-                <Typography variant="caption" color="text.secondary">
-                  Poslaćemo vam email kada bude gotovo štampanje
-                </Typography>
-              </Box>
-
               <Grid container spacing={2}>
                 <Grid size={{ xs: 6 }}>
                   <Button
                     variant="contained"
                     color="primary"
                     fullWidth
-                    disabled={!estimatedCost}
-                    onClick={handleOrderClick}
+                    onClick={() => { handleAddToCart(); router.push('/checkout') }}
                   >
-                    {estimatedCost
+                    {/* {estimatedCost
                       ? `Naruči i plati (${calculateShopPrice(selectedShopData)} RSD)`
-                      : "Prvo konfigurišite štampanje"}
+                      : "Prvo konfigurišite štampanje"} */}
+                    Plati i poruci odmah
                   </Button>
                 </Grid>
 

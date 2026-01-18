@@ -1,7 +1,12 @@
-/**
- * print-shop router
- */
-
-import { factories } from '@strapi/strapi';
-
-export default factories.createCoreRouter('api::print-shop.print-shop');
+module.exports = {
+    routes: [
+        {
+            method: 'GET',
+            path: '/print-shops',
+            handler: 'print-shop.listShops',
+            config: {
+                auth: false,
+            },
+        },
+    ],
+};

@@ -1,0 +1,27 @@
+'use strict';
+
+module.exports = {
+    routes: [
+        {
+            method: 'GET',
+            path: '/orders/:orderId/items/count',
+            handler: 'order-item.countByOrder',
+            config: {
+                auth: false,
+            },
+        },
+        {
+            method: 'GET',
+            path: '/order/:orderId/items',
+            handler: 'order-item.itemsByOrder',
+        },
+        {
+            method: 'PUT',
+            path: '/order/sync',
+            handler: 'order-item.sync',
+            config: {
+                auth: false,
+            },
+        }
+    ],
+};

@@ -22,21 +22,18 @@ export interface PrintOptions {
 }
 
 export interface CopyShop {
-  id: string
+  id: number
   name: string
   address: string
   city: string
-  phone: string
-  email: string
-  coordinates: {
-    lat: number
-    lng: number
-  }
-  pricing: ShopPricing
-  services: string[]
-  workingHours: string
-  rating: number
-  isActive: boolean
+
+  // UI koristi ovo
+  templates: string[]
+
+  is_open_now: boolean
+  working_time_today: string | null
+
+  total_price?: number
 }
 
 export interface ShopPricing {
@@ -66,17 +63,16 @@ export interface User {
 }
 
 export interface AddToCartPayload {
-  orderCode?: string
-  documentS3Key: string
-  fileName?: string
-  copies: number
-  color: "bw" | "color"
-  binding: "none" | "spiral" | "stapled"
-  pages?: number
-  price: number
-  customerEmail?: string
-  customerPhone?: string
-  printShopId: number
+  order_code?: string
+  product_template_id?: number
+  selected_options: string
+  quantity: number
+  print_shop_id: number | null
+  customer_email: string
+  document_url: string
+  document_name: string
+  document_pages: string
+  document_mime?: string
 }
 
 export interface Order {
@@ -85,4 +81,89 @@ export interface Order {
   status_code: string
   total_price: number
   order_items: any[]
+}
+export interface ProductTemplate {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  allowed_options?: any
+}
+type AllowedOptionType = 'select' | 'radio' | 'number';
+
+interface AllowedOptionBase {
+  type: AllowedOptionType;
+  label: string;
+  pricing_type: 'enum' | 'boolean' | 'number' | 'range';
+  required?: boolean;
+  default?: any;
+}
+
+interface AllowedOptionSelect extends AllowedOptionBase {
+  type: 'select' | 'radio';
+  options: { value: any; label: string }[];
+}
+
+interface AllowedOptionNumber extends AllowedOptionBase {
+  type: 'number';
+  min?: number;
+  max?: number;
+}
+
+
+export type SelectedOptions = {
+  paper_size?: string;
+  color?: string;
+  binding?: string;
+  doubleSided?: boolean;
+  copies?: number;
+  // add any other option keys here
+  [k: string]: any;
+};
+
+export type AllowedOption = {
+  type: 'select' | 'radio' | 'number';
+  label: string;
+  options?: { label: string; value: string | number | boolean }[];
+  min?: number;
+  max?: number;
+};
+
+export type OrderItem = {
+  id: number;
+  documentId: string;
+  document_name: string;
+  document_pages: number;
+  document_mime: string;
+  unit_price: number | string;
+  total_price: number | string;
+  quantity: number;
+  selected_options: SelectedOptions;
+  allowed_options: Record<string, AllowedOption>;
+  status_code: string;
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string;
+  locale?: string | null;
+};
+export interface SyncCartPayload {
+  order_code: string;
+  updated?: Array<{
+    id: number;
+    selected_options?: Record<string, any>;
+    quantity?: number;
+  }>;
+  created?: Array<{
+    file_id?: number;
+    product_template?: number;
+    selected_options?: Record<string, any>;
+    quantity?: number;
+  }>;
+  deletedIds?: number[];
+}
+
+export interface SyncCartResponse {
+  order_code: string;
+  cart_count: number;
+  order_total: number;
 }

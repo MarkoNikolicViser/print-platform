@@ -1,0 +1,40 @@
+{
+    "kind": "collectionType",
+    "collectionName": "print_shop_product_pricings",
+    "info": {
+        "singularName": "print-shop-product-pricing",
+        "pluralName": "print-shop-product-pricings",
+        "displayName": "Print Shop Product Pricing",
+        "description": "Cene proizvoda po kopirnici"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "attributes": {
+        "print_shop": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::print-shop.print-shop",
+            "required": true
+        },
+        "product_template": {
+            "type": "relation",
+            "relation": "manyToOne",
+            "target": "api::product-template.product-template",
+            "required": true
+        },
+        "base_price": {
+            "type": "decimal",
+            "required": true
+        },
+        "option_price_modifiers": {
+            "type": "json",
+            "required": true,
+            "description": "Mapiranje opcija u dodatne cene"
+        },
+        "is_active": {
+            "type": "boolean",
+            "default": true
+        }
+    }
+}
