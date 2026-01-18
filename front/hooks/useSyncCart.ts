@@ -1,27 +1,29 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { strapiService } from "../services/strapiService"
-import type { AddToCartPayload, Order } from "../types"
+import type { SyncCartPayload, SyncCartResponse } from "../types"
 import { toast } from "react-toastify"
 
-export function useAddToCart() {
+export function useSyncCart() {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: async (payload: AddToCartPayload): Promise<Order> => {
-            const response = await strapiService.addToCart(payload)
+        mutationFn: async (
+            payload: SyncCartPayload
+        ): Promise<SyncCartResponse> => {
+            const response = await strapiService.syncCart(payload)
             if (!response) {
-                throw new Error("Failed to add item to cart")
+                throw new Error("Failed to sync cart")
             }
             return response
         },
 
         onSuccess: (data) => {
-            toast(`Dodato u korpu`, {
+            toast(`Azurirana korpa`, {
                 type: "success",
             });
             const { orderId, count, total, expiresAt, items } = data
 
-            // 1️⃣ localStorage
+            // 1️⃣ localStorage (opciono)
             localStorage.setItem("order_code", orderId)
 
             // 2️⃣ CART COUNT
@@ -47,7 +49,7 @@ export function useAddToCart() {
         },
 
         onError: (error) => {
-            console.error("Add to cart failed:", error)
+            console.error("Sync cart failed:", error)
         },
     })
 }
