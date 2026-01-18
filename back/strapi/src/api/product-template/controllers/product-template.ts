@@ -3,6 +3,7 @@
 module.exports = {
     async findByMime(ctx) {
         strapi.log.info('findByMime handler executed');
+
         const { document_mime } = ctx.query;
 
         if (!document_mime || typeof document_mime !== 'string') {
@@ -14,7 +15,7 @@ module.exports = {
             {
                 filters: {
                     supported_mime: {
-                        $contains: [document_mime],
+                        $contains: [document_mime] as any, // ✅ cast za TS
                     },
                 },
                 fields: ['id', 'name', 'description', 'icon', 'allowed_options'],
