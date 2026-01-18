@@ -774,7 +774,7 @@ export interface ApiProductTemplateProductTemplate
       Schema.Attribute.Private;
     name: Schema.Attribute.String & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
-    supported_mime: Schema.Attribute.JSON & Schema.Attribute.Required;
+    supported_mime: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
