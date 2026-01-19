@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { strapiService } from '../services/strapiService';
-import type { Order, SyncCartPayload } from '../types';
+import type { SyncCartPayload } from '../types';
 import { toast } from 'react-toastify';
 
 export function useSyncCart() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: SyncCartPayload): Promise<Order> => {
+    mutationFn: async (payload: SyncCartPayload) => {
       const response = await strapiService.syncCart(payload);
       if (!response) {
         throw new Error('Failed to sync cart');

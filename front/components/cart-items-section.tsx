@@ -3,7 +3,7 @@
 
 import React from 'react';
 import {
-    Box, Typography, Grid, Divider, Button, Stack, Paper,
+    Box, Typography, Grid, Button, Stack, Paper,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useOrderItems } from '../hooks/useOrderItems';
@@ -19,7 +19,7 @@ import { toast } from 'react-toastify';
 export default function CartItemsSection() {
     const router = useRouter();
     const [orderId, setOrderId] = React.useState<string | undefined>(undefined);
-    const { mutate: syncCart, isLoading: isLoadingSync } = useSyncCart()
+    const { mutate: syncCart, isPending: isLoadingSync } = useSyncCart()
 
 
     const { data: orderItems, isLoading, isError, error } = useOrderItems(orderId);
@@ -92,7 +92,6 @@ export default function CartItemsSection() {
         syncCart({
             order_code: orderId,
             updated: patch.update,
-            created: patch?.add || [],
             deletedIds: patch.remove,
         })
         reset(structuredClone(edited))
@@ -112,7 +111,7 @@ export default function CartItemsSection() {
         if (stored) setOrderId(String(stored));
     }, []);
 
-    const isReady = edited.length > 0 || serverItems.length === 0;
+    const isReady = edited.length >= 0 || serverItems.length === 0;
 
     if (isLoading || !orderId || !isReady) return <OrderItemsSkeleton />;
     if (isError) return <ErrorState queryKey={['order-items']} message={error.message} />;
