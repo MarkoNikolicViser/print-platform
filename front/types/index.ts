@@ -1,93 +1,108 @@
 export interface PrintJob {
-  id: string
-  fileName: string
-  fileUrl: string
-  fileSize: number
-  pageCount: number
-  printOptions: PrintOptions
-  shopId: string
-  userId?: string
-  status: "pending" | "processing" | "ready" | "completed" | "cancelled"
-  totalCost: number
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  pageCount: number;
+  printOptions: PrintOptions;
+  shopId: string;
+  userId?: string;
+  status: 'pending' | 'processing' | 'ready' | 'completed' | 'cancelled';
+  totalCost: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ApiShop {
+  id: number;
+  name: string;
+  address: string;
+  city: string;
+  templates: string[];
+  is_open_today: boolean;
+  working_time_today: string | null;
+  total_price?: number;
 }
 
 export interface PrintOptions {
-  colorPrinting: boolean
-  doubleSided: boolean
-  paperType: "standard" | "premium" | "photo"
-  binding: "none" | "staple" | "spiral" | "hardcover"
-  copies: number
+  colorPrinting: boolean;
+  doubleSided: boolean;
+  paperType: 'standard' | 'premium' | 'photo';
+  binding: 'none' | 'staple' | 'spiral' | 'hardcover';
+  copies: number;
 }
 
 export interface CopyShop {
-  id: number
-  name: string
-  address: string
-  city: string
+  id: number;
+  name: string;
+  address: string;
+  city: string;
 
   // UI koristi ovo
-  templates: string[]
+  templates: string[];
 
-  is_open_now: boolean
-  working_time_today: string | null
-
-  total_price?: number
+  is_open_now: boolean;
+  working_time_today: string | null;
+  is_open_today: boolean;
+  total_price?: number;
 }
 
 export interface ShopPricing {
-  blackWhite: number // per page
-  color: number // per page
-  doubleSidedDiscount: number // percentage
+  blackWhite: number; // per page
+  color: number; // per page
+  doubleSidedDiscount: number; // percentage
   paperTypes: {
-    standard: number // multiplier
-    premium: number // multiplier
-    photo: number // multiplier
-  }
+    standard: number; // multiplier
+    premium: number; // multiplier
+    photo: number; // multiplier
+  };
   binding: {
-    staple: number // fixed cost
-    spiral: number // fixed cost
-    hardcover: number // fixed cost
-  }
+    staple: number; // fixed cost
+    spiral: number; // fixed cost
+    hardcover: number; // fixed cost
+  };
 }
 
 export interface User {
-  id: string
-  email: string
-  name: string
-  phone?: string
-  address?: string
-  printHistory: PrintJob[]
-  createdAt: Date
+  id: string;
+  email: string;
+  name: string;
+  phone?: string;
+  address?: string;
+  printHistory: PrintJob[];
+  createdAt: Date;
 }
 
 export interface AddToCartPayload {
-  order_code?: string
-  product_template_id?: number
-  selected_options: string
-  quantity: number
-  print_shop_id: number | null
-  customer_email: string
-  document_url: string
-  document_name: string
-  document_pages: string
-  document_mime?: string
+  order_code?: string;
+  product_template_id?: number;
+  selected_options: string;
+  quantity: number;
+  print_shop_id: number | null;
+  customer_email?: string;
+  document_url: string;
+  document_name: string | undefined;
+  document_pages: string;
+  document_mime?: string;
 }
 
 export interface Order {
-  id: string
-  order_code: string
-  status_code: string
-  total_price: number
-  order_items: any[]
+  orderId: string;
+  order_code: string;
+  status_code: string;
+  total_price: number;
+  order_items: any[];
+  count: number;
+  total: number;
+  expiresAt: string;
+  items: ProductTemplate[];
 }
 export interface ProductTemplate {
   id: number;
   name: string;
   description: string;
   icon: string;
-  allowed_options?: any
+  allowed_options?: any;
 }
 type AllowedOptionType = 'select' | 'radio' | 'number';
 
@@ -109,7 +124,6 @@ interface AllowedOptionNumber extends AllowedOptionBase {
   min?: number;
   max?: number;
 }
-
 
 export type SelectedOptions = {
   paper_size?: string;
@@ -160,10 +174,4 @@ export interface SyncCartPayload {
     quantity?: number;
   }>;
   deletedIds?: number[];
-}
-
-export interface SyncCartResponse {
-  order_code: string;
-  cart_count: number;
-  order_total: number;
 }

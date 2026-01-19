@@ -1,48 +1,36 @@
-"use client"
+import { useQuery } from '@tanstack/react-query';
+import { strapiService } from '../services/strapiService';
+import type { CopyShop, PrintOptions } from '../types';
 
-import { useState, useEffect } from "react"
-import type { CopyShop } from "../types"
-import { strapiService } from "../services/strapiService"
+type UseCopyShopsParams = {
+  selectedTemplate?: number | undefined;
+  quantity?: number;
+  memoizedConfig?: PrintOptions | string;
+  numberOfPages?: number; // Defaults to 3 to match your current call
+  enabled?: boolean;
+};
 
-interface UseCopyShopsReturn {
-  shops: CopyShop[]
-  loading: boolean
-  error: string | null
-  refetch: () => Promise<void>
-  getShopById: (id: string) => CopyShop | undefined
-}
+export function useCopyShops({
+  selectedTemplate,
+  quantity,
+  memoizedConfig,
+  numberOfPages = 3,
+  enabled = true
+}: UseCopyShopsParams) {
+  const templateId = selectedTemplate ?? null;
 
-export const useCopyShops = (): UseCopyShopsReturn => {
-  const [shops, setShops] = useState<CopyShop[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const fetchShops = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const fetchedShops = await strapiService.getCopyShops()
-      setShops(fetchedShops)
-    } catch (err: any) {
-      setError(err.message || "Greška pri učitavanju štamparija")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchShops()
-  }, [])
-
-  const getShopById = (id: string): CopyShop | undefined => {
-    return shops.find((shop) => shop.id === id)
-  }
-
-  return {
-    shops,
-    loading,
-    error,
-    refetch: fetchShops,
-    getShopById,
-  }
+  return useQuery<CopyShop[], Error>({
+    queryKey: ['copyShops', memoizedConfig, quantity],
+    enabled,
+    refetchOnWindowFocus: false,
+    queryFn: () =>
+      !templateId
+        ? strapiService.getCopyShops()
+        : strapiService.getCopyShops(
+            templateId,
+            numberOfPages,
+            quantity,
+            memoizedConfig
+          )
+  });
 }
