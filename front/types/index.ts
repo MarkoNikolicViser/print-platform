@@ -161,7 +161,7 @@ export type OrderItem = {
   locale?: string | null;
 };
 export interface SyncCartPayload {
-  order_code: string;
+  order_code: string | undefined;
   updated?: Array<{
     id: number;
     selected_options?: Record<string, any>;
@@ -175,3 +175,8 @@ export interface SyncCartPayload {
   }>;
   deletedIds?: number[];
 }
+
+export type ApiError = {
+  status: number;
+  message: string;
+};
