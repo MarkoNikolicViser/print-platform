@@ -26,34 +26,26 @@ import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import ErrorState from '../components/ui/error-state';
 import { useAddToCart } from "../hooks/useAddToCart"
 import { usePrintContext } from "@/context/PrintContext";
+import { useCopyShops } from "@/hooks/useCopyShops";
+import { CopyShop } from "@/types";
 
 type SortBy = "distance" | "price" | "rating"
-
-interface ApiShop {
-  id: number
-  name: string
-  address: string
-  city: string
-  templates: string[]
-  is_open_today: boolean
-  working_time_today: string | null
-  total_price?: number
-}
 
 interface FileCalculatedDetail {
   estimatedCost: number
 }
 
-interface AddToCartPayload {
-  order_code?: string
-  product_template_id?: number
-  selected_options: string
-  quantity: number
-  print_shop_id: number | null
-  document_url: string
-  document_name: string
-  document_pages: string
-  document_mime?: string
+export interface AddToCartPayload {
+  order_code?: string;
+  product_template_id?: number;
+  selected_options: string;
+  quantity: number;
+  print_shop_id: number | null;
+  customer_email?: string;
+  document_url: string;
+  document_name: string | undefined;
+  document_pages: string;
+  document_mime?: string;
 }
 
 interface Shop {
@@ -167,24 +159,20 @@ export function ShopSelectionSection() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
-  const {
-    data: copyShops = [],
-    isLoading,
-    error,
-    isError,
-  } = useQuery<ApiShop[], Error>({
-    queryKey: ["copyShops", memoizedConfig, quantity],
-    queryFn: () =>
-      !selectedTemplate
-        ? strapiService.getCopyShops()
-        : strapiService.getCopyShops(
-          selectedTemplate?.id,
-          3,
-          quantity,
-          memoizedConfig
-        ),
-    refetchOnWindowFocus: false,
-  });
+  
+const {
+  data: copyShops = [],
+  isLoading,
+  error,
+  isError,
+} = useCopyShops({
+  selectedTemplate:selectedTemplate?.id,
+  quantity,
+  memoizedConfig,
+  numberOfPages: 3,          // optional; defaults to 3
+  enabled: true,     // optional
+});
+
 
   // Listen for cost updates from print configuration
   useEffect(() => {
@@ -230,7 +218,7 @@ export function ShopSelectionSection() {
     })
 
 
-  const selectedShopData: ApiShop | null =
+  const selectedShopData: CopyShop | null =
     selectedShop && copyShops
       ? copyShops.find((s) => s.id === selectedShop) ?? null
       : null
@@ -323,7 +311,7 @@ export function ShopSelectionSection() {
                 Ovde bi se prikazala mapa sa lokacijama štamparija
               </Typography>
               <Grid container spacing={2}>
-                {copyShops?.map((shop: ApiShop) => (
+                {copyShops?.map((shop: CopyShop) => (
                   <Grid size={{ xs: 12, md: 4 }} key={shop.id}>
                     <Box p={2} border={1} borderRadius={2}>
                       <Typography variant="body1">{shop.name}</Typography>
@@ -347,7 +335,7 @@ export function ShopSelectionSection() {
                 </Typography>
               </Card>
             ) : (
-              copyShops?.map((shop: ApiShop) => (
+              copyShops?.map((shop: CopyShop) => (
                 <Card
                   key={shop.id}
                   variant="outlined"
