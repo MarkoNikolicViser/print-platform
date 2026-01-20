@@ -22,17 +22,12 @@ import {
 } from '@mui/material';
 import { MapPin, Clock, Star, Navigation, Filter, Search, EuroIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useMemo } from 'react';
-
+import { useState, useMemo } from 'react';
 import ErrorState from '../components/ui/error-state';
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import { useAddToCart } from '../hooks/useAddToCart';
 
 type SortBy = 'distance' | 'price' | 'rating';
-
-// interface FileCalculatedDetail {
-//   estimatedCost: number;
-// }
 
 export interface AddToCartPayload {
   order_code?: string;
@@ -47,103 +42,8 @@ export interface AddToCartPayload {
   document_mime?: string;
 }
 
-interface Shop {
-  id: number;
-  name: string;
-  address: string;
-  city: string;
-  phone: string;
-  distance: number;
-  basePrice: number;
-  rating: number;
-  reviewCount: number;
-  estimatedTime: string;
-  services: string[];
-  workingHours: string;
-  coordinates: { lat: number; lng: number };
-  total_price?: number;
-}
-
-const mockShops: Shop[] = [
-  {
-    id: 1,
-    name: 'Copy Centar Beograd',
-    address: 'Knez Mihailova 15',
-    city: 'Beograd',
-    phone: '+381 11 123-4567',
-    distance: 0.5,
-    basePrice: 8,
-    rating: 4.8,
-    reviewCount: 124,
-    estimatedTime: '30 min',
-    services: ['Štampanje', 'Kopiranje', 'Skeniranje', 'Povezivanje'],
-    workingHours: '08:00 - 20:00',
-    coordinates: { lat: 44.8176, lng: 20.4633 },
-  },
-  {
-    id: 2,
-    name: 'Štamparija Milenijum',
-    address: 'Terazije 25',
-    city: 'Beograd',
-    phone: '+381 11 234-5678',
-    distance: 1.2,
-    basePrice: 6,
-    rating: 4.6,
-    reviewCount: 89,
-    estimatedTime: '45 min',
-    services: ['Štampanje', 'Kopiranje', 'Laminiranje'],
-    workingHours: '09:00 - 19:00',
-    coordinates: { lat: 44.8125, lng: 20.4612 },
-  },
-  {
-    id: 3,
-    name: 'Print Shop Novi Sad',
-    address: 'Zmaj Jovina 8',
-    city: 'Novi Sad',
-    phone: '+381 21 345-6789',
-    distance: 2.1,
-    basePrice: 5,
-    rating: 4.9,
-    reviewCount: 156,
-    estimatedTime: '1 sat',
-    services: ['Štampanje', 'Kopiranje', 'Skeniranje', 'Povezivanje', 'Dizajn'],
-    workingHours: '08:30 - 19:30',
-    coordinates: { lat: 45.2671, lng: 19.8335 },
-  },
-  {
-    id: 4,
-    name: 'Express Print Niš',
-    address: 'Obrenovićeva 12',
-    city: 'Niš',
-    phone: '+381 18 456-7890',
-    distance: 3.5,
-    basePrice: 7,
-    rating: 4.4,
-    reviewCount: 67,
-    estimatedTime: '1.5 sata',
-    services: ['Štampanje', 'Kopiranje', 'Foto štampanje'],
-    workingHours: '09:00 - 18:00',
-    coordinates: { lat: 43.3209, lng: 21.8958 },
-  },
-  {
-    id: 5,
-    name: 'Kragujevac Copy',
-    address: 'Svetozara Markovića 3',
-    city: 'Kragujevac',
-    phone: '+381 34 567-8901',
-    distance: 4.2,
-    basePrice: 6,
-    rating: 4.7,
-    reviewCount: 93,
-    estimatedTime: '2 sata',
-    services: ['Štampanje', 'Kopiranje', 'Skeniranje', 'Povezivanje'],
-    workingHours: '08:00 - 18:30',
-    coordinates: { lat: 44.0165, lng: 20.9114 },
-  },
-];
-
 export function ShopSelectionSection() {
-  const { file, selectedTemplate, printConfig, quantity } = usePrintContext();
+  const { file, selectedTemplate, printConfig, quantity, fileInfo } = usePrintContext();
   const disabled = !file || !selectedTemplate;
   const [selectedShop, setSelectedShop] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('distance');
@@ -168,44 +68,9 @@ export function ShopSelectionSection() {
     selectedTemplate: selectedTemplate?.id,
     quantity,
     memoizedConfig,
-    numberOfPages: 3, // optional; defaults to 3
+    numberOfPages: fileInfo?.pages, // optional; defaults to 3
     enabled: true, // optional
   });
-
-  // Listen for cost updates from print configuration
-  useEffect(() => {
-    const handleFileCalculated = () => {
-      // setEstimatedCost(event.detail.estimatedCost || 0)
-    };
-
-    window.addEventListener('fileCalculated', handleFileCalculated as EventListener);
-
-    return () =>
-      window.removeEventListener('fileCalculated', handleFileCalculated as EventListener);
-  }, []);
-
-  const cities = ['all', ...Array.from(new Set(mockShops.map((shop) => shop.city)))];
-
-  // const filteredAndSortedShops = mockShops
-  //   .filter((shop) => {
-  //     const matchesCity = filterCity === 'all' || shop.city === filterCity;
-  //     const matchesSearch =
-  //       shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       shop.address.toLowerCase().includes(searchTerm.toLowerCase());
-  //     return matchesCity && matchesSearch;
-  //   })
-  //   .sort((a, b) => {
-  //     switch (sortBy) {
-  //       case 'distance':
-  //         return a.distance - b.distance;
-  //       case 'price':
-  //         return a.basePrice - b.basePrice;
-  //       case 'rating':
-  //         return b.rating - a.rating;
-  //       default:
-  //         return 0;
-  //     }
-  //   });
 
   const selectedShopData: CopyShop | null =
     selectedShop && copyShops ? (copyShops.find((s) => s.id === selectedShop) ?? null) : null;
@@ -220,7 +85,7 @@ export function ShopSelectionSection() {
       print_shop_id: selectedShop,
       document_url: '/test.pdf',
       document_name: file?.name,
-      document_pages: '3',
+      document_pages: String(fileInfo?.pages),
       document_mime: file?.type,
     };
     addToCart(payload);
@@ -280,11 +145,6 @@ export function ShopSelectionSection() {
             <InputLabel>Grad</InputLabel>
             <Select value={filterCity} onChange={(e) => setFilterCity(e.target.value)} label="Grad">
               <MenuItem value="all">Svi gradovi</MenuItem>
-              {cities.slice(1).map((city) => (
-                <MenuItem key={city} value={city}>
-                  {city}
-                </MenuItem>
-              ))}
             </Select>
           </FormControl>
         </Box>

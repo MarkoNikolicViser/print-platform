@@ -182,3 +182,9 @@ export type ApiError = {
   status: number;
   message: string;
 };
+export interface FileInfo {
+  name: string;
+  size: number;
+  type: string;
+  pages?: number;
+}

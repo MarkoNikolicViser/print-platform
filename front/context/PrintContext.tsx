@@ -1,5 +1,6 @@
 'use client';
 
+import { FileInfo } from '@/types';
 import React, {
   createContext,
   useContext,
@@ -22,6 +23,8 @@ type PrintContextType = {
   setPrintConfig: any;
   quantity: number;
   setQuantity: Dispatch<SetStateAction<number>>;
+  fileInfo: FileInfo | null;
+  setFileInfo: Dispatch<SetStateAction<FileInfo | null>>;
 };
 
 // Create the context with default undefined
@@ -33,6 +36,7 @@ export function PrintProvider({ children }: { children: ReactNode }) {
   const [selectedTemplate, setSelectedTemplate] = useState<SelectedTemplate | null>(null);
   const [printConfig, setPrintConfig] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
 
   return (
     <PrintContext.Provider
@@ -45,6 +49,8 @@ export function PrintProvider({ children }: { children: ReactNode }) {
         setPrintConfig,
         quantity,
         setQuantity,
+        fileInfo,
+        setFileInfo,
       }}
     >
       {children}

@@ -1,6 +1,4 @@
-// useFileUpload.ts
 import { useState } from 'react';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { PDFDocument } from 'pdf-lib';
 
 export const allowedFileTypes = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
@@ -22,44 +20,48 @@ export const useFileUpload = () => {
     }
 
     setLoading(true);
-
-    let pageCount: number | undefined = undefined;
+    let pageCount: number | undefined;
 
     try {
       if (ext === '.pdf') {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdfDoc = await PDFDocument.load(arrayBuffer);
-        pageCount = pdfDoc.getPageCount();
+        const buf = await file.arrayBuffer();
+        const pdf = await PDFDocument.load(buf);
+        pageCount = pdf.getPageCount();
       }
 
-      const s3 = new S3Client({
-        region: process.env.NEXT_PUBLIC_AWS_REGION,
-        credentials: {
-          accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || '',
-          secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || '',
+      const params = new URLSearchParams({
+        fileName: file.name,
+        contentType: file.type || 'application/octet-stream',
+      });
+
+      const presignRes = await fetch(`/api/upload-url?${params.toString()}`, { method: 'GET' });
+      if (!presignRes.ok) {
+        const data = await presignRes.json().catch(() => ({}));
+        throw new Error(data?.error || 'Failed to get upload URL');
+      }
+      const { url, publicUrl } = await presignRes.json();
+
+      const putRes = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
         },
+        body: file,
       });
 
-      const fileKey = `${Date.now()}_${file.name}`;
-      const command = new PutObjectCommand({
-        Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET_NAME,
-        Key: fileKey,
-        Body: file,
-        ContentType: file.type,
-      });
-
-      await s3.send(command);
+      if (!putRes.ok) {
+        throw new Error('Upload failed');
+      }
 
       setLoading(false);
-
       return {
         success: true,
-        url: `https://${process.env.NEXT_PUBLIC_AWS_BUCKET_NAME}.s3.${process.env.NEXT_PUBLIC_AWS_REGION}.amazonaws.com/${fileKey}`,
+        url: publicUrl,
         ...(pageCount !== undefined && { pageCount }),
       };
-    } catch (error: any) {
+    } catch (e: any) {
       setLoading(false);
-      return { success: false, error: error.message || 'Upload failed' };
+      return { success: false, error: e?.message || 'Upload failed' };
     }
   };
 
