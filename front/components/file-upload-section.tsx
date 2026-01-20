@@ -20,6 +20,7 @@ import { Upload, FileText, AlertCircle, X } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 
 import { PrintTypeSelector } from './print-type-selector';
+import { allowedFileTypes } from '@/hooks/useFileUpload';
 
 interface FileInfo {
   name: string;
@@ -36,15 +37,14 @@ export function FileUploadSection() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const allowedTypes = ['.pdf', '.doc', '.docx', '.txt', '.jpg'];
   const maxFileSize = 50 * 1024 * 1024;
 
   /* ---------------- utils ---------------- */
 
   const validateFile = (file: File): string | null => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-    if (!allowedTypes.includes(ext)) {
-      return `Dozvoljeni formati: ${allowedTypes.join(', ')}`;
+    if (!allowedFileTypes.includes(ext)) {
+      return `Dozvoljeni formati: ${allowedFileTypes.join(', ')}`;
     }
     if (file.size > maxFileSize) {
       return 'Maksimalna veličina fajla je 50MB.';
@@ -146,7 +146,7 @@ export function FileUploadSection() {
                 <input
                   hidden
                   type="file"
-                  accept={allowedTypes.join(',')}
+                  accept={allowedFileTypes.join(', ')}
                   onChange={(e) => e.target.files && selectFile(e.target.files[0])}
                 />
 
