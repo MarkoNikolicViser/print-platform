@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Drawer,
@@ -12,8 +12,8 @@ import {
   useMediaQuery,
   useTheme,
   Tooltip,
-} from "@mui/material";
-import { BarChart3, ShoppingCart, DollarSign, Settings, Home } from "lucide-react";
+} from '@mui/material';
+import { BarChart3, ShoppingCart, DollarSign, Settings, Home } from 'lucide-react';
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -21,39 +21,38 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { id: "dashboard", label: "Pregled", icon: <BarChart3 size={20} /> },
-  { id: "orders", label: "Narudžbine", icon: <ShoppingCart size={20} /> },
-  { id: "pricing", label: "Cene", icon: <DollarSign size={20} /> },
-  { id: "settings", label: "Podešavanja", icon: <Settings size={20} /> },
+  { id: 'dashboard', label: 'Pregled', icon: <BarChart3 size={20} /> },
+  { id: 'orders', label: 'Narudžbine', icon: <ShoppingCart size={20} /> },
+  { id: 'pricing', label: 'Cene', icon: <DollarSign size={20} /> },
+  { id: 'settings', label: 'Podešavanja', icon: <Settings size={20} /> },
 ];
 
 export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
     <Drawer
       variant="permanent"
       PaperProps={{
         sx: {
-          position: "relative", // prevents overlay
+          position: 'relative', // prevents overlay
           width: isMobile ? 64 : 240,
           flexShrink: 0,
-          bgcolor: "background.paper",
+          bgcolor: 'background.paper',
           borderRight: `1px solid ${theme.palette.divider}`,
         },
       }}
     >
-
       <Box p={2}>
         <Tooltip title="Nazad na sajt" placement="right" disableHoverListener={!isMobile}>
           <Button
             // variant="outlined"
             fullWidth={!isMobile}
-            onClick={() => (window.location.href = "/")}
+            onClick={() => (window.location.href = '/')}
             sx={{
               mb: 2,
-              justifyContent: isMobile ? "center" : "flex-start",
+              justifyContent: isMobile ? 'center' : 'flex-start',
               minWidth: 0,
               // px: isMobile ? 0 : 2,
             }}
@@ -71,7 +70,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
                   selected={activeTab === item.id}
                   onClick={() => onTabChange(item.id)}
                   sx={{
-                    justifyContent: isMobile ? "center" : "flex-start",
+                    justifyContent: isMobile ? 'center' : 'flex-start',
                     px: isMobile ? 0 : 2,
                   }}
                 >

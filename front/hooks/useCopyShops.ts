@@ -15,7 +15,7 @@ export function useCopyShops({
   quantity,
   memoizedConfig,
   numberOfPages = 3,
-  enabled = true
+  enabled = true,
 }: UseCopyShopsParams) {
   const templateId = selectedTemplate ?? null;
 
@@ -26,11 +26,6 @@ export function useCopyShops({
     queryFn: () =>
       !templateId
         ? strapiService.getCopyShops()
-        : strapiService.getCopyShops(
-            templateId,
-            numberOfPages,
-            quantity,
-            memoizedConfig
-          )
+        : strapiService.getCopyShops(templateId, numberOfPages, quantity, memoizedConfig),
   });
 }

@@ -10,7 +10,12 @@
       "version": "detect"
     },
     "import/resolver": {
-     
+           "alias": {
+        "map": [
+          ["@", "./"]
+        ],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
     }
   },
   "extends": [
@@ -30,7 +35,7 @@
     "react",
     "react-hooks",
     "@typescript-eslint",
-    "eslint-plugin-import-helpers"
+    "import-helpers"
   ],
   "rules": {
     "@typescript-eslint/no-namespace": "off",
@@ -61,5 +66,5 @@
       }
     ]
   },
-  "ignorePatterns": ["bin/**/*.js", "build/"]
+  "ignorePatterns": ["bin/**/*.js", "build/", "dist/*"]
 }

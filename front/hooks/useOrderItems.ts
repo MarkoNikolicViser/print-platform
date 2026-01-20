@@ -12,6 +12,6 @@ export function useOrderItems(orderId?: string, enabled: boolean = true) {
     enabled: !!orderId && enabled,
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 }

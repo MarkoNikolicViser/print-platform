@@ -1,6 +1,5 @@
-"use client"
+'use client';
 
-import { useState } from "react"
 import {
   Box,
   Typography,
@@ -12,36 +11,37 @@ import {
   TextField,
   Switch,
   Divider,
-} from "@mui/material";
-import { Save, DollarSign } from "lucide-react";
+} from '@mui/material';
+import { Save, DollarSign } from 'lucide-react';
+import { useState } from 'react';
 
 interface PricingConfig {
-  basePricePerPage: number
-  colorMultiplier: number
-  doubleSidedDiscount: number
+  basePricePerPage: number;
+  colorMultiplier: number;
+  doubleSidedDiscount: number;
   paperSizePricing: {
-    a5: number
-    a4: number
-    a3: number
-    a2: number
-  }
+    a5: number;
+    a4: number;
+    a3: number;
+    a2: number;
+  };
   paperTypePricing: {
-    standard: number
-    premium: number
-    photo: number
-    cardstock: number
-  }
+    standard: number;
+    premium: number;
+    photo: number;
+    cardstock: number;
+  };
   bindingPricing: {
-    staple: number
-    spiral: number
-    thermal: number
-  }
+    staple: number;
+    spiral: number;
+    thermal: number;
+  };
   bulkDiscounts: {
-    enabled: boolean
-    tier1: { min: number; discount: number }
-    tier2: { min: number; discount: number }
-    tier3: { min: number; discount: number }
-  }
+    enabled: boolean;
+    tier1: { min: number; discount: number };
+    tier2: { min: number; discount: number };
+    tier3: { min: number; discount: number };
+  };
 }
 
 export function PricingSettings() {
@@ -72,32 +72,32 @@ export function PricingSettings() {
       tier2: { min: 100, discount: 0.1 },
       tier3: { min: 200, discount: 0.15 },
     },
-  })
+  });
 
-  const [hasChanges, setHasChanges] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false);
 
   const updatePricing = (path: string, value: any) => {
     setPricing((prev) => {
-      const keys = path.split(".")
-      const updated = { ...prev }
-      let current: any = updated
+      const keys = path.split('.');
+      const updated = { ...prev };
+      let current: any = updated;
 
       for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...current[keys[i]] }
-        current = current[keys[i]]
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
       }
 
-      current[keys[keys.length - 1]] = value
-      return updated
-    })
-    setHasChanges(true)
-  }
+      current[keys[keys.length - 1]] = value;
+      return updated;
+    });
+    setHasChanges(true);
+  };
 
   const savePricing = () => {
     // In a real app, this would save to the backend
-    console.log("Saving pricing configuration:", pricing)
-    setHasChanges(false)
-  }
+    console.log('Saving pricing configuration:', pricing);
+    setHasChanges(false);
+  };
 
   return (
     <Box display="flex" flexDirection="column" gap={6}>
@@ -141,9 +141,7 @@ export function PricingSettings() {
                 label="Osnovna cena po stranici (RSD)"
                 type="number"
                 value={pricing.basePricePerPage}
-                onChange={(e) =>
-                  updatePricing("basePricePerPage", parseFloat(e.target.value))
-                }
+                onChange={(e) => updatePricing('basePricePerPage', parseFloat(e.target.value))}
                 fullWidth
                 inputProps={{ step: 0.1 }}
               />
@@ -153,9 +151,7 @@ export function PricingSettings() {
                 label="Množilac za boju"
                 type="number"
                 value={pricing.colorMultiplier}
-                onChange={(e) =>
-                  updatePricing("colorMultiplier", parseFloat(e.target.value))
-                }
+                onChange={(e) => updatePricing('colorMultiplier', parseFloat(e.target.value))}
                 fullWidth
                 inputProps={{ step: 0.1 }}
                 helperText="Koliko puta je skuplje od crno-bele"
@@ -167,7 +163,7 @@ export function PricingSettings() {
                 type="number"
                 value={pricing.doubleSidedDiscount * 100}
                 onChange={(e) =>
-                  updatePricing("doubleSidedDiscount", parseFloat(e.target.value) / 100)
+                  updatePricing('doubleSidedDiscount', parseFloat(e.target.value) / 100)
                 }
                 fullWidth
                 inputProps={{ step: 1, max: 50 }}
@@ -253,7 +249,7 @@ export function PricingSettings() {
           <Box display="flex" alignItems="center" gap={2} mb={2}>
             <Switch
               checked={pricing.bulkDiscounts.enabled}
-              onChange={(e) => updatePricing("bulkDiscounts.enabled", e.target.checked)}
+              onChange={(e) => updatePricing('bulkDiscounts.enabled', e.target.checked)}
             />
             <Typography>Omogući popuste za veće količine</Typography>
           </Box>
@@ -263,7 +259,7 @@ export function PricingSettings() {
               <Divider sx={{ mb: 2 }} />
               <Grid container spacing={3}>
                 {Object.entries(pricing.bulkDiscounts)
-                  .filter(([key]) => key !== "enabled")
+                  .filter(([key]) => key !== 'enabled')
                   .map(([tier, config]) => (
                     <Box key={tier}>
                       <Grid size={{ xs: 12, md: 10 }} pb={2}>
@@ -285,7 +281,7 @@ export function PricingSettings() {
                           onChange={(e) =>
                             updatePricing(
                               `bulkDiscounts.${tier}.discount`,
-                              parseFloat(e.target.value) / 100
+                              parseFloat(e.target.value) / 100,
                             )
                           }
                           fullWidth
@@ -308,15 +304,16 @@ export function PricingSettings() {
             <strong>Primer:</strong> 10 stranica A4, crno-belo, obostrano, spiralno povezivanje
           </Typography>
           <Typography variant="body2">
-            Cena: {pricing.basePricePerPage} × 10 × {pricing.paperSizePricing.a4} × (1 - {pricing.doubleSidedDiscount}) + {pricing.bindingPricing.spiral} ={" "}
+            Cena: {pricing.basePricePerPage} × 10 × {pricing.paperSizePricing.a4} × (1 -{' '}
+            {pricing.doubleSidedDiscount}) + {pricing.bindingPricing.spiral} ={' '}
             <strong>
               {Math.round(
                 pricing.basePricePerPage *
-                10 *
-                pricing.paperSizePricing.a4 *
-                (1 - pricing.doubleSidedDiscount) +
-                pricing.bindingPricing.spiral
-              )}{" "}
+                  10 *
+                  pricing.paperSizePricing.a4 *
+                  (1 - pricing.doubleSidedDiscount) +
+                  pricing.bindingPricing.spiral,
+              )}{' '}
               RSD
             </strong>
           </Typography>

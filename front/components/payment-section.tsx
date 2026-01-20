@@ -1,6 +1,11 @@
-"use client"
+'use client';
 
-import React, { useState } from "react"
+import BusinessIcon from '@mui/icons-material/Business';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import LockIcon from '@mui/icons-material/Lock';
+import SmartphoneIcon from '@mui/icons-material/Smartphone';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {
   Box,
   Card,
@@ -17,79 +22,70 @@ import {
   Stack,
   Alert,
   CircularProgress,
-} from "@mui/material"
-import LockIcon from "@mui/icons-material/Lock"
-import CreditCardIcon from "@mui/icons-material/CreditCard"
-import SmartphoneIcon from "@mui/icons-material/Smartphone"
-import BusinessIcon from "@mui/icons-material/Business"
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"
-import WarningAmberIcon from "@mui/icons-material/WarningAmber"
+} from '@mui/material';
+import React, { useState } from 'react';
 
 const paymentMethods = [
   {
-    id: "card",
-    name: "Platna kartica",
-    description: "Visa, MasterCard, Dina",
+    id: 'card',
+    name: 'Platna kartica',
+    description: 'Visa, MasterCard, Dina',
     icon: <CreditCardIcon />,
     fee: 0,
-    processingTime: "Trenutno",
+    processingTime: 'Trenutno',
   },
   {
-    id: "mbanking",
-    name: "m-Banking",
-    description: "Komercijalna, Intesa, Raiffeisen",
+    id: 'mbanking',
+    name: 'm-Banking',
+    description: 'Komercijalna, Intesa, Raiffeisen',
     icon: <SmartphoneIcon />,
     fee: 0,
-    processingTime: "1-2 min",
+    processingTime: '1-2 min',
   },
   {
-    id: "bank_transfer",
-    name: "Bankovna doznaka",
-    description: "Prenos na račun štamparije",
+    id: 'bank_transfer',
+    name: 'Bankovna doznaka',
+    description: 'Prenos na račun štamparije',
     icon: <BusinessIcon />,
     fee: 0,
-    processingTime: "1-24h",
+    processingTime: '1-24h',
   },
-]
-
+];
 
 export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
-  const [selectedMethod, setSelectedMethod] = useState("")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentComplete, setPaymentComplete] = useState(false)
+  const [selectedMethod, setSelectedMethod] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentComplete, setPaymentComplete] = useState(false);
 
   const [cardDetails, setCardDetails] = useState({
-    number: "",
-    expiry: "",
-    cvv: "",
-    name: "",
-  })
+    number: '',
+    expiry: '',
+    cvv: '',
+    name: '',
+  });
 
-  const selectedPaymentMethod = paymentMethods.find(
-    (m) => m.id === selectedMethod
-  )
+  const selectedPaymentMethod = paymentMethods.find((m) => m.id === selectedMethod);
 
-  const totalWithFees =
-    orderSummary.totalCost + (selectedPaymentMethod?.fee || 0)
+  const totalWithFees = orderSummary.totalCost + (selectedPaymentMethod?.fee || 0);
 
   const handlePayment = () => {
-    if (!selectedMethod) return
-    setIsProcessing(true)
+    if (!selectedMethod) return;
+    setIsProcessing(true);
 
     setTimeout(() => {
-      setIsProcessing(false)
-      setPaymentComplete(true)
+      setIsProcessing(false);
+      setPaymentComplete(true);
 
       setTimeout(() => {
-        onPaymentComplete(`PS${Date.now()}`)
-      }, 2000)
-    }, 3000)
-  }
+        onPaymentComplete(`PS${Date.now()}`);
+      }, 2000);
+    }, 3000);
+  };
 
   if (paymentComplete) {
     return (
       <Card>
-        <CardContent sx={{ textAlign: "center", p: 4 }}>
+        <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <CheckCircleIcon color="success" sx={{ fontSize: 64, mb: 2 }} />
           <Typography variant="h5" fontWeight="bold">
             Plaćanje uspešno!
@@ -98,16 +94,14 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
             Vaša narudžbina je primljena.
           </Typography>
 
-          <Box sx={{ p: 2, bgcolor: "grey.100", borderRadius: 2 }}>
+          <Box sx={{ p: 2, bgcolor: 'grey.100', borderRadius: 2 }}>
             <Typography>ID: PS{Date.now()}</Typography>
             <Typography>Štamparija: {orderSummary.shopName}</Typography>
-            <Typography>
-              Ukupno: {totalWithFees} RSD
-            </Typography>
+            <Typography>Ukupno: {totalWithFees} RSD</Typography>
           </Box>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -124,7 +118,9 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
 
       <CardContent>
         {/* ORDER SUMMARY */}
-        <Box sx={{ p: 2, border: "1px solid", borderColor: "primary.main", borderRadius: 2, mb: 3 }}>
+        <Box
+          sx={{ p: 2, border: '1px solid', borderColor: 'primary.main', borderRadius: 2, mb: 3 }}
+        >
           <Typography fontWeight="bold" color="primary" mb={1}>
             Rezime narudžbine
           </Typography>
@@ -137,27 +133,20 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
 
             <Stack direction="row" spacing={1}>
               {orderSummary.printConfig.isColor && <Chip label="Boja" size="small" />}
-              {orderSummary.printConfig.isDoubleSided && (
-                <Chip label="Obostrano" size="small" />
-              )}
-              {orderSummary.printConfig.binding !== "none" && (
+              {orderSummary.printConfig.isDoubleSided && <Chip label="Obostrano" size="small" />}
+              {orderSummary.printConfig.binding !== 'none' && (
                 <Chip label="Povezivanje" size="small" />
               )}
             </Stack>
 
             <Divider />
 
-            <Typography fontWeight="bold">
-              Ukupno: {totalWithFees} RSD
-            </Typography>
+            <Typography fontWeight="bold">Ukupno: {totalWithFees} RSD</Typography>
           </Stack>
         </Box>
 
         {/* PAYMENT METHODS */}
-        <RadioGroup
-          value={selectedMethod}
-          onChange={(e) => setSelectedMethod(e.target.value)}
-        >
+        <RadioGroup value={selectedMethod} onChange={(e) => setSelectedMethod(e.target.value)}>
           {paymentMethods.map((method) => (
             <FormControlLabel
               key={method.id}
@@ -167,9 +156,7 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
                 <Stack direction="row" spacing={2} alignItems="center">
                   {method.icon}
                   <Box>
-                    <Typography fontWeight="medium">
-                      {method.name}
-                    </Typography>
+                    <Typography fontWeight="medium">{method.name}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {method.description}
                     </Typography>
@@ -181,7 +168,7 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
         </RadioGroup>
 
         {/* CARD DETAILS */}
-        {selectedMethod === "card" && (
+        {selectedMethod === 'card' && (
           <Box sx={{ mt: 3 }}>
             <Typography fontWeight="bold" mb={2}>
               Detalji kartice
@@ -192,33 +179,25 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
                 label="Ime na kartici"
                 fullWidth
                 value={cardDetails.name}
-                onChange={(e) =>
-                  setCardDetails({ ...cardDetails, name: e.target.value })
-                }
+                onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
               />
               <TextField
                 label="Broj kartice"
                 fullWidth
                 value={cardDetails.number}
-                onChange={(e) =>
-                  setCardDetails({ ...cardDetails, number: e.target.value })
-                }
+                onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
               />
               <Stack direction="row" spacing={2}>
                 <TextField
                   label="MM/GG"
                   value={cardDetails.expiry}
-                  onChange={(e) =>
-                    setCardDetails({ ...cardDetails, expiry: e.target.value })
-                  }
+                  onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
                 />
                 <TextField
                   label="CVV"
                   type="password"
                   value={cardDetails.cvv}
-                  onChange={(e) =>
-                    setCardDetails({ ...cardDetails, cvv: e.target.value })
-                  }
+                  onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
                 />
               </Stack>
             </Stack>
@@ -226,7 +205,7 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
         )}
 
         {/* BANK TRANSFER */}
-        {selectedMethod === "bank_transfer" && (
+        {selectedMethod === 'bank_transfer' && (
           <Alert severity="warning" sx={{ mt: 3 }}>
             <WarningAmberIcon sx={{ mr: 1 }} />
             Štampanje počinje nakon prijema uplate (1–24h)
@@ -244,11 +223,7 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
             disabled={!selectedMethod || isProcessing}
             onClick={handlePayment}
           >
-            {isProcessing ? (
-              <CircularProgress size={24} />
-            ) : (
-              `Plati ${totalWithFees} RSD`
-            )}
+            {isProcessing ? <CircularProgress size={24} /> : `Plati ${totalWithFees} RSD`}
           </Button>
         </Stack>
 
@@ -265,6 +240,5 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
         </Typography>
       </CardContent>
     </Card>
-  )
+  );
 }
-

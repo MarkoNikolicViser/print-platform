@@ -1,8 +1,5 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useCartItemCount } from "../hooks/useCartItemCount";
 import {
   AppBar,
   Toolbar,
@@ -12,27 +9,31 @@ import {
   Avatar,
   useMediaQuery,
   useTheme,
-} from "@mui/material";
-import { User, Settings, LogOut } from "lucide-react";
-import CartButton from './ui/CartButton'
+} from '@mui/material';
+import { User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { useCartItemCount } from '../hooks/useCartItemCount';
+import CartButton from './ui/CartButton';
 
 export function Header() {
-  const initialOrderId = typeof window !== "undefined" ? localStorage.getItem("order_code") ?? undefined : undefined
-  const [orderId, setOrderId] = useState<string | undefined>(initialOrderId)
+  const initialOrderId =
+    typeof window !== 'undefined' ? (localStorage.getItem('order_code') ?? undefined) : undefined;
+  const [orderId, setOrderId] = useState<string | undefined>(initialOrderId);
   const [user, setUser] = useState<any>(null);
   const [admin, setAdmin] = useState<any>(null);
 
   const router = useRouter();
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md")); // hides text on md and smaller
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-
-  const { data: cartCounter } = useCartItemCount(orderId)
+  const { data: cartCounter } = useCartItemCount(orderId);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    const adminData = localStorage.getItem("admin");
+    const userData = localStorage.getItem('user');
+    const adminData = localStorage.getItem('admin');
 
     if (userData) {
       setUser(JSON.parse(userData));
@@ -43,27 +44,19 @@ export function Header() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("admin");
+    localStorage.removeItem('user');
+    localStorage.removeItem('admin');
     setUser(null);
     setAdmin(null);
-    router.push("/");
+    router.push('/');
   };
 
   return (
-    <AppBar
-      position="static"
-      color="default"
-      sx={{ borderBottom: 2, borderColor: "primary.main" }}
-    >
-      <Toolbar sx={{ justifyContent: "space-between", px: 2 }}>
+    <AppBar position="static" color="default" sx={{ borderBottom: 2, borderColor: 'primary.main' }}>
+      <Toolbar sx={{ justifyContent: 'space-between', px: 2 }}>
         <Box display="flex" alignItems="center" gap={2}>
-          <Avatar sx={{ bgcolor: "primary.main", width: 32, height: 32 }}>
-            <Typography
-              variant="caption"
-              color="primary.contrastText"
-              fontWeight="bold"
-            >
+          <Avatar sx={{ bgcolor: 'primary.main', width: 32, height: 32 }}>
+            <Typography variant="caption" color="primary.contrastText" fontWeight="bold">
               G2C
             </Typography>
           </Avatar>
@@ -71,8 +64,8 @@ export function Header() {
             variant="h6"
             color="primary"
             fontWeight="bold"
-            sx={{ cursor: "pointer" }}
-            onClick={() => router.push("/")}
+            sx={{ cursor: 'pointer' }}
+            onClick={() => router.push('/')}
           >
             Go2Copy
           </Typography>
@@ -82,12 +75,12 @@ export function Header() {
           <Button
             variant="text"
             size="small"
-            onClick={() => router.push("/login")}
+            onClick={() => router.push('/login')}
             startIcon={<User size={16} />}
           >
-            {!isMobile && "Za kopirnice"}
+            {!isMobile && 'Za kopirnice'}
           </Button>
-          <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push("/cart")} />
+          <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push('/cart')} />
         </Box>
       </Toolbar>
     </AppBar>
