@@ -71,6 +71,8 @@ export interface User {
   address?: string;
   printHistory: PrintJob[];
   createdAt: Date;
+  app_role: string;
+  username: string;
 }
 
 export interface AddToCartPayload {

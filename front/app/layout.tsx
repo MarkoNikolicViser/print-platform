@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import { Providers } from "./providers";
+import type { Metadata } from 'next';
+
+import './globals.css';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: "PrintSerbia - Online Štamparija",
-  description: "Naručite štampanje online - bez čekanja u redu",
+  title: 'PrintSerbia - Online Štamparija',
+  description: 'Naručite štampanje online - bez čekanja u redu',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

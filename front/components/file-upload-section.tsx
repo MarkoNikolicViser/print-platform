@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState, useCallback } from "react";
+import { usePrintContext } from '@/context/PrintContext';
 import {
   Box,
   Typography,
@@ -15,10 +15,11 @@ import {
   Grid,
   Paper,
   Chip,
-} from "@mui/material";
-import { Upload, FileText, AlertCircle, X } from "lucide-react";
-import { PrintTypeSelector } from "./print-type-selector";
-import { usePrintContext } from "@/context/PrintContext";
+} from '@mui/material';
+import { Upload, FileText, AlertCircle, X } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+
+import { PrintTypeSelector } from './print-type-selector';
 
 interface FileInfo {
   name: string;
@@ -35,33 +36,33 @@ export function FileUploadSection() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const allowedTypes = [".pdf", ".doc", ".docx", ".txt", ".jpg"];
+  const allowedTypes = ['.pdf', '.doc', '.docx', '.txt', '.jpg'];
   const maxFileSize = 50 * 1024 * 1024;
 
   /* ---------------- utils ---------------- */
 
   const validateFile = (file: File): string | null => {
-    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
     if (!allowedTypes.includes(ext)) {
-      return `Dozvoljeni formati: ${allowedTypes.join(", ")}`;
+      return `Dozvoljeni formati: ${allowedTypes.join(', ')}`;
     }
     if (file.size > maxFileSize) {
-      return "Maksimalna veličina fajla je 50MB.";
+      return 'Maksimalna veličina fajla je 50MB.';
     }
     return null;
   };
 
   const estimatePages = (file: File) => {
     const kb = file.size / 1024;
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    if (ext === "pdf") return Math.max(1, Math.round(kb / 100));
-    if (ext === "doc" || ext === "docx") return Math.max(1, Math.round(kb / 50));
-    if (ext === "txt") return Math.max(1, Math.round(kb / 5));
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') return Math.max(1, Math.round(kb / 100));
+    if (ext === 'doc' || ext === 'docx') return Math.max(1, Math.round(kb / 50));
+    if (ext === 'txt') return Math.max(1, Math.round(kb / 5));
     return 1;
   };
 
   const formatSize = (bytes: number) => {
-    const sizes = ["B", "KB", "MB", "GB"];
+    const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
@@ -92,13 +93,13 @@ export function FileUploadSection() {
       setDone(true);
 
       window.dispatchEvent(
-        new CustomEvent("fileCalculated", {
+        new CustomEvent('fileCalculated', {
           detail: {
             file,
             pages: info.pages,
             estimatedCost: info.pages! * 10,
           },
-        })
+        }),
       );
     }, 1800);
   };
@@ -115,7 +116,11 @@ export function FileUploadSection() {
     <Card>
       <CardHeader
         title={
-          <Typography variant="h6" color="primary" sx={{ textTransform: "uppercase", fontWeight: "bold" }}>
+          <Typography
+            variant="h6"
+            color="primary"
+            sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
+          >
             1. Otpremanje fajla
           </Typography>
         }
@@ -141,10 +146,8 @@ export function FileUploadSection() {
                 <input
                   hidden
                   type="file"
-                  accept={allowedTypes.join(",")}
-                  onChange={(e) =>
-                    e.target.files && selectFile(e.target.files[0])
-                  }
+                  accept={allowedTypes.join(',')}
+                  onChange={(e) => e.target.files && selectFile(e.target.files[0])}
                 />
 
                 <Paper
@@ -160,13 +163,13 @@ export function FileUploadSection() {
                   }}
                   sx={{
                     p: 5,
-                    textAlign: "center",
+                    textAlign: 'center',
                     borderRadius: 3,
-                    border: "2px dashed",
-                    borderColor: dragOver ? "primary.main" : "grey.400",
-                    bgcolor: dragOver ? "action.hover" : "transparent",
-                    cursor: "pointer",
-                    transition: "all .2s ease",
+                    border: '2px dashed',
+                    borderColor: dragOver ? 'primary.main' : 'grey.400',
+                    bgcolor: dragOver ? 'action.hover' : 'transparent',
+                    cursor: 'pointer',
+                    transition: 'all .2s ease',
                   }}
                 >
                   <Upload size={36} />
@@ -183,8 +186,8 @@ export function FileUploadSection() {
                 sx={{
                   p: 2,
                   borderRadius: 2,
-                  border: "1px solid",
-                  borderColor: done ? "success.main" : "divider",
+                  border: '1px solid',
+                  borderColor: done ? 'success.main' : 'divider',
                 }}
               >
                 <Box display="flex" justifyContent="space-between">
@@ -198,8 +201,8 @@ export function FileUploadSection() {
                       <Box mt={1}>
                         <Chip
                           size="small"
-                          color={done ? "success" : "warning"}
-                          label={done ? "Obrađeno" : "Nije obrađeno"}
+                          color={done ? 'success' : 'warning'}
+                          label={done ? 'Obrađeno' : 'Nije obrađeno'}
                         />
                       </Box>
                     </Box>
@@ -213,24 +216,14 @@ export function FileUploadSection() {
           </Grid>
 
           {/* RIGHT */}
-          <Grid size={{ xs: 12, md: 4 }} >
+          <Grid size={{ xs: 12, md: 4 }}>
             <Box display="flex" flexDirection="column" gap={2}>
               <Typography
                 variant="caption"
                 textAlign="center"
-                color={
-                  done
-                    ? "success.main"
-                    : file
-                      ? "primary.main"
-                      : "text.secondary"
-                }
+                color={done ? 'success.main' : file ? 'primary.main' : 'text.secondary'}
               >
-                {done
-                  ? "Korak 1 završen"
-                  : file
-                    ? "Spremno za obračun"
-                    : "Izaberite fajl"}
+                {done ? 'Korak 1 završen' : file ? 'Spremno za obračun' : 'Izaberite fajl'}
               </Typography>
 
               <Button
@@ -238,11 +231,7 @@ export function FileUploadSection() {
                 onClick={handleCalculate}
                 disabled={!file || loading || done}
               >
-                {loading
-                  ? "Analiza u toku…"
-                  : done
-                    ? "Cena izračunata"
-                    : "Izračunaj cenu"}
+                {loading ? 'Analiza u toku…' : done ? 'Cena izračunata' : 'Izračunaj cenu'}
               </Button>
 
               {loading && <LinearProgress />}
@@ -251,10 +240,7 @@ export function FileUploadSection() {
         </Grid>
 
         <Box mt={4}>
-          <PrintTypeSelector
-            fileUploaded={Boolean(file)}
-            documentMime={file?.type}
-          />
+          <PrintTypeSelector fileUploaded={Boolean(file)} documentMime={file?.type} />
         </Box>
       </CardContent>
     </Card>

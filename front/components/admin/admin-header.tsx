@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   AppBar,
@@ -11,12 +11,12 @@ import {
   Badge,
   useMediaQuery,
   useTheme,
-} from "@mui/material";
-import { Bell, Settings, LogOut, User } from "lucide-react";
+} from '@mui/material';
+import { Bell, Settings, LogOut, User } from 'lucide-react';
 
 export function AdminHeader() {
   const theme = useTheme();
-  const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md")); // md = 960px
+  const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md')); // md = 960px
 
   return (
     <AppBar
@@ -24,11 +24,11 @@ export function AdminHeader() {
       elevation={0}
       sx={{
         borderBottom: 2,
-        borderColor: "primary.main",
-        bgcolor: "background.default",
+        borderColor: 'primary.main',
+        bgcolor: 'background.default',
       }}
     >
-      <Toolbar sx={{ px: 3, py: 2, justifyContent: "space-between" }}>
+      <Toolbar sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
         {/* Left Section */}
         <Box display="flex" alignItems="center" gap={3}>
           <Box display="flex" alignItems="center" gap={1}>
@@ -41,11 +41,7 @@ export function AdminHeader() {
               alignItems="center"
               justifyContent="center"
             >
-              <Typography
-                variant="caption"
-                fontWeight="bold"
-                color="primary.contrastText"
-              >
+              <Typography variant="caption" fontWeight="bold" color="primary.contrastText">
                 PS
               </Typography>
             </Box>
@@ -61,11 +57,7 @@ export function AdminHeader() {
             )}
           </Box>
           {!isMobileOrTablet && (
-            <Chip
-              label="Aktivno"
-              size="small"
-              sx={{ bgcolor: "#C8E6C9", color: "#1B5E20" }}
-            />
+            <Chip label="Aktivno" size="small" sx={{ bgcolor: '#C8E6C9', color: '#1B5E20' }} />
           )}
         </Box>
 

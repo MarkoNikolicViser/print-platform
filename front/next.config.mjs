@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+
+import path from 'path';
+
 const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
@@ -8,6 +11,10 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+  },
+  webpack: (config) => {
+    config.resolve.alias['@'] = path.resolve(process.cwd(), '*');
+    return config;
   },
 }
 

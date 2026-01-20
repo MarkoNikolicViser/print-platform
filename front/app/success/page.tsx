@@ -1,42 +1,47 @@
-"use client"
+'use client';
 
-import { useEffect, useState } from "react"
-import { Container, Paper, Typography, Box, Button, Alert } from "@mui/material"
-import { CheckCircle, Printer as Print, User } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { Container, Paper, Typography, Box, Button, Alert } from '@mui/material';
+import { CheckCircle, Printer as Print, User } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function SuccessPage() {
-  const [orderDetails, setOrderDetails] = useState<any>(null)
-  const [user, setUser] = useState<any>(null)
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const orderId = searchParams.get("orderId")
+  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [user, setUser] = useState<any>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId');
 
   useEffect(() => {
     // Check if user is logged in
-    const userData = localStorage.getItem("user")
+    const userData = localStorage.getItem('user');
     if (userData) {
-      setUser(JSON.parse(userData))
+      setUser(JSON.parse(userData));
     }
 
     // Mock order details based on orderId
     if (orderId) {
       setOrderDetails({
         id: orderId,
-        shopName: "Copy Shop Centar",
-        shopAddress: "Knez Mihailova 15, Beograd",
-        estimatedTime: "30-45 minuta",
-        contactPhone: "+381 11 123 4567",
-      })
+        shopName: 'Copy Shop Centar',
+        shopAddress: 'Knez Mihailova 15, Beograd',
+        estimatedTime: '30-45 minuta',
+        contactPhone: '+381 11 123 4567',
+      });
     }
-  }, [orderId])
+  }, [orderId]);
 
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: 4, textAlign: "center" }}>
-        <CheckCircle sx={{ fontSize: 80, color: "success.main", mb: 2 }} />
+      <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
+        <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
 
-        <Typography variant="h4" component="h1" gutterBottom sx={{ color: "#1e3a8a", fontWeight: 600 }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{ color: '#1e3a8a', fontWeight: 600 }}
+        >
           Porudžbina uspešno poslata!
         </Typography>
 
@@ -45,8 +50,8 @@ export default function SuccessPage() {
         </Typography>
 
         {orderDetails && (
-          <Box sx={{ mb: 4, p: 3, bgcolor: "grey.50", borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: "#1e3a8a" }}>
+          <Box sx={{ mb: 4, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: '#1e3a8a' }}>
               Detalji porudžbine
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
@@ -67,7 +72,7 @@ export default function SuccessPage() {
           </Box>
         )}
 
-        <Alert severity="info" sx={{ mb: 4, textAlign: "left" }}>
+        <Alert severity="info" sx={{ mb: 4, textAlign: 'left' }}>
           <Typography variant="body2">
             <strong>Sledeći koraci:</strong>
           </Typography>
@@ -82,12 +87,12 @@ export default function SuccessPage() {
           </Typography>
         </Alert>
 
-        <Box sx={{ display: "flex", gap: 2, justifyContent: "center", flexWrap: "wrap" }}>
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Button
             variant="contained"
             startIcon={<Print />}
-            onClick={() => router.push("/")}
-            sx={{ bgcolor: "#f97316", "&:hover": { bgcolor: "#ea580c" } }}
+            onClick={() => router.push('/')}
+            sx={{ bgcolor: '#f97316', '&:hover': { bgcolor: '#ea580c' } }}
           >
             Nova porudžbina
           </Button>
@@ -96,8 +101,8 @@ export default function SuccessPage() {
             <Button
               variant="outlined"
               startIcon={<User />}
-              onClick={() => router.push("/profile")}
-              sx={{ color: "#1e3a8a", borderColor: "#1e3a8a" }}
+              onClick={() => router.push('/profile')}
+              sx={{ color: '#1e3a8a', borderColor: '#1e3a8a' }}
             >
               Moj profil
             </Button>
@@ -107,8 +112,8 @@ export default function SuccessPage() {
             <Button
               variant="outlined"
               startIcon={<User />}
-              onClick={() => router.push("/login")}
-              sx={{ color: "#1e3a8a", borderColor: "#1e3a8a" }}
+              onClick={() => router.push('/login')}
+              sx={{ color: '#1e3a8a', borderColor: '#1e3a8a' }}
             >
               Prijavite se
             </Button>
@@ -116,5 +121,5 @@ export default function SuccessPage() {
         </Box>
       </Paper>
     </Container>
-  )
+  );
 }

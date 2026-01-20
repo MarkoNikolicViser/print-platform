@@ -6,7 +6,7 @@ import type {
   AddToCartPayload,
   SyncCartPayload,
   Order,
-  PrintOptions
+  PrintOptions,
 } from '../types';
 
 class StrapiService {
@@ -17,20 +17,17 @@ class StrapiService {
       baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337/api',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.REACT_APP_STRAPI_API_TOKEN || ''}`
-      }
+        Authorization: `Bearer ${process.env.REACT_APP_STRAPI_API_TOKEN || ''}`,
+      },
     });
 
     // Add request interceptor for error handling
     this.api.interceptors.response.use(
       (response) => response,
       (error) => {
-        console.error(
-          'Strapi API Error:',
-          error.response?.data || error.message
-        );
+        console.error('Strapi API Error:', error.response?.data || error.message);
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -38,24 +35,19 @@ class StrapiService {
     productTemplateId?: number,
     numberOfPages?: number,
     quantity?: number,
-    selectedOptions?: PrintOptions | string
+    selectedOptions?: PrintOptions | string,
   ): Promise<CopyShop[]> {
     try {
       // Build params object only with defined values
       const params: Record<string, any> = {};
-      if (productTemplateId !== undefined)
-        params.productTemplateId = productTemplateId;
+      if (productTemplateId !== undefined) params.productTemplateId = productTemplateId;
       if (numberOfPages !== undefined) params.numberOfPages = numberOfPages;
       if (quantity !== undefined) params.quantity = quantity;
-      if (selectedOptions !== undefined)
-        params.selectedOptions = selectedOptions;
+      if (selectedOptions !== undefined) params.selectedOptions = selectedOptions;
 
-      const response: AxiosResponse<CopyShop[]> = await this.api.get(
-        '/print-shops',
-        {
-          params
-        }
-      );
+      const response: AxiosResponse<CopyShop[]> = await this.api.get('/print-shops', {
+        params,
+      });
 
       return response.data;
     } catch (error) {
@@ -66,12 +58,12 @@ class StrapiService {
 
   async loginUser(
     identifier: string,
-    password: string
+    password: string,
   ): Promise<{ jwt: string; user: User } | null> {
     try {
       const response: AxiosResponse = await this.api.post('/auth/local', {
         identifier, // can be email or username
-        password
+        password,
       });
 
       // Strapi returns { jwt, user }
@@ -84,10 +76,7 @@ class StrapiService {
     }
   }
 
-  async sendOrderConfirmation(
-    printJob: PrintJob,
-    userEmail: string
-  ): Promise<boolean> {
+  async sendOrderConfirmation(printJob: PrintJob, userEmail: string): Promise<boolean> {
     try {
       await this.api.post('/email', {
         to: userEmail,
@@ -96,8 +85,8 @@ class StrapiService {
         data: {
           fileName: printJob.fileName,
           totalCost: printJob.totalCost,
-          orderId: printJob.id
-        }
+          orderId: printJob.id,
+        },
       });
       return true;
     } catch (error) {
@@ -106,10 +95,7 @@ class StrapiService {
     }
   }
 
-  async sendOrderReady(
-    printJob: PrintJob,
-    userEmail: string
-  ): Promise<boolean> {
+  async sendOrderReady(printJob: PrintJob, userEmail: string): Promise<boolean> {
     try {
       await this.api.post('/email', {
         to: userEmail,
@@ -117,8 +103,8 @@ class StrapiService {
         template: 'order-ready',
         data: {
           fileName: printJob.fileName,
-          orderId: printJob.id
-        }
+          orderId: printJob.id,
+        },
       });
       return true;
     } catch (error) {
@@ -128,12 +114,9 @@ class StrapiService {
   }
   async addToCart(payload: AddToCartPayload): Promise<Order | null> {
     try {
-      const response: AxiosResponse = await this.api.post(
-        '/orders/add-to-cart',
-        {
-          ...payload
-        }
-      );
+      const response: AxiosResponse = await this.api.post('/orders/add-to-cart', {
+        ...payload,
+      });
       return response.data;
     } catch (error) {
       console.error('Error adding item to cart:', error);
@@ -144,8 +127,8 @@ class StrapiService {
     try {
       const response = await this.api.get('/product-templates/by-mime', {
         params: {
-          document_mime: documentMime
-        }
+          document_mime: documentMime,
+        },
       });
       return response.data.data;
     } catch (error) {
@@ -162,7 +145,7 @@ class StrapiService {
       console.error('Error fetching cart item count:', error);
       return {
         orderId,
-        count: 0
+        count: 0,
       };
     }
   }

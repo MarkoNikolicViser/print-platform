@@ -17,7 +17,7 @@ export function useSyncCart() {
 
     onSuccess: (data) => {
       toast(`Azurirana korpa`, {
-        type: 'success'
+        type: 'success',
       });
       const { orderId, count, total, expiresAt, items } = data;
 
@@ -25,7 +25,7 @@ export function useSyncCart() {
 
       queryClient.setQueryData(['cart-item-count'], {
         orderId,
-        count
+        count,
       });
 
       queryClient.setQueryData(['order-items'], {
@@ -33,12 +33,12 @@ export function useSyncCart() {
         count,
         total,
         expiresAt,
-        items
+        items,
       });
     },
 
     onError: (error) => {
       console.error('Sync cart failed:', error);
-    }
+    },
   });
 }

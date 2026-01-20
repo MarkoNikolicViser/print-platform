@@ -9,10 +9,7 @@ function ids(items: OrderItem[]) {
     .join(',');
 }
 
-export function useDirtyCart(
-  initialItems: OrderItem[],
-  editedItems: OrderItem[]
-) {
+export function useDirtyCart(initialItems: OrderItem[], editedItems: OrderItem[]) {
   const initialRef = React.useRef<OrderItem[]>([]);
   const prevServerIds = React.useRef<string | null>(null);
 
@@ -25,16 +22,13 @@ export function useDirtyCart(
     }
   }, [initialItems]);
 
-  const result = React.useMemo(
-    () => diffCartById(initialRef.current, editedItems),
-    [editedItems]
-  );
+  const result = React.useMemo(() => diffCartById(initialRef.current, editedItems), [editedItems]);
 
   const reset = React.useCallback(
     (next?: OrderItem[]) => {
       initialRef.current = structuredClone(next ?? editedItems);
     },
-    [editedItems]
+    [editedItems],
   );
   const hardResetToServer = React.useCallback(() => {
     initialRef.current = structuredClone(initialItems);
@@ -45,6 +39,6 @@ export function useDirtyCart(
     ...result,
     reset,
     hardResetToServer,
-    initial: initialRef.current
+    initial: initialRef.current,
   };
 }
