@@ -146,7 +146,7 @@ export function FileUploadSection() {
                 <input
                   hidden
                   type="file"
-                  accept={allowedFileTypes.join(', ')}
+                  accept={allowedFileTypes.join(',')}
                   onChange={(e) => e.target.files && selectFile(e.target.files[0])}
                 />
 
@@ -177,7 +177,7 @@ export function FileUploadSection() {
                     Kliknite ili prevucite fajl
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    PDF, DOC, DOCX, TXT • max 50MB
+                    {allowedFileTypes.join(', ').toUpperCase()} • max 50MB
                   </Typography>
                 </Paper>
               </label>
