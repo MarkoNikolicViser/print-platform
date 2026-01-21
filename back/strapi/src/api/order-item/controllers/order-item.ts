@@ -171,17 +171,18 @@ module.exports = {
         });
 
       if (!pricing) continue;
+      const pages = Number(item.document_pages) || 1;
 
       const optionPrice = await calculatePrice({
         printShopId,
         productTemplate: item.product_template,
         pricing: { rules: pricing.option_price_modifiers },
-        document: { pages: item.document_pages },
+        document: { pages },
         options: item.selected_options || {},
       });
 
       const unitPrice = Number(pricing.base_price) + optionPrice;
-      const totalPrice = unitPrice * item.quantity;
+      const totalPrice = unitPrice * item.quantity * pages;
 
       await strapi.db.query("api::order-item.order-item").update({
         where: { id: item.id },

@@ -154,13 +154,6 @@ export function PrintConfigSection() {
               ),
             )}
         </Grid>
-
-        {printConfig ? (
-          <Box mt={2}>
-            <Typography variant="body2">Trenutna konfiguracija:</Typography>
-            <pre>{JSON.stringify(printConfig, null, 2)}</pre>
-          </Box>
-        ) : null}
       </CardContent>
     </Card>
   );

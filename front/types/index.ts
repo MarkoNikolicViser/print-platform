@@ -82,7 +82,7 @@ export interface AddToCartPayload {
   quantity: number;
   print_shop_id: number | null;
   customer_email?: string;
-  document_url: string;
+  document_url: string | undefined;
   document_name: string | undefined;
   document_pages: string;
   document_mime?: string;
@@ -182,3 +182,10 @@ export type ApiError = {
   status: number;
   message: string;
 };
+export interface FileInfo {
+  name: string;
+  size: number;
+  type: string;
+  pages?: number;
+  url?: string;
+}
