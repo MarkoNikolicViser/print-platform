@@ -2,7 +2,7 @@
 
 import { usePrintContext } from '@/context/PrintContext';
 import { useCopyShops } from '@/hooks/useCopyShops';
-import { CopyShop } from '@/types';
+import { AddToCartPayload, CopyShop } from '@/types';
 import {
   Card,
   CardHeader,
@@ -28,19 +28,6 @@ import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import { useAddToCart } from '../hooks/useAddToCart';
 
 type SortBy = 'distance' | 'price' | 'rating';
-
-export interface AddToCartPayload {
-  order_code?: string;
-  product_template_id?: number;
-  selected_options: string;
-  quantity: number;
-  print_shop_id: number | null;
-  customer_email?: string;
-  document_url: string;
-  document_name: string | undefined;
-  document_pages: string;
-  document_mime?: string;
-}
 
 export function ShopSelectionSection() {
   const { file, selectedTemplate, printConfig, quantity, fileInfo } = usePrintContext();
@@ -83,7 +70,7 @@ export function ShopSelectionSection() {
       selected_options: memoizedConfig,
       quantity: quantity,
       print_shop_id: selectedShop,
-      document_url: '/test.pdf',
+      document_url: fileInfo?.url,
       document_name: file?.name,
       document_pages: String(fileInfo?.pages),
       document_mime: file?.type,

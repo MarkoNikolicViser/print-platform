@@ -82,7 +82,7 @@ export interface AddToCartPayload {
   quantity: number;
   print_shop_id: number | null;
   customer_email?: string;
-  document_url: string;
+  document_url: string | undefined;
   document_name: string | undefined;
   document_pages: string;
   document_mime?: string;
@@ -187,4 +187,5 @@ export interface FileInfo {
   size: number;
   type: string;
   pages?: number;
+  url?: string;
 }

@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { Upload, FileText, AlertCircle, X } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
-
 import { PrintTypeSelector } from './print-type-selector';
 import { allowedFileTypes } from '@/hooks/useFileUpload';
 import { useFileUpload } from '@/hooks/useFileUpload';
@@ -29,13 +28,11 @@ export function FileUploadSection() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  // track uploaded URL if needed downstream (e.g., server -> print job)
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
 
   const { uploadFile, loading: uploading } = useFileUpload();
   const maxFileSize = 50 * 1024 * 1024;
 
-  /* ---------------- utils ---------------- */
 
   const validateFile = (file: File): string | null => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
@@ -63,9 +60,6 @@ export function FileUploadSection() {
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
 
-  /* ---------------- handlers ---------------- */
-
-  // Upload + immediately compute estimate on success
   const selectFile = useCallback(
     async (file: File) => {
       const err = validateFile(file);
@@ -90,23 +84,20 @@ export function FileUploadSection() {
       try {
         const res = await uploadFile(file);
         if (!res.success) {
-          // rollback
           setUploadedUrl(null);
           setError(res.error || 'Greška pri otpremanju.');
           setFile(null);
           setFileInfo(null);
           return;
         }
-
-        // success – sync pages from backend-derived count if present
         const finalPages = res.pageCount ?? estimatePages(file);
+        const url = res.url ?? ''
 
-        setFileInfo((prev) => (prev ? { ...prev, pages: finalPages } : prev));
+        setFileInfo((prev) => (prev ? { ...prev, pages: finalPages, url } : prev));
         if (res.url) {
           setUploadedUrl(res.url);
         }
 
-        // Immediately mark as processed and dispatch estimate result
         const estimatedCost = (finalPages || 1) * 10; // your current pricing logic
         setDone(true);
 
@@ -151,7 +142,6 @@ export function FileUploadSection() {
     setUploadedUrl(null);
   };
 
-  /* ---------------- render ---------------- */
 
   return (
     <Card>
@@ -290,8 +280,6 @@ export function FileUploadSection() {
                           label={done ? 'Obrađeno' : 'Nije obrađeno'}
                         />
                       </Box>
-
-                      {/* No manual "Izračunaj cenu" action anymore */}
                     </Box>
                   </Box>
                   <IconButton onClick={reset} disabled={uploading}>
