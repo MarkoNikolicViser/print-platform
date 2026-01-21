@@ -17,8 +17,10 @@ import {
   Radio,
   Checkbox,
   Box,
+  Button,
 } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
 
 interface OptionField {
   type: 'number' | 'select' | 'radio' | 'checkbox';
@@ -30,8 +32,11 @@ interface OptionField {
 }
 
 export function PrintConfigSection() {
-  const { file, selectedTemplate, printConfig, setPrintConfig, quantity, setQuantity } =
+  const { file, selectedTemplate, printConfig, setPrintConfig, quantity, setQuantity, fileInfo } =
     usePrintContext();
+  const [open, setOpen] = useState(false);
+  const [image, setImage] = useState<string | null>(null);
+
   const updateConfig = (key: string, value: any) => {
     setPrintConfig((prev: any) => ({ ...prev, [key]: value }));
   };
@@ -154,6 +159,29 @@ export function PrintConfigSection() {
               ),
             )}
         </Grid>
+        <>
+          {file ? <Button
+            variant="contained"
+            onClick={() => {
+              setImage(URL.createObjectURL(file));
+              setOpen(true);
+            }}
+          >
+            Crop Image
+          </Button> : null}
+
+          {image && (
+            <ImageCropperDialog
+              open={open}
+              image={image}
+              aspect={1} // kvadrat, promeniti za šolju/majicu
+              onComplete={(file) => {
+                console.log('Cropped file ready for upload:', file);
+              }}
+              onClose={() => setOpen(false)}
+            />
+          )}
+        </>
       </CardContent>
     </Card>
   );

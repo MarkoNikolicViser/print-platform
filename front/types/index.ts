@@ -185,7 +185,18 @@ export type ApiError = {
 export interface FileInfo {
   name: string;
   size: number;
-  type: string;
+  type: PrintType | string;
   pages?: number;
   url?: string;
+}
+export type PrintType =
+  | "application/pdf"
+  | "image/jpeg"
+  | "mug"
+  | "tshirt"
+  | "image/png";
+
+export interface PreviewProps {
+  fileUrl: string;
+  fileType?: string;
 }
