@@ -33,6 +33,7 @@
     "prettier": "^3.8.0",
     "react": "^19",
     "react-dom": "^19",
+    "react-easy-crop": "^5.5.6",
     "react-toastify": "^11.0.5",
     "sass": "latest",
     "sass-embedded": "latest",
