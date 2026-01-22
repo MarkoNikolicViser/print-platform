@@ -16,11 +16,12 @@ import {
   FormControlLabel,
   Radio,
   Checkbox,
-  Box,
   Button,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { toast } from 'react-toastify';
 
 interface OptionField {
   type: 'number' | 'select' | 'radio' | 'checkbox';
@@ -32,8 +33,16 @@ interface OptionField {
 }
 
 export function PrintConfigSection() {
-  const { file, selectedTemplate, printConfig, setPrintConfig, quantity, setQuantity, fileInfo } =
-    usePrintContext();
+  const {
+    file,
+    selectedTemplate,
+    printConfig,
+    setPrintConfig,
+    quantity,
+    setQuantity,
+    setFileInfo,
+  } = usePrintContext();
+  const { uploadFile, loading: uploading } = useFileUpload();
   const [open, setOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
 
@@ -54,6 +63,27 @@ export function PrintConfigSection() {
     setPrintConfig(temp);
   }, [selectedTemplate]);
   const disabled = !file || !selectedTemplate; // 👈 disable if file is empty
+
+  const handleUploadCropped = useCallback(async (editedFile: File) => {
+    try {
+      const res = await uploadFile(editedFile);
+      if (!res.success) {
+        toast(`Greska pri editu`, {
+          type: 'error',
+        });
+        return;
+      }
+      const url = res.url ?? '';
+      setFileInfo((prev) => (prev ? { ...prev, url } : prev));
+      toast(`Uspesno editovanje slike`, {
+        type: 'success',
+      });
+    } catch (err) {
+      toast(`Greska pri editu`, {
+        type: 'error',
+      });
+    }
+  }, []);
 
   return (
     <Card>
@@ -160,24 +190,24 @@ export function PrintConfigSection() {
             )}
         </Grid>
         <>
-          {file ? <Button
-            variant="contained"
-            onClick={() => {
-              setImage(URL.createObjectURL(file));
-              setOpen(true);
-            }}
-          >
-            Crop Image
-          </Button> : null}
+          {file ? (
+            <Button
+              variant="contained"
+              onClick={() => {
+                setImage(URL.createObjectURL(file));
+                setOpen(true);
+              }}
+            >
+              Crop Image
+            </Button>
+          ) : null}
 
           {image && (
             <ImageCropperDialog
               open={open}
               image={image}
               aspect={1} // kvadrat, promeniti za šolju/majicu
-              onComplete={(file) => {
-                console.log('Cropped file ready for upload:', file);
-              }}
+              onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile)}
               onClose={() => setOpen(false)}
             />
           )}
