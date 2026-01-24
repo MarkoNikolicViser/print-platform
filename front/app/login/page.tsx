@@ -19,6 +19,7 @@ import { useState } from 'react';
 import type React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
+import { API_URL } from '@/helpers/constants';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,9 +68,7 @@ export default function LoginPage() {
     }
   };
   const handleGoogleLogin = () => {
-    const strapiUrl =
-      process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
-    window.location.href = `${strapiUrl}/api/connect/google`;
+    window.location.href = `${API_URL}/api/connect/google`;
   };
 
   const handleRegister = async (e: React.FormEvent) => {

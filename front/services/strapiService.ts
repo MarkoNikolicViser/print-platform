@@ -7,9 +7,7 @@ import type {
   Order,
   PrintOptions,
 } from '../types';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337/api';
-const TOKEN_KEY = 'jwtToken';
+import { API_URL, TOKEN_KEY } from '../helpers/constants'
 
 function getJwtFromCookie(): string | null {
   if (typeof document === 'undefined') return null;
@@ -44,11 +42,14 @@ class StrapiService {
       (response) => response,
       (error) => {
         if (error.response?.status === 401) {
-          this.logout();
+          console.warn('401 detected – user not authenticated');
+          // ❌ NE logout ovde
+          // logout radiš samo na eksplicitni klik
         }
         return Promise.reject(error);
       },
     );
+
   }
 
   /* -------------------- AUTH HELPERS -------------------- */
@@ -115,8 +116,14 @@ class StrapiService {
     }
   }
 
-  logout() {
-    this.removeAuthToken();
+  async logout(): Promise<void> {
+    try {
+      await this.api.post('/auth/logout');
+    } catch (e) {
+      console.warn('Logout endpoint failed, clearing token anyway');
+    } finally {
+      this.removeAuthToken();
+    }
   }
 
   /* -------------------- COPY SHOPS -------------------- */

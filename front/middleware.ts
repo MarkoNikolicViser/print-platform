@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { TOKEN_KEY } from './helpers/constants'
 
 export function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
@@ -12,7 +13,7 @@ export function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    const jwt = req.cookies.get('jwtToken')?.value;
+    const jwt = req.cookies.get(TOKEN_KEY)?.value;
 
     const publicRoutes = ['/', '/login', '/register', '/auth/callback'];
     const isPublicRoute = publicRoutes.includes(pathname);
