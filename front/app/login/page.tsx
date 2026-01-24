@@ -1,6 +1,5 @@
 'use client';
 
-import { strapiService } from '@/services/strapiService';
 import {
   Box,
   Container,
@@ -12,11 +11,14 @@ import {
   Alert,
   Tabs,
   Tab,
+  Divider,
+  CircularProgress,
 } from '@mui/material';
-import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import type React from 'react';
 import { useState } from 'react';
+import type React from 'react';
+import { useAuth } from '@/context/AuthContext';
+import GoogleIcon from '@mui/icons-material/Google';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -24,153 +26,116 @@ interface TabPanelProps {
   value: number;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div role="tabpanel" hidden={value !== index} {...other}>
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
+function TabPanel({ children, value, index }: TabPanelProps) {
+  if (value !== index) return null;
+  return <Box sx={{ pt: 3 }}>{children}</Box>;
 }
 
 export default function LoginPage() {
+  const { login, register } = useAuth();
+  const router = useRouter();
+
   const [tabValue, setTabValue] = useState(0);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: '',
+  });
+
   const [registerData, setRegisterData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
-  const [adminData, setAdminData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-
-  const loginMutation = useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      return strapiService.loginUser(email, password);
-    },
-    onSuccess: (data) => {
-      if (!data?.user) return;
-
-      const { app_role, username, email } = data?.user;
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          email: email,
-          name: username,
-          role: app_role,
-          orders: [],
-        }),
-      );
-      if (app_role === 'shop') {
-        router.push('/admin');
-      } else {
-        router.push('/profile');
-      }
-      localStorage.setItem('jwt', data.jwt);
-      // toast("Uspesno logovanje", { type: "success" });
-      // Cookies.set("jwt", data?.jwt);
-      // navigate("/home");
-    },
-    onError: () => {
-      // toast("Greska", { type: "error" });
-    },
-  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate({ email: loginData.email, password: loginData.password });
+    setError('');
+    setLoading(true);
 
-    // Simulate login
-    // setTimeout(() => {
-    //   localStorage.setItem(
-    //     "user",
-    //     JSON.stringify({
-    //       email: loginData.email,
-    //       name: loginData.,
-    //       orders: [],
-    //     }),
-    //   )
-    //   setLoading(false)
-    //   router.push("/profile")
-    // }, 1000)
+
+    try {
+      await login(loginData.email, loginData.password);
+      router.push('/store');
+    } catch (err: any) {
+      setError(err.message || 'Greška pri prijavi');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleGoogleLogin = () => {
+    const strapiUrl =
+      process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+    window.location.href = `${strapiUrl}/api/connect/google`;
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     if (registerData.password !== registerData.confirmPassword) {
       setError('Lozinke se ne poklapaju');
       return;
     }
 
     setLoading(true);
-    setError('');
 
-    // Simulate registration
-    setTimeout(() => {
-      localStorage.setItem(
-        'user',
-        JSON.stringify({
-          email: registerData.email,
-          name: registerData.name,
-          orders: [],
-        }),
+    try {
+      await register(
+        registerData.email,
+        registerData.password,
+        registerData.name,
       );
+      router.push('/store');
+    } catch (err: any) {
+      setError(err.message || 'Greška pri registraciji');
+    } finally {
       setLoading(false);
-      router.push('/profile');
-    }, 1000);
-  };
-
-  const handleAdminLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    // Simulate admin login
-    setTimeout(() => {
-      if (adminData.email === 'admin@copyshop.rs' && adminData.password === 'admin123') {
-        localStorage.setItem(
-          'admin',
-          JSON.stringify({
-            email: adminData.email,
-            shopName: 'Copy Shop Beograd',
-            role: 'admin',
-          }),
-        );
-        setLoading(false);
-        router.push('/admin');
-      } else {
-        setError('Neispravni podaci za administratora');
-        setLoading(false);
-      }
-    }, 1000);
+    }
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 8 }}>
-      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-        <Typography
-          variant="h4"
-          component="h1"
-          gutterBottom
-          align="center"
-          sx={{ color: '#1e3a8a', fontWeight: 600 }}
-        >
-          Prijava za kopirnice
-        </Typography>
+    <Container
+      maxWidth="sm"
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      <Paper
+        elevation={6}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          width: '100%',
+        }}
+      >
+        <Box sx={{ textAlign: 'center', mb: 3 }}>
+          <Typography variant="h4" fontWeight={700}>
+            PrintSerbia
+          </Typography>
+          <Typography color="text.secondary">
+            Online štamparija za profesionalce
+          </Typography>
+        </Box>
 
         <Tabs
           value={tabValue}
-          onChange={(_, newValue) => setTabValue(newValue)}
+          onChange={(_, v) => {
+            setTabValue(v);
+            setError('');
+          }}
           centered
-          sx={{ mb: 2 }}
         >
           <Tab label="Prijava" />
           <Tab label="Registracija" />
-          {/* <Tab label="Administrator" /> */}
         </Tabs>
+
+        <Divider sx={{ my: 2 }} />
 
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -178,126 +143,146 @@ export default function LoginPage() {
           </Alert>
         )}
 
+        {/* LOGIN */}
         <TabPanel value={tabValue} index={0}>
+          <Button
+            fullWidth
+            variant="outlined"
+            size="large"
+            onClick={handleGoogleLogin}
+            startIcon={<GoogleIcon />}
+            sx={{
+              backgroundColor: '#fff',
+              color: '#3c4043',
+              borderColor: '#dadce0',
+              '&:hover': {
+                backgroundColor: '#f7f8f8',
+              },
+            }}
+          >
+            Nastavi sa Google nalogom
+          </Button>
+
+          <Divider sx={{ my: 2 }}>ili</Divider>
+
           <Box component="form" onSubmit={handleLogin}>
             <TextField
               fullWidth
               label="Email"
               type="email"
-              value={loginData.email}
-              onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-              margin="normal"
               required
+              margin="normal"
+              autoComplete="email"
+              value={loginData.email}
+              onChange={(e) =>
+                setLoginData({ ...loginData, email: e.target.value })
+              }
             />
             <TextField
               fullWidth
               label="Lozinka"
               type="password"
-              value={loginData.password}
-              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-              margin="normal"
               required
+              margin="normal"
+              autoComplete="current-password"
+              value={loginData.password}
+              onChange={(e) =>
+                setLoginData({ ...loginData, password: e.target.value })
+              }
             />
+
             <Button
               type="submit"
               fullWidth
+              size="large"
               variant="contained"
               disabled={loading}
-              sx={{ mt: 3, mb: 2, bgcolor: '#f97316', '&:hover': { bgcolor: '#ea580c' } }}
+              sx={{
+                mt: 3,
+                py: 1.3,
+                fontWeight: 600,
+                bgcolor: '#f97316',
+                ':hover': { bgcolor: '#ea580c' },
+              }}
             >
-              {loading ? 'Prijavljivanje...' : 'Prijavite se'}
+              {loading ? <CircularProgress size={24} /> : 'Prijavite se'}
             </Button>
           </Box>
         </TabPanel>
 
+        {/* REGISTER */}
         <TabPanel value={tabValue} index={1}>
           <Box component="form" onSubmit={handleRegister}>
             <TextField
               fullWidth
               label="Ime i prezime"
-              value={registerData.name}
-              onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-              margin="normal"
               required
+              margin="normal"
+              value={registerData.name}
+              onChange={(e) =>
+                setRegisterData({ ...registerData, name: e.target.value })
+              }
             />
             <TextField
               fullWidth
               label="Email"
               type="email"
-              value={registerData.email}
-              onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-              margin="normal"
               required
+              margin="normal"
+              autoComplete="email"
+              value={registerData.email}
+              onChange={(e) =>
+                setRegisterData({ ...registerData, email: e.target.value })
+              }
             />
             <TextField
               fullWidth
               label="Lozinka"
               type="password"
-              value={registerData.password}
-              onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-              margin="normal"
               required
+              margin="normal"
+              value={registerData.password}
+              onChange={(e) =>
+                setRegisterData({ ...registerData, password: e.target.value })
+              }
             />
             <TextField
               fullWidth
               label="Potvrdite lozinku"
               type="password"
+              required
+              margin="normal"
               value={registerData.confirmPassword}
               onChange={(e) =>
-                setRegisterData({ ...registerData, confirmPassword: e.target.value })
+                setRegisterData({
+                  ...registerData,
+                  confirmPassword: e.target.value,
+                })
               }
-              margin="normal"
-              required
             />
+
             <Button
               type="submit"
               fullWidth
+              size="large"
               variant="contained"
               disabled={loading}
-              sx={{ mt: 3, mb: 2, bgcolor: '#f97316', '&:hover': { bgcolor: '#ea580c' } }}
+              sx={{
+                mt: 3,
+                py: 1.3,
+                fontWeight: 600,
+                bgcolor: '#f97316',
+                ':hover': { bgcolor: '#ea580c' },
+              }}
             >
-              {loading ? 'Registracija...' : 'Registrujte se'}
+              {loading ? <CircularProgress size={24} /> : 'Napravite nalog'}
             </Button>
           </Box>
         </TabPanel>
 
-        {/* <TabPanel value={tabValue} index={2}>
-          <Box component="form" onSubmit={handleAdminLogin}>
-            <TextField
-              fullWidth
-              label="Admin Email"
-              type="email"
-              value={adminData.email}
-              onChange={(e) => setAdminData({ ...adminData, email: e.target.value })}
-              margin="normal"
-              required
-              placeholder="admin@copyshop.rs"
-            />
-            <TextField
-              fullWidth
-              label="Admin Lozinka"
-              type="password"
-              value={adminData.password}
-              onChange={(e) => setAdminData({ ...adminData, password: e.target.value })}
-              margin="normal"
-              required
-              placeholder="admin123"
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={loading}
-              sx={{ mt: 3, mb: 2, bgcolor: "#1e3a8a", "&:hover": { bgcolor: "#1e40af" } }}
-            >
-              {loading ? "Prijavljivanje..." : "Admin Prijava"}
-            </Button>
-          </Box>
-        </TabPanel> */}
-
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
-          <Link href="/" sx={{ color: '#1e3a8a' }}>
-            Nazad na početnu
+        <Box sx={{ textAlign: 'center', mt: 3 }}>
+          <Link href="/" underline="hover">
+            ← Nazad na početnu
           </Link>
         </Box>
       </Paper>

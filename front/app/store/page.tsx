@@ -8,7 +8,7 @@ import { PricingSettings } from '@/components/admin/pricing-settings';
 import { ShopSettings } from '@/components/admin/shop-settings';
 import { useState } from 'react';
 
-export default function AdminPage() {
+export default function StorePage() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const renderContent = () => {
