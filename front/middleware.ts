@@ -15,7 +15,7 @@ export function middleware(req: NextRequest) {
 
     const jwt = req.cookies.get(TOKEN_KEY)?.value;
 
-    const publicRoutes = ['/', '/login', '/register', '/auth/callback'];
+    const publicRoutes = ['/', '/login', '/register', '/auth/callback', '/cart'];
     const isPublicRoute = publicRoutes.includes(pathname);
     const isStoreRoute = pathname.startsWith('/store');
 

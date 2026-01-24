@@ -160,6 +160,44 @@ class StrapiService {
     const response = await this.api.put('/order/sync', payload);
     return response.data;
   }
+  async getProductTemplatesByMime(documentMime: string) {
+    try {
+      const response = await this.api.get('/product-templates/by-mime', {
+        params: {
+          document_mime: documentMime
+        }
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching product templates by mime:', error);
+      return [];
+    }
+  }
+
+  async getCartItemCount(orderId: string) {
+    try {
+      const response = await this.api.get(`/orders/${orderId}/items/count`);
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching cart item count:', error);
+      return {
+        orderId,
+        count: 0
+      };
+    }
+  }
+
+  async getOrderItems(orderId: string) {
+    try {
+      const response = await this.api.get(`/order/${orderId}/items`);
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching cart items:', error);
+      throw error;
+    }
+  }
 }
 
 export const strapiService = new StrapiService();

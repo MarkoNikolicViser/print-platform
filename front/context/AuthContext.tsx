@@ -9,20 +9,7 @@ import {
 } from 'react';
 import { useRouter } from 'next/navigation';
 import { strapiService } from '@/services/strapiService';
-
-export interface AppUser {
-  id: number;
-  email: string;
-  username: string;
-}
-
-interface AuthContextType {
-  user: AppUser | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
-}
+import { User, AuthContextType } from '@/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -33,11 +20,10 @@ export const useAuth = () => {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AppUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // 🔹 pri refreshu – proveri ko je user (cookie → Strapi)
   useEffect(() => {
     const fetchMe = async () => {
       try {
@@ -56,7 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const { jwt, user } = await strapiService.loginUser(email, password);
 
-    // cookie je source of truth (middleware)
     document.cookie = `jwt=${jwt}; path=/; SameSite=Lax`;
 
     setUser(user);
