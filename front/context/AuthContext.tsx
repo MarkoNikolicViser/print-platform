@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { strapiService } from '@/services/strapiService';
 import { User, AuthContextType } from '@/types';
@@ -24,47 +18,84 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  /* -------------------- BOOTSTRAP AUTH -------------------- */
   useEffect(() => {
-    const fetchMe = async () => {
+    let mounted = true;
+
+    const bootstrapAuth = async () => {
+      setLoading(true);
       try {
+        // poziva se cookie-based /users/me
         const me = await strapiService.getMe();
-        setUser(me);
+        if (mounted) setUser(me);
       } catch {
-        setUser(null);
+        if (mounted) setUser(null);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     };
 
-    fetchMe();
+    bootstrapAuth();
+    return () => { mounted = false; };
   }, []);
 
+  /* -------------------- LOGIN / REGISTER -------------------- */
   const login = async (email: string, password: string) => {
-    const { jwt, user } = await strapiService.loginUser(email, password);
-
-    document.cookie = `jwt=${jwt}; path=/; SameSite=Lax`;
-
-    setUser(user);
-    router.push('/store');
+    setLoading(true);
+    try {
+      const { user } = await strapiService.loginUser(email, password);
+      setUser(user);
+      router.push('/store');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const register = async (email: string, password: string, name: string) => {
-    const { jwt, user } = await strapiService.registerUser(name, email, password);
-
-    document.cookie = `jwt=${jwt}; path=/; SameSite=Lax`;
-
-    setUser(user);
-    router.push('/store');
+  const loginSSO = async (jwt: string, ssoUser: User) => {
+    setLoading(true);
+    try {
+      await strapiService.loginSSO(jwt, ssoUser); // postavlja token ako backend ne postavlja cookie
+      setUser(ssoUser);
+      router.push('/store');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const logout = () => {
-    document.cookie = 'jwt=; path=/; max-age=0';
-    setUser(null);
-    router.push('/login');
+  const register = async (email: string, password: string, username: string) => {
+    setLoading(true);
+    try {
+      const { user } = await strapiService.registerUser(username, email, password);
+      setUser(user);
+      router.push('/store');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* -------------------- LOGOUT -------------------- */
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await strapiService.logout();
+      setUser(null);
+      router.push('/login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        loginSSO,
+        register,
+        logout,
+      }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

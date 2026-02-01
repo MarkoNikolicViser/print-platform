@@ -1,5 +1,14 @@
-module.exports = {
+// src/api/auth/routes/auth.ts
+export default {
     routes: [
+        {
+            method: 'GET',
+            path: '/sso/google/callback',
+            handler: 'auth.googleCallback',
+            config: {
+                auth: false,
+            },
+        },
         {
             method: 'POST',
             path: '/auth/logout',

@@ -1,13 +1,19 @@
-module.exports = {
+export default ({ env }) => ({
     'users-permissions': {
         config: {
             providers: {
                 google: {
-                    clientId: process.env.GOOGLE_CLIENT_ID,
-                    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                    callback: '/api/auth/google/callback',
+                    clientId: env('GOOGLE_CLIENT_ID'),
+                    clientSecret: env('GOOGLE_CLIENT_SECRET'),
+                    callback: 'http://localhost:3000/auth/callback',
                 },
+            },
+            jwt: {
+                expiresIn: '7d',
+            },
+            cookie: {
+                name: 'token',
             },
         },
     },
-};
+});

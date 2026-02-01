@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { strapiService } from '../services/strapiService';
-import { ApiError, Order, OrderItem } from '@/types';
+import { ApiError, Order } from '@/types';
 
 export function useOrderItems(orderId?: string, enabled: boolean = true) {
   return useQuery({

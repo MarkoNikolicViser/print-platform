@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import type {
   CopyShop,
   User,
@@ -7,13 +7,7 @@ import type {
   Order,
   PrintOptions,
 } from '../types';
-import { API_URL, TOKEN_KEY } from '../helpers/constants'
-
-function getJwtFromCookie(): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(/(^| )jwtToken=([^;]+)/);
-  return match ? match[2] : null;
-}
+import { API_URL } from '../helpers/constants';
 
 class StrapiService {
   private api: AxiosInstance;
@@ -21,109 +15,64 @@ class StrapiService {
   constructor() {
     this.api = axios.create({
       baseURL: API_URL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      withCredentials: true, // bitno za SSO / cookies
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true, // ⚡ važno za cookie-based auth
     });
 
-    // ⬇️ init auth token (localStorage OR cookie)
-    if (typeof window !== 'undefined') {
-      const token =
-        localStorage.getItem(TOKEN_KEY) || getJwtFromCookie();
-
-      if (token) {
-        this.setAuthToken(token);
+    // interceptor koji dodaje JWT iz cookie-a u header
+    this.api.interceptors.request.use((config) => {
+      const token = this.getTokenFromCookie();
+      if (token && config.headers) {
+        config.headers['Authorization'] = `Bearer ${token}`;
       }
-    }
-
-    // ⛔ global 401 handler
-    this.api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          console.warn('401 detected – user not authenticated');
-          // ❌ NE logout ovde
-          // logout radiš samo na eksplicitni klik
-        }
-        return Promise.reject(error);
-      },
-    );
-
+      return config;
+    });
   }
 
-  /* -------------------- AUTH HELPERS -------------------- */
-
-  private setAuthToken(token: string) {
-    this.api.defaults.headers.common.Authorization = `Bearer ${token}`;
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(TOKEN_KEY, token);
-      document.cookie = `jwtToken=${token}; path=/; SameSite=Lax`;
-    }
+  /* -------------------- HELPERS -------------------- */
+  getTokenFromCookie(): string | null {
+    const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
+    return match ? match[2] : null;
   }
 
-  private removeAuthToken() {
-    delete this.api.defaults.headers.common.Authorization;
-
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem(TOKEN_KEY);
-      document.cookie = 'jwtToken=; path=/; max-age=0';
-    }
+  setTokenCookie(token: string) {
+    document.cookie = `token=${token}; path=/; SameSite=Lax; Secure=false;`;
   }
 
   /* -------------------- AUTH -------------------- */
 
-  async loginUser(
-    identifier: string,
-    password: string,
-  ): Promise<{ jwt: string; user: User }> {
-    const response: AxiosResponse = await axios.post(
-      `${API_URL}/auth/local`,
-      { identifier, password },
-      { headers: { 'Content-Type': 'application/json' } },
-    );
+  async loginUser(identifier: string, password: string): Promise<{ user: User }> {
+    const res = await this.api.post('/auth/local', { identifier, password });
 
-    const { jwt, user } = response.data;
-    this.setAuthToken(jwt);
+    // setuj cookie HttpOnly (ako backend ne setuje)
+    if (res.data.jwt) this.setTokenCookie(res.data.jwt);
 
-    return { jwt, user };
+    return { user: res.data.user };
   }
 
-  async registerUser(
-    username: string,
-    email: string,
-    password: string,
-  ): Promise<{ jwt: string; user: User }> {
-    const response: AxiosResponse = await axios.post(
-      `${API_URL}/auth/local/register`,
-      { username, email, password },
-      { headers: { 'Content-Type': 'application/json' } },
-    );
+  async registerUser(username: string, email: string, password: string): Promise<{ user: User }> {
+    const res = await this.api.post('/auth/local/register', { username, email, password });
 
-    const { jwt, user } = response.data;
-    this.setAuthToken(jwt);
+    // setuj cookie HttpOnly (ako backend ne setuje)
+    if (res.data.jwt) this.setTokenCookie(res.data.jwt);
 
-    return { jwt, user };
+    return { user: res.data.user };
   }
 
   async getMe(): Promise<User | null> {
     try {
-      const response = await this.api.get('/users/me');
-      return response.data;
+      const jwt = localStorage.getItem('jwt')
+      const res = await axios.get('/users/me', { headers: { 'Authorization': `Bearer ${jwt}` } }); // ⚡ cookie se šalje i JWT ide u header
+      return res.data;
     } catch {
       return null;
     }
   }
 
   async logout(): Promise<void> {
-    try {
-      await this.api.post('/auth/logout');
-    } catch (e) {
-      console.warn('Logout endpoint failed, clearing token anyway');
-    } finally {
-      this.removeAuthToken();
-    }
+    await this.api.post('/auth/logout');
+    // očisti cookie lokalno
+    document.cookie = 'token=; max-age=0; path=/';
   }
 
   /* -------------------- COPY SHOPS -------------------- */
@@ -132,42 +81,38 @@ class StrapiService {
     productTemplateId?: number,
     numberOfPages?: number,
     quantity?: number,
-    selectedOptions?: PrintOptions | string,
+    selectedOptions?: PrintOptions | string
   ): Promise<CopyShop[]> {
     const params: Record<string, any> = {};
-
     if (productTemplateId !== undefined) params.productTemplateId = productTemplateId;
     if (numberOfPages !== undefined) params.numberOfPages = numberOfPages;
     if (quantity !== undefined) params.quantity = quantity;
     if (selectedOptions !== undefined) params.selectedOptions = selectedOptions;
 
-    const response = await this.api.get('/print-shops', { params });
-    return response.data;
+    const res = await this.api.get('/print-shops', { params });
+    return res.data;
   }
 
   /* -------------------- CART / ORDER -------------------- */
 
   async addToCart(payload: AddToCartPayload): Promise<Order | null> {
     try {
-      const response = await this.api.post('/orders/add-to-cart', payload);
-      return response.data;
+      const res = await this.api.post('/orders/add-to-cart', payload);
+      return res.data;
     } catch {
       return null;
     }
   }
 
   async syncCart(payload: SyncCartPayload): Promise<Order> {
-    const response = await this.api.put('/order/sync', payload);
-    return response.data;
+    const res = await this.api.put('/order/sync', payload);
+    return res.data;
   }
+
   async getProductTemplatesByMime(documentMime: string) {
     try {
-      const response = await this.api.get('/product-templates/by-mime', {
-        params: {
-          document_mime: documentMime
-        }
-      });
-      return response.data.data;
+      const res = await this.api.get('/product-templates/by-mime', { params: { document_mime: documentMime } });
+      return res.data.data;
     } catch (error) {
       console.error('Error fetching product templates by mime:', error);
       return [];
@@ -176,27 +121,16 @@ class StrapiService {
 
   async getCartItemCount(orderId: string) {
     try {
-      const response = await this.api.get(`/orders/${orderId}/items/count`);
-
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching cart item count:', error);
-      return {
-        orderId,
-        count: 0
-      };
+      const res = await this.api.get(`/orders/${orderId}/items/count`);
+      return res.data;
+    } catch {
+      return { orderId, count: 0 };
     }
   }
 
   async getOrderItems(orderId: string) {
-    try {
-      const response = await this.api.get(`/order/${orderId}/items`);
-
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching cart items:', error);
-      throw error;
-    }
+    const res = await this.api.get(`/order/${orderId}/items`);
+    return res.data;
   }
 }
 

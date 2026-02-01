@@ -22,7 +22,6 @@
     "axios": "latest",
     "clsx": "^2.1.1",
     "eslint-plugin-prettier": "^5.5.5",
-    "firebase": "latest",
     "jiti": "latest",
     "less": "latest",
     "lightningcss": "latest",

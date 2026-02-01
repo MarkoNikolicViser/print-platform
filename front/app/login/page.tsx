@@ -15,11 +15,11 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
-import { API_URL } from '@/helpers/constants';
+import { API_URL, GOOGLE_CLIENT_ID, STRAPI_REDIRECT_URI } from '@/helpers/constants';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,8 +67,22 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+
   const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/api/connect/google`;
+    const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+    const options = {
+      client_id: GOOGLE_CLIENT_ID,
+      redirect_uri: 'http://localhost:1337/api/sso/google/callback',
+      response_type: 'code',
+      scope: 'openid email profile',
+      access_type: 'offline',
+      prompt: 'select_account',
+    };
+
+    const queryString = new URLSearchParams(options).toString();
+    window.location.href = `${rootUrl}?${queryString}`;
   };
 
   const handleRegister = async (e: React.FormEvent) => {
