@@ -51,21 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginSSO = async (jwt: string, ssoUser: User) => {
-    setLoading(true);
-    try {
-      await strapiService.loginSSO(jwt, ssoUser); // postavlja token ako backend ne postavlja cookie
-      setUser(ssoUser);
-      router.push('/store');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const register = async (email: string, password: string, username: string) => {
     setLoading(true);
     try {
-      const { user } = await strapiService.registerUser(username, email, password);
+      const { user } = await strapiService.register(username, email, password);
       setUser(user);
       router.push('/store');
     } finally {
@@ -91,7 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         loading,
         login,
-        loginSSO,
         register,
         logout,
       }}

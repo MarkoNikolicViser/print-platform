@@ -9,4 +9,5 @@ export default ({ env }) => ({
   app: {
     keys: env.array('APP_KEYS'),
   },
+  jwtSecret: env('JWT_SECRET', 'your-super-secret-key'),
 });

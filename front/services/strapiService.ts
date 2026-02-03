@@ -16,53 +16,29 @@ class StrapiService {
     this.api = axios.create({
       baseURL: API_URL,
       headers: { 'Content-Type': 'application/json' },
-      withCredentials: true, // ⚡ važno za cookie-based auth
+      withCredentials: true,
     });
-
-    // interceptor koji dodaje JWT iz cookie-a u header
-    this.api.interceptors.request.use((config) => {
-      const token = this.getTokenFromCookie();
-      if (token && config.headers) {
-        config.headers['Authorization'] = `Bearer ${token}`;
-      }
-      return config;
-    });
-  }
-
-  /* -------------------- HELPERS -------------------- */
-  getTokenFromCookie(): string | null {
-    const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
-    return match ? match[2] : null;
-  }
-
-  setTokenCookie(token: string) {
-    document.cookie = `token=${token}; path=/; SameSite=Lax; Secure=false;`;
   }
 
   /* -------------------- AUTH -------------------- */
 
   async loginUser(identifier: string, password: string): Promise<{ user: User }> {
-    const res = await this.api.post('/auth/local', { identifier, password });
-
-    // setuj cookie HttpOnly (ako backend ne setuje)
-    if (res.data.jwt) this.setTokenCookie(res.data.jwt);
-
+    const res = await this.api.post('/auth/local-cookie', { identifier, password });
     return { user: res.data.user };
   }
 
-  async registerUser(username: string, email: string, password: string): Promise<{ user: User }> {
-    const res = await this.api.post('/auth/local/register', { username, email, password });
-
-    // setuj cookie HttpOnly (ako backend ne setuje)
-    if (res.data.jwt) this.setTokenCookie(res.data.jwt);
-
+  async register(username: string, email: string, password: string): Promise<{ user: User }> {
+    const res = await this.api.post('/auth/register-cookie', {
+      username,
+      email,
+      password,
+    });
     return { user: res.data.user };
   }
 
   async getMe(): Promise<User | null> {
     try {
-      const jwt = localStorage.getItem('jwt')
-      const res = await axios.get('/users/me', { headers: { 'Authorization': `Bearer ${jwt}` } }); // ⚡ cookie se šalje i JWT ide u header
+      const res = await this.api.get('/users/me');
       return res.data;
     } catch {
       return null;
@@ -71,8 +47,6 @@ class StrapiService {
 
   async logout(): Promise<void> {
     await this.api.post('/auth/logout');
-    // očisti cookie lokalno
-    document.cookie = 'token=; max-age=0; path=/';
   }
 
   /* -------------------- COPY SHOPS -------------------- */

@@ -18,15 +18,15 @@ export function middleware(req: NextRequest) {
     const isPublicRoute = publicRoutes.includes(pathname);
     const isStoreRoute = pathname.startsWith('/store');
 
-    // if (!jwt) {
-    //     if (isPublicRoute) return NextResponse.next();
-    //     return NextResponse.redirect(new URL('/login', req.url));
-    // }
+    if (!jwt) {
+        if (isPublicRoute) return NextResponse.next();
+        return NextResponse.redirect(new URL('/login', req.url));
+    }
 
-    // if (jwt) {//setuj jwt u local storage iz cookie u middlware
-    //     if (isStoreRoute) return NextResponse.next();
-    //     return NextResponse.redirect(new URL('/store', req.url));
-    // }
+    if (jwt) {//setuj jwt u local storage iz cookie u middlware
+        if (isStoreRoute) return NextResponse.next();
+        return NextResponse.redirect(new URL('/store', req.url));
+    }
 
     return NextResponse.next();
 }

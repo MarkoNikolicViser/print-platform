@@ -10,6 +10,9 @@ export default [
       credentials: true,
     },
   },
+  {
+    name: 'global::cookie-jwt',
+  },
   'strapi::poweredBy',
   'strapi::logger',
   'strapi::query',
