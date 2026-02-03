@@ -23,7 +23,7 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL('/login', req.url));
     }
 
-    if (jwt) {//setuj jwt u local storage iz cookie u middlware
+    if (jwt) {
         if (isStoreRoute) return NextResponse.next();
         return NextResponse.redirect(new URL('/store', req.url));
     }
