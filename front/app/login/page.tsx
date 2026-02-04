@@ -68,11 +68,9 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    const redirectUri = new URL(STRAPI_REDIRECT_URI, window.location.origin).toString();
-
     const options = {
       client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: redirectUri,
+      redirect_uri: STRAPI_REDIRECT_URI,
       response_type: 'code',
       scope: 'openid email profile',
       access_type: 'offline',
