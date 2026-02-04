@@ -1,4 +1,3 @@
-// src/api/auth/routes/auth.ts
 export default {
   routes: [
     {
@@ -20,15 +19,6 @@ export default {
     {
       method: "GET",
       path: "/sso/google/callback",
-      handler: "auth.googleCallback",
-      config: {
-        auth: false,
-      },
-    },
-
-    {
-      method: "GET",
-      path: "/auth/google/code",
       handler: "auth.googleCallback",
       config: {
         auth: false,
