@@ -1,357 +1,242 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
-  Grid,
-  Card,
-  CardHeader,
-  CardContent,
   TextField,
-  Switch,
   Button,
-  Chip,
+  Stack,
   Paper,
+  Chip,
 } from '@mui/material';
-import { Save, MapPin, Clock, CreditCard } from 'lucide-react';
-import { useState } from 'react';
 
-interface ShopConfig {
-  name: string;
-  address: string;
-  city: string;
-  phone: string;
-  email: string;
-  workingHours: {
-    monday: { open: string; close: string; closed: boolean };
-    tuesday: { open: string; close: string; closed: boolean };
-    wednesday: { open: string; close: string; closed: boolean };
-    thursday: { open: string; close: string; closed: boolean };
-    friday: { open: string; close: string; closed: boolean };
-    saturday: { open: string; close: string; closed: boolean };
-    sunday: { open: string; close: string; closed: boolean };
-  };
-  services: string[];
-  bankAccount: string;
-  description: string;
-  isActive: boolean;
-  maxOrdersPerDay: number;
-  estimatedProcessingTime: number;
-}
+import { useMyPrintShop } from '@/hooks/useMyPrintShop';
+import { useUpdateMyPrintShop } from '@/hooks/useUpdateMyPrintShop';
 
-const availableServices = [
-  'Štampanje',
-  'Kopiranje',
-  'Skeniranje',
-  'Povezivanje',
-  'Laminiranje',
-  'Foto štampanje',
-  'Dizajn',
-  'Plotovanje',
-];
+/* =========================
+   Working hours mappers
+========================= */
 
-const dayNames = {
-  monday: 'Ponedeljak',
-  tuesday: 'Utorak',
-  wednesday: 'Sreda',
-  thursday: 'Četvrtak',
-  friday: 'Petak',
-  saturday: 'Subota',
-  sunday: 'Nedelja',
-};
+const daysMap = {
+  mon: 'monday',
+  tue: 'tuesday',
+  wed: 'wednesday',
+  thu: 'thursday',
+  fri: 'friday',
+  sat: 'saturday',
+  sun: 'sunday',
+} as const;
 
-export function ShopSettings() {
-  const [config, setConfig] = useState<ShopConfig>({
-    name: 'Copy Centar Beograd',
-    address: 'Knez Mihailova 15',
-    city: 'Beograd',
-    phone: '+381 11 123-4567',
-    email: 'info@copycentar.rs',
-    workingHours: {
-      monday: { open: '08:00', close: '20:00', closed: false },
-      tuesday: { open: '08:00', close: '20:00', closed: false },
-      wednesday: { open: '08:00', close: '20:00', closed: false },
-      thursday: { open: '08:00', close: '20:00', closed: false },
-      friday: { open: '08:00', close: '20:00', closed: false },
-      saturday: { open: '09:00', close: '17:00', closed: false },
-      sunday: { open: '10:00', close: '15:00', closed: true },
-    },
-    services: ['Štampanje', 'Kopiranje', 'Skeniranje', 'Povezivanje'],
-    bankAccount: '160-5000001234567-89',
-    description: 'Profesionalna štamparija u centru Beograda sa dugogodišnjim iskustvom.',
-    isActive: true,
-    maxOrdersPerDay: 50,
-    estimatedProcessingTime: 45,
+const reverseDaysMap = Object.fromEntries(
+  Object.entries(daysMap).map(([k, v]) => [v, k])
+);
+
+function apiToUIWorkingHours(apiHours: any) {
+  const result: any = {};
+
+  Object.entries(daysMap).forEach(([apiKey, uiKey]) => {
+    const day = apiHours?.[apiKey];
+    result[uiKey] = {
+      open: day?.from ?? '08:00',
+      close: day?.to ?? '16:00',
+      closed: day?.open === false,
+    };
   });
 
+  return result;
+}
+
+function uiToApiWorkingHours(uiHours: any) {
+  const result: any = {};
+
+  Object.entries(reverseDaysMap).forEach(([uiKey, apiKey]) => {
+    const day = uiHours[uiKey];
+    result[apiKey] = day.closed
+      ? { open: false }
+      : { open: true, from: day.open, to: day.close };
+  });
+
+  return result;
+}
+
+/* =========================
+   Component
+========================= */
+
+export function ShopSettings() {
+  const { data: shop, isLoading } = useMyPrintShop();
+  const updateShop = useUpdateMyPrintShop();
+
+  const [config, setConfig] = useState<any>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const updateConfig = (path: string, value: any) => {
-    setConfig((prev) => {
-      const keys = path.split('.');
-      const updated = { ...prev };
-      let current: any = updated;
+  useEffect(() => {
+    if (shop) {
+      setConfig({
+        name: shop.name,
+        address: shop.address,
+        city: shop.city,
+        phone: shop.phone,
+        email: shop.email,
+        isActive: shop.is_active,
+        workingHours: apiToUIWorkingHours(shop.working_hours),
+      });
+    }
+  }, [shop]);
 
-      for (let i = 0; i < keys.length - 1; i++) {
-        current[keys[i]] = { ...current[keys[i]] };
-        current = current[keys[i]];
-      }
+  if (isLoading || !config) {
+    return <Typography>Učitavanje...</Typography>;
+  }
 
-      current[keys[keys.length - 1]] = value;
-      return updated;
-    });
+  const updateField = (field: string, value: any) => {
+    setConfig((prev: any) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
 
-  const toggleService = (service: string) => {
-    const newServices = config.services.includes(service)
-      ? config.services.filter((s) => s !== service)
-      : [...config.services, service];
-    updateConfig('services', newServices);
+  const updateWorkingHour = (
+    day: string,
+    field: 'open' | 'close' | 'closed',
+    value: any
+  ) => {
+    setConfig((prev: any) => ({
+      ...prev,
+      workingHours: {
+        ...prev.workingHours,
+        [day]: {
+          ...prev.workingHours[day],
+          [field]: value,
+        },
+      },
+    }));
+    setHasChanges(true);
   };
 
   const saveConfig = () => {
-    // In a real app, this would save to the backend
-    console.log('Saving shop configuration:', config);
+    updateShop.mutate({
+      name: config.name,
+      address: config.address,
+      city: config.city,
+      phone: config.phone,
+      working_hours: uiToApiWorkingHours(config.workingHours),
+    });
     setHasChanges(false);
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={6}>
-      {/* Header */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Typography variant="h5" color="primary" fontWeight="bold" gutterBottom>
-            Podešavanja štamparije
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Upravljajte informacijama o vašoj štampariji
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={saveConfig}
-          disabled={!hasChanges}
-          startIcon={<Save size={16} />}
-        >
-          Sačuvaj izmene
-        </Button>
-      </Box>
+    <Box maxWidth={900}>
+      <Typography variant="h5" mb={3}>
+        Podešavanja štamparije
+      </Typography>
 
-      {/* Basic Information */}
-      <Card>
-        <CardHeader
-          title={
-            <Box display="flex" alignItems="center" gap={1}>
-              <MapPin size={20} />
-              <Typography variant="subtitle1" color="primary">
-                Osnovne informacije
-              </Typography>
-            </Box>
-          }
-        />
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="Naziv štamparije"
-                value={config.name}
-                onChange={(e) => updateConfig('name', e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="Grad"
-                value={config.city}
-                onChange={(e) => updateConfig('city', e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="Adresa"
-                value={config.address}
-                onChange={(e) => updateConfig('address', e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="Telefon"
-                value={config.phone}
-                onChange={(e) => updateConfig('phone', e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="Email"
-                type="email"
-                value={config.email}
-                onChange={(e) => updateConfig('email', e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                label="Opis"
-                value={config.description}
-                onChange={(e) => updateConfig('description', e.target.value)}
-                multiline
-                rows={3}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <Box display="flex" alignItems="center" gap={2}>
-                <Switch
-                  checked={config.isActive}
-                  onChange={(e) => updateConfig('isActive', e.target.checked)}
-                />
-                <Typography>Štamparija je aktivna i prima narudžbine</Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+      <Stack spacing={3}>
+        <Paper sx={{ p: 3 }}>
+          <Stack spacing={2}>
+            <TextField
+              label="Naziv"
+              value={config.name}
+              onChange={(e) => updateField('name', e.target.value)}
+              fullWidth
+            />
 
-      {/* Working Hours */}
-      <Card>
-        <CardHeader
-          title={
-            <Box display="flex" alignItems="center" gap={1}>
-              <Clock size={20} />
-              <Typography variant="subtitle1" color="primary">
-                Radno vreme
-              </Typography>
-            </Box>
-          }
-        />
-        <CardContent>
-          <Box display="flex" flexDirection="column" gap={2}>
-            {Object.entries(config.workingHours).map(([day, hours]) => (
-              <Box key={day} display="flex" alignItems="center" gap={2}>
-                <Box width={100}>
-                  <Typography color="primary" fontWeight="medium">
-                    {dayNames[day]}
+            <TextField
+              label="Adresa"
+              value={config.address}
+              onChange={(e) => updateField('address', e.target.value)}
+              fullWidth
+            />
+
+            <TextField
+              label="Grad"
+              value={config.city}
+              onChange={(e) => updateField('city', e.target.value)}
+              fullWidth
+            />
+
+            <TextField
+              label="Telefon"
+              value={config.phone}
+              onChange={(e) => updateField('phone', e.target.value)}
+              fullWidth
+            />
+
+            {/* READ ONLY */}
+            <TextField
+              label="Email"
+              value={config.email}
+              disabled
+              fullWidth
+            />
+
+            <Chip
+              label={config.isActive ? 'Aktivna' : 'Neaktivna'}
+              color={config.isActive ? 'success' : 'default'}
+              sx={{ width: 'fit-content' }}
+            />
+          </Stack>
+        </Paper>
+
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h6" mb={2}>
+            Radno vreme
+          </Typography>
+
+          <Stack spacing={2}>
+            {Object.entries(config.workingHours).map(
+              ([day, value]: any) => (
+                <Stack
+                  key={day}
+                  direction="row"
+                  spacing={2}
+                  alignItems="center"
+                >
+                  <Typography sx={{ width: 90 }}>
+                    {day.toUpperCase()}
                   </Typography>
-                </Box>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Switch
-                    checked={!hours.closed}
-                    onChange={(e) => updateConfig(`workingHours.${day}.closed`, !e.target.checked)}
+
+                  <TextField
+                    type="time"
+                    disabled={value.closed}
+                    value={value.open}
+                    onChange={(e) =>
+                      updateWorkingHour(day, 'open', e.target.value)
+                    }
                   />
-                  <Typography variant="body2">Radi</Typography>
-                </Box>
-                {!hours.closed && (
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <TextField
-                      type="time"
-                      value={hours.open}
-                      onChange={(e) => updateConfig(`workingHours.${day}.open`, e.target.value)}
-                      size="small"
-                    />
-                    <Typography>-</Typography>
-                    <TextField
-                      type="time"
-                      value={hours.close}
-                      onChange={(e) => updateConfig(`workingHours.${day}.close`, e.target.value)}
-                      size="small"
-                    />
-                  </Box>
-                )}
-              </Box>
-            ))}
-          </Box>
-        </CardContent>
-      </Card>
 
-      {/* Services */}
-      <Card>
-        <CardHeader
-          title={
-            <Typography variant="subtitle1" color="primary">
-              Usluge
-            </Typography>
-          }
-        />
-        <CardContent>
-          <Grid container spacing={2}>
-            {availableServices.map((service) => {
-              const isSelected = config.services.includes(service);
-              return (
-                <Grid size={{ xs: 6, md: 3 }} key={service}>
-                  <Paper
-                    onClick={() => toggleService(service)}
-                    sx={{
-                      p: 2,
-                      border: '1px solid',
-                      borderColor: isSelected ? 'primary.main' : 'grey.300',
-                      backgroundColor: isSelected ? 'action.hover' : 'inherit',
-                      cursor: 'pointer',
-                    }}
+                  <TextField
+                    type="time"
+                    disabled={value.closed}
+                    value={value.close}
+                    onChange={(e) =>
+                      updateWorkingHour(day, 'close', e.target.value)
+                    }
+                  />
+
+                  <Button
+                    size="small"
+                    variant={value.closed ? 'contained' : 'outlined'}
+                    onClick={() =>
+                      updateWorkingHour(day, 'closed', !value.closed)
+                    }
                   >
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                      <Typography variant="body2" fontWeight="medium">
-                        {service}
-                      </Typography>
-                      {isSelected && <Chip label="✓" size="small" color="primary" />}
-                    </Box>
-                  </Paper>
-                </Grid>
-              );
-            })}
-          </Grid>
-        </CardContent>
-      </Card>
+                    {value.closed ? 'Zatvoreno' : 'Otvoreno'}
+                  </Button>
+                </Stack>
+              )
+            )}
+          </Stack>
+        </Paper>
 
-      {/* Payment & Operations */}
-      <Card>
-        <CardHeader
-          title={
-            <Box display="flex" alignItems="center" gap={1}>
-              <CreditCard size={20} />
-              <Typography variant="subtitle1" color="primary">
-                Plaćanje i operacije
-              </Typography>
-            </Box>
-          }
-        />
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                label="Broj računa za doznake"
-                value={config.bankAccount}
-                onChange={(e) => updateConfig('bankAccount', e.target.value)}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="Maksimalno narudžbina dnevno"
-                type="number"
-                value={config.maxOrdersPerDay}
-                onChange={(e) => updateConfig('maxOrdersPerDay', parseInt(e.target.value, 10))}
-                fullWidth
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                label="Prosečno vreme obrade (minuti)"
-                type="number"
-                value={config.estimatedProcessingTime}
-                onChange={(e) =>
-                  updateConfig('estimatedProcessingTime', parseInt(e.target.value, 10))
-                }
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+        <Box textAlign="right">
+          <Button
+            variant="contained"
+            disabled={!hasChanges || updateShop.isPending}
+            onClick={saveConfig}
+          >
+            Sačuvaj izmene
+          </Button>
+        </Box>
+      </Stack>
     </Box>
   );
 }
