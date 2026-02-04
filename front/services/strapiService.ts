@@ -106,6 +106,20 @@ class StrapiService {
     const res = await this.api.get(`/order/${orderId}/items`);
     return res.data;
   }
+
+  /* -------------------- PRINT SHOP (ADMIN) -------------------- */
+
+  async getMyPrintShop(): Promise<CopyShop> {
+    const res = await this.api.get('/print-shop/me');
+    return res.data;
+  }
+
+  async updateMyPrintShop(
+    data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours'>>
+  ): Promise<CopyShop> {
+    const res = await this.api.put('/print-shop/me', data);
+    return res.data;
+  }
 }
 
 export const strapiService = new StrapiService();

@@ -57,7 +57,7 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
               // px: isMobile ? 0 : 2,
             }}
           >
-            <Home size={20} />
+            {/* <Home size={20} /> */}
             {!isMobile && <Box ml={1}>Nazad na sajt</Box>}
           </Button>
         </Tooltip>

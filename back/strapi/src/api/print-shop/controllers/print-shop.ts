@@ -208,4 +208,68 @@ module.exports = {
       })
     );
   },
+  async me(ctx) {
+    const printShopId = ctx.state.printShopId;
+    const printShop = await strapi.entityService.findOne(
+      'api::print-shop.print-shop',
+      printShopId,
+      {
+        populate: {
+          print_shop_prices: true,
+        },
+      }
+    );
+
+    return {
+      id: printShop.id,
+      name: printShop.name,
+      address: printShop.address,
+      city: printShop.city,
+      email: printShop.email,
+      phone: printShop.phone,
+      is_active: printShop.is_active,
+      working_hours: printShop.working_hours,
+      stats: {
+        total_completed_orders: printShop.total_completed_orders,
+        on_time_rate: printShop.on_time_rate,
+      },
+    };
+  },
+  async updateMe(ctx) {
+    const printShopId = ctx.state.printShopId;
+
+    if (!printShopId) {
+      return ctx.unauthorized('No shop linked');
+    }
+
+    const allowedFields = [
+      'name',
+      'address',
+      'city',
+      'phone',
+      'working_hours',
+    ];
+
+    const data = Object.keys(ctx.request.body).reduce((acc, key) => {
+      if (allowedFields.includes(key)) {
+        acc[key] = ctx.request.body[key];
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
+    const updated = await strapi.entityService.update(
+      'api::print-shop.print-shop',
+      printShopId,
+      { data }
+    );
+
+    return {
+      id: updated.id,
+      name: updated.name,
+      address: updated.address,
+      city: updated.city,
+      phone: updated.phone,
+      working_hours: updated.working_hours,
+    };
+  }
 };
