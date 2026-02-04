@@ -5,9 +5,16 @@ import { TOKEN_KEY } from './helpers/constants';
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname === '/favicon.ico') {
+  // ✅ Skip Next internals, static assets, and proxy routes
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/strapi') ||
+    pathname === '/favicon.ico'
+  ) {
     return NextResponse.next();
   }
+
   const jwt = req.cookies.get(TOKEN_KEY)?.value;
 
   const publicRoutes = ['/', '/login', '/register', '/cart'];
@@ -19,12 +26,9 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  if (jwt) {
-    if (isStoreRoute) return NextResponse.next();
-    return NextResponse.redirect(new URL('/store', req.url));
-  }
-
-  return NextResponse.next();
+  // If logged in:
+  if (isStoreRoute) return NextResponse.next();
+  return NextResponse.redirect(new URL('/store', req.url));
 }
 
 export const config = {
