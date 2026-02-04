@@ -14,16 +14,19 @@ import {
   Paper,
   Chip,
   CircularProgress,
+  Button,
 } from '@mui/material';
 import { Upload, FileText, AlertCircle, X } from 'lucide-react';
 import React, { useState, useCallback } from 'react';
 import { PrintTypeSelector } from './print-type-selector';
 import { allowedFileTypes } from '@/hooks/useFileUpload';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import { PreviewModal } from './PreviewRenderer';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 export function FileUploadSection() {
   const { file, setFile, fileInfo, setFileInfo } = usePrintContext();
-
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -142,7 +145,6 @@ export function FileUploadSection() {
     setUploadedUrl(null);
   };
 
-
   return (
     <Card>
       <CardHeader
@@ -243,7 +245,7 @@ export function FileUploadSection() {
                     <Box>
                       <Typography fontWeight={600}>{fileInfo?.name}</Typography>
                       <Typography variant="caption">
-                        {formatSize(fileInfo!.size)} • {fileInfo?.pages} stranica
+                        {formatSize(fileInfo!.size)} {fileInfo?.pages && fileInfo?.pages > 1 ? `• ${fileInfo?.pages} stranica` : null}
                       </Typography>
                       <Box mt={1} display="flex" gap={1} flexWrap="wrap">
                         {uploading ? (
@@ -279,6 +281,14 @@ export function FileUploadSection() {
                           color={done ? 'success' : 'warning'}
                           label={done ? 'Obrađeno' : 'Nije obrađeno'}
                         />
+                        <Chip
+                          size="small"
+                          disabled={!done}
+                          color={'warning'}
+                          label={'Pogledaj fajl'}
+                          icon={<VisibilityIcon />}
+                          onClick={() => setPreviewOpen(true)}
+                        />
                       </Box>
                     </Box>
                   </Box>
@@ -294,6 +304,12 @@ export function FileUploadSection() {
         <Box mt={4}>
           <PrintTypeSelector fileUploaded={Boolean(file)} documentMime={file?.type} />
         </Box>
+        <PreviewModal
+          open={previewOpen}
+          onClose={() => setPreviewOpen(false)}
+          printType={fileInfo?.type ?? 'application/pdf'}
+          fileUrl={fileInfo?.url ?? ''}
+        />
       </CardContent>
     </Card>
   );
