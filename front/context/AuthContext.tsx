@@ -1,107 +1,90 @@
 'use client';
 
-import type React from 'react';
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import {
-  type User as FirebaseUser,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import { auth } from '../src/config/firebase';
-import type { User } from '../types';
-import { strapiService } from '../services/strapiService';
-
-interface AuthContextType {
-  currentUser: FirebaseUser | null;
-  userData: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => Promise<void>;
-  loading: boolean;
-}
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { strapiService } from '@/services/strapiService';
+import { User, AuthContextType } from '@/types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
+  return ctx;
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
-  const [userData, setUserData] = useState<User | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  const login = async (email: string, password: string): Promise<void> => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = await strapiService.getUserByEmail(email);
-      setUserData(user);
-    } catch (error: any) {
-      throw new Error('Greška pri prijavljivanju: ' + error.message);
-    }
-  };
-
-  const register = async (email: string, password: string, name: string): Promise<void> => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-      // Create user in Strapi
-      const newUser = await strapiService.createUser({
-        email,
-        name,
-      });
-
-      setUserData(newUser);
-    } catch (error: any) {
-      throw new Error('Greška pri registraciji: ' + error.message);
-    }
-  };
-
-  const logout = async (): Promise<void> => {
-    try {
-      await signOut(auth);
-      setUserData(null);
-    } catch (error: any) {
-      throw new Error('Greška pri odjavljivanju: ' + error.message);
-    }
-  };
-
+  /* -------------------- BOOTSTRAP AUTH -------------------- */
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
+    let mounted = true;
 
-      if (user) {
-        // Fetch user data from Strapi
-        const userData = await strapiService.getUserByEmail(user.email!);
-        setUserData(userData);
-      } else {
-        setUserData(null);
+    const bootstrapAuth = async () => {
+      setLoading(true);
+      try {
+        // poziva se cookie-based /users/me
+        const me = await strapiService.getMe();
+        if (mounted) setUser(me);
+      } catch {
+        if (mounted) setUser(null);
+      } finally {
+        if (mounted) setLoading(false);
       }
+    };
 
-      setLoading(false);
-    });
-
-    return unsubscribe;
+    bootstrapAuth();
+    return () => { mounted = false; };
   }, []);
 
-  const value: AuthContextType = {
-    currentUser,
-    userData,
-    login,
-    register,
-    logout,
-    loading,
+  /* -------------------- LOGIN / REGISTER -------------------- */
+  const login = async (email: string, password: string) => {
+    setLoading(true);
+    try {
+      const { user } = await strapiService.loginUser(email, password);
+      setUser(user);
+      router.push('/store');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
-};
+  const register = async (email: string, password: string, username: string) => {
+    setLoading(true);
+    try {
+      const { user } = await strapiService.register(username, email, password);
+      setUser(user);
+      router.push('/store');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* -------------------- LOGOUT -------------------- */
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await strapiService.logout();
+      setUser(null);
+      router.push('/login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+      }}
+    >
+      {!loading && children}
+    </AuthContext.Provider>
+  );
+}

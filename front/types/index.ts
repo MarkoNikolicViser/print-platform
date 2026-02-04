@@ -95,7 +95,7 @@ export interface Order {
   total_price: number;
   order_items: any[];
   count: number;
-  total: number;
+  total?: number;
   expiresAt: string;
   items: ProductTemplate[];
 }
@@ -188,4 +188,11 @@ export interface FileInfo {
   type: string;
   pages?: number;
   url?: string;
+}
+export interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => void;
 }

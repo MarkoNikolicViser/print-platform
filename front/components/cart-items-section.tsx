@@ -3,29 +3,28 @@
 import { OrderItem, SelectedOptions, AllowedOption } from '@/types';
 import { Box, Typography, Grid, Button, Stack, Paper } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import React from 'react';
-import { toast } from 'react-toastify';
-
+import React, { useEffect, useMemo, useState } from 'react';
 import { renderOptionField } from '../components/ui/DynamicRenderOfFields';
 import { useDirtyCart } from '../hooks/useDirtyCart';
 import { useOrderItems } from '../hooks/useOrderItems';
 import { useSyncCart } from '../hooks/useSyncCart';
 import ErrorState from './ui/error-state';
 import { OrderItemsSkeleton } from './ui/OrderItemsSkeleton';
+import EmptyCartState from './ui/EmptyCartState';
 
 export default function CartItemsSection() {
   const router = useRouter();
-  const [orderId, setOrderId] = React.useState<string | undefined>(undefined);
+  const [orderId, setOrderId] = useState<string | undefined>(undefined);
   const { mutate: syncCart, isPending: isLoadingSync } = useSyncCart();
 
   const { data: orderItems, isLoading, isError, error } = useOrderItems(orderId);
 
   // keep a local editable copy sourced from server data
-  const serverItems = React.useMemo(() => (orderItems?.items as OrderItem[]) ?? [], [orderItems]);
-  const [edited, setEdited] = React.useState<OrderItem[]>([]);
+  const serverItems = useMemo(() => (orderItems?.items as OrderItem[]) ?? [], [orderItems]);
+  const [edited, setEdited] = useState<OrderItem[]>([]);
 
   // Init edited when serverItems arrive
-  React.useEffect(() => {
+  useEffect(() => {
     if (serverItems.length > 0) {
       setEdited(structuredClone(serverItems));
     }
@@ -35,7 +34,7 @@ export default function CartItemsSection() {
   const { dirty, patch, changed, reset } = useDirtyCart(serverItems, edited);
 
   // Currency formatter (RSD)
-  const currencyFmt = React.useMemo(
+  const currencyFmt = useMemo(
     () =>
       new Intl.NumberFormat('sr-RS', {
         style: 'currency',
@@ -54,12 +53,12 @@ export default function CartItemsSection() {
       prev.map((it) =>
         it.id === itemId
           ? {
-              ...it,
-              selected_options: {
-                ...it.selected_options,
-                [key]: value,
-              },
-            }
+            ...it,
+            selected_options: {
+              ...it.selected_options,
+              [key]: value,
+            },
+          }
           : it,
       ),
     );
@@ -91,16 +90,7 @@ export default function CartItemsSection() {
     reset(structuredClone(edited));
   };
 
-  React.useEffect(() => {
-    if (error?.status === 410) {
-      toast(`Istekla je korpa`, {
-        type: 'error',
-      });
-      router.push('/');
-    }
-  }, [isError, error, router]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     const stored = localStorage.getItem('order_code');
     if (stored) setOrderId(String(stored));
   }, []);
@@ -109,7 +99,7 @@ export default function CartItemsSection() {
 
   if (isLoading || !orderId || !isReady) return <OrderItemsSkeleton />;
   if (isError) return <ErrorState queryKey={['order-items']} message={error.message} />;
-
+  if (edited.length === 0) return <EmptyCartState />
   return (
     <Box maxWidth="md" mx="auto" mt={4} px={2}>
       <Box sx={{ p: 2 }}>
@@ -204,12 +194,6 @@ export default function CartItemsSection() {
                   </Grid>
                 </Grid>
               </Grid>
-              {/* 
-                            <Divider sx={{ my: 2 }} />
-
-                            <Typography variant="body2" color="text.secondary">
-                                Napomena: Izmena opcija ne menja cenu osim ako obezbedite <code>priceFn</code>.
-                            </Typography> */}
             </Paper>
           ))}
         </Stack>

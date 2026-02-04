@@ -1,5 +1,6 @@
 'use client';
 
+import { useLogout } from '@/hooks/useLogout';
 import {
   AppBar,
   Toolbar,
@@ -13,10 +14,18 @@ import {
   useTheme,
 } from '@mui/material';
 import { Bell, Settings, LogOut, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function AdminHeader() {
+  const router = useRouter();
   const theme = useTheme();
+  const { mutate: logout } = useLogout()
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md')); // md = 960px
+
+  const handleLogout = () => {
+    logout()
+    router.push('/login')
+  }
 
   return (
     <AppBar
@@ -76,7 +85,7 @@ export function AdminHeader() {
               <IconButton size="small" color="default">
                 <Settings size={18} />
               </IconButton>
-              <IconButton size="small" color="default">
+              <IconButton onClick={handleLogout} size="small" color="default">
                 <LogOut size={18} />
               </IconButton>
             </>
@@ -88,7 +97,7 @@ export function AdminHeader() {
               <Button variant="text" size="small" startIcon={<Settings size={18} />}>
                 Podešavanja
               </Button>
-              <Button variant="outlined" size="small" startIcon={<LogOut size={18} />}>
+              <Button onClick={handleLogout} variant="outlined" size="small" startIcon={<LogOut size={18} />}>
                 Odjavi se
               </Button>
             </>
