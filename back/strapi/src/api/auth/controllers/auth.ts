@@ -11,6 +11,58 @@ const client = new OAuth2Client({
   redirectUri: CALLBACK_URI,
 });
 
+// ---- Cookie helpers (env-driven) ----
+const isProd = process.env.NODE_ENV === "production";
+
+/**
+ * Env vars supported:
+ * - COOKIE_NAME (default: token)
+ * - COOKIE_DOMAIN (optional; e.g. ".example.com")
+ * - COOKIE_SECURE ("true"/"false") default: true in prod, false in dev
+ * - COOKIE_SAMESITE ("lax"/"none"/"strict") default: none in prod, lax in dev
+ * - COOKIE_MAX_AGE_DAYS (default: 365)
+ */
+const COOKIE_NAME = process.env.COOKIE_NAME || "token";
+
+function parseBool(value, fallback) {
+  if (value === undefined) return fallback;
+  return value === "true" || value === "1";
+}
+
+function cookieOptions() {
+  const days = Number(process.env.COOKIE_MAX_AGE_DAYS || 365);
+  const maxAge = 1000 * 60 * 60 * 24 * days; // ✅ milliseconds (Koa expects ms)
+
+  const sameSite = (
+    process.env.COOKIE_SAMESITE || (isProd ? "none" : "lax")
+  ).toLowerCase();
+
+  const secure = parseBool(process.env.COOKIE_SECURE, isProd);
+
+  // If SameSite=None, Secure MUST be true (browsers will block otherwise)
+  const finalSecure = sameSite === "none" ? true : secure;
+
+  const domain = process.env.COOKIE_DOMAIN || undefined;
+
+  return {
+    httpOnly: true,
+    secure: finalSecure,
+    sameSite: sameSite, // "lax" | "none" | "strict"
+    path: "/",
+    maxAge,
+    ...(domain ? { domain } : {}),
+  };
+}
+
+function clearCookieOptions() {
+  // Use same flags as set-cookie so removal works reliably
+  return {
+    ...cookieOptions(),
+    maxAge: 0,
+    expires: new Date(0),
+  };
+}
+
 export default {
   async login(ctx) {
     const { identifier, password } = ctx.request.body;
@@ -44,16 +96,10 @@ export default {
       .service("jwt")
       .issue({ id: user.id });
 
-    ctx.cookies.set("token", jwt, {
-      httpOnly: true,
-      secure: false, // DEV
-      sameSite: "Lax",
-      path: "/",
-      maxAge: 31536000,
-    });
-
+    ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
     ctx.send({ user });
   },
+
   async register(ctx) {
     const { username, email, password } = ctx.request.body;
 
@@ -63,48 +109,33 @@ export default {
 
     const userQuery = strapi.query("plugin::users-permissions.user");
 
-    // 1️⃣ Proveri da li user već postoji
-    const existingUser = await userQuery.findOne({
-      where: { email },
-    });
-
+    const existingUser = await userQuery.findOne({ where: { email } });
     if (existingUser) {
       return ctx.badRequest("Email already in use");
     }
 
-    // 2️⃣ Uzmi authenticated role
     const role = await strapi
       .query("plugin::users-permissions.role")
       .findOne({ where: { type: "authenticated" } });
 
-    // 3️⃣ Kreiraj usera
     const user = await strapi.plugin("users-permissions").service("user").add({
       username,
       email,
       password,
-      confirmed: true, // ako nemaš email confirmation
+      confirmed: true,
       provider: "local",
       role: role.id,
     });
 
-    // 4️⃣ Izdaj JWT
     const jwt = strapi
       .plugin("users-permissions")
       .service("jwt")
       .issue({ id: user.id });
 
-    // 5️⃣ Setuj httpOnly cookie
-    ctx.cookies.set("token", jwt, {
-      httpOnly: true,
-      secure: true, // DEV → true u produkciji
-      sameSite: "Lax",
-      path: "/",
-      maxAge: 31536000,
-    });
-
-    // 6️⃣ Vrati usera (bez jwt-a)
+    ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
     ctx.send({ user });
   },
+
   async googleCallback(ctx) {
     const { code } = ctx.query;
 
@@ -113,13 +144,11 @@ export default {
     }
 
     try {
-      // 1️⃣ Exchange code → tokens
-      const { tokens } = await client.getToken(code as string);
+      const { tokens } = await client.getToken(code);
       client.setCredentials(tokens);
 
-      // 2️⃣ Verify ID token
       const ticket = await client.verifyIdToken({
-        idToken: tokens.id_token!,
+        idToken: tokens.id_token,
         audience: process.env.GOOGLE_CLIENT_ID,
       });
 
@@ -130,12 +159,8 @@ export default {
 
       const email = payload.email;
 
-      // 3️⃣ Find or create user
       const userQuery = strapi.db.query("plugin::users-permissions.user");
-
-      let user = await userQuery.findOne({
-        where: { email },
-      });
+      let user = await userQuery.findOne({ where: { email } });
 
       const role = await strapi
         .query("plugin::users-permissions.role")
@@ -156,14 +181,7 @@ export default {
         .service("jwt")
         .issue({ id: user.id });
 
-      ctx.cookies.set("token", jwt, {
-        httpOnly: true,
-        secure: false, // DEV → true u produkciji
-        sameSite: "Lax", // OK za localhost
-        path: "/",
-        maxAge: 31536000, // 365 dana
-      });
-
+      ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
       ctx.redirect(`${FRONTEND_URL}/store`);
     } catch (err) {
       console.error("Google callback error:", err);
@@ -172,14 +190,7 @@ export default {
   },
 
   async logout(ctx) {
-    ctx.cookies.set("token", "", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
-      path: "/",
-      expires: new Date(0),
-    });
-
+    ctx.cookies.set(COOKIE_NAME, "", clearCookieOptions());
     ctx.send({ ok: true });
   },
 };
