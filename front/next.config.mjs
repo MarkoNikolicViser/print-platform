@@ -2,7 +2,7 @@
 
 import path from "path";
 
-const STRAPI_API_BASE = "https://tranquil-wonder-8d0bf7e262.strapiapp.com";
+const STRAPI_API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 const nextConfig = {
   eslint: {
@@ -22,16 +22,11 @@ const nextConfig = {
     return config;
   },
 
-  /**
-   * Proxy API requests:
-   * /api/*  ->  https://tranquil-wonder-8d0bf7e262.strapiapp.com/api/*
-   */
- 
 async rewrites() {
   return [
     {
       source: "/strapi/:path*",
-      destination: "https://tranquil-wonder-8d0bf7e262.strapiapp.com/api/:path*",
+      destination: `${STRAPI_API_BASE}/:path*`,
     },
   ];
 }

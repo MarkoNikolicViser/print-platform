@@ -57,7 +57,6 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-
     try {
       await login(loginData.email, loginData.password);
       router.push('/store');
@@ -68,11 +67,12 @@ export default function LoginPage() {
     }
   };
 
-
   const handleGoogleLogin = () => {
+    const redirectUri = new URL(STRAPI_REDIRECT_URI, window.location.origin).toString();
+
     const options = {
       client_id: GOOGLE_CLIENT_ID,
-      redirect_uri: STRAPI_REDIRECT_URI,
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: 'openid email profile',
       access_type: 'offline',
@@ -95,11 +95,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await register(
-        registerData.email,
-        registerData.password,
-        registerData.name,
-      );
+      await register(registerData.email, registerData.password, registerData.name);
       router.push('/store');
     } catch (err: any) {
       setError(err.message || 'Greška pri registraciji');
@@ -129,9 +125,7 @@ export default function LoginPage() {
           <Typography variant="h4" fontWeight={700}>
             PrintSerbia
           </Typography>
-          <Typography color="text.secondary">
-            Online štamparija za profesionalce
-          </Typography>
+          <Typography color="text.secondary">Online štamparija za profesionalce</Typography>
         </Box>
 
         <Tabs
@@ -185,9 +179,7 @@ export default function LoginPage() {
               margin="normal"
               autoComplete="email"
               value={loginData.email}
-              onChange={(e) =>
-                setLoginData({ ...loginData, email: e.target.value })
-              }
+              onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
             />
             <TextField
               fullWidth
@@ -197,9 +189,7 @@ export default function LoginPage() {
               margin="normal"
               autoComplete="current-password"
               value={loginData.password}
-              onChange={(e) =>
-                setLoginData({ ...loginData, password: e.target.value })
-              }
+              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
             />
 
             <Button
@@ -230,9 +220,7 @@ export default function LoginPage() {
               required
               margin="normal"
               value={registerData.name}
-              onChange={(e) =>
-                setRegisterData({ ...registerData, name: e.target.value })
-              }
+              onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
             />
             <TextField
               fullWidth
@@ -242,9 +230,7 @@ export default function LoginPage() {
               margin="normal"
               autoComplete="email"
               value={registerData.email}
-              onChange={(e) =>
-                setRegisterData({ ...registerData, email: e.target.value })
-              }
+              onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
             />
             <TextField
               fullWidth
@@ -253,9 +239,7 @@ export default function LoginPage() {
               required
               margin="normal"
               value={registerData.password}
-              onChange={(e) =>
-                setRegisterData({ ...registerData, password: e.target.value })
-              }
+              onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
             />
             <TextField
               fullWidth
