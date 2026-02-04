@@ -14,6 +14,9 @@ class StrapiService {
 
   constructor() {
     this.api = axios.create({
+      // IMPORTANT:
+      // API_URL should now be "/strapi" (via constants.ts),
+      // because Next rewrites /strapi/* -> https://...strapiapp.com/api/*
       baseURL: API_URL,
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
@@ -55,9 +58,10 @@ class StrapiService {
     productTemplateId?: number,
     numberOfPages?: number,
     quantity?: number,
-    selectedOptions?: PrintOptions | string
+    selectedOptions?: PrintOptions | string,
   ): Promise<CopyShop[]> {
     const params: Record<string, any> = {};
+
     if (productTemplateId !== undefined) params.productTemplateId = productTemplateId;
     if (numberOfPages !== undefined) params.numberOfPages = numberOfPages;
     if (quantity !== undefined) params.quantity = quantity;
@@ -85,7 +89,9 @@ class StrapiService {
 
   async getProductTemplatesByMime(documentMime: string) {
     try {
-      const res = await this.api.get('/product-templates/by-mime', { params: { document_mime: documentMime } });
+      const res = await this.api.get('/product-templates/by-mime', {
+        params: { document_mime: documentMime },
+      });
       return res.data.data;
     } catch (error) {
       console.error('Error fetching product templates by mime:', error);
@@ -115,7 +121,7 @@ class StrapiService {
   }
 
   async updateMyPrintShop(
-    data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours'>>
+    data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours'>>,
   ): Promise<CopyShop> {
     const res = await this.api.put('/print-shop/me', data);
     return res.data;

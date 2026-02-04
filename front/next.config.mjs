@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 
-import path from 'path';
+import path from "path";
+
+const STRAPI_API_BASE = "https://tranquil-wonder-8d0bf7e262.strapiapp.com";
 
 const nextConfig = {
   eslint: {
@@ -12,10 +14,28 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+
   webpack: (config) => {
-    config.resolve.alias['@'] = path.resolve(process.cwd(), '*');
+    // Common alias pattern in Next.js projects:
+    // '@' -> project root
+    config.resolve.alias["@"] = path.resolve(process.cwd());
     return config;
   },
+
+  /**
+   * Proxy API requests:
+   * /api/*  ->  https://tranquil-wonder-8d0bf7e262.strapiapp.com/api/*
+   */
+ 
+async rewrites() {
+  return [
+    {
+      source: "/strapi/:path*",
+      destination: "https://tranquil-wonder-8d0bf7e262.strapiapp.com/api/:path*",
+    },
+  ];
 }
 
-export default nextConfig
+};
+
+export default nextConfig;
