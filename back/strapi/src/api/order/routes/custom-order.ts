@@ -32,6 +32,15 @@ module.exports = {
             method: 'POST',
             path: '/shop-panel/order-item',
             handler: 'shop-panel.updateItem'
-        }
+        },
+        {
+            method: 'GET',
+            path: '/orders/my-shop',
+            handler: 'order.findForMyShop',
+            config: {
+                auth: { required: true },
+                policies: ['api::print-shop.is-shop-owner'],
+            },
+        },
     ]
 };

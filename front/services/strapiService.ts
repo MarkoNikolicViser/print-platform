@@ -6,6 +6,7 @@ import type {
   SyncCartPayload,
   Order,
   PrintOptions,
+  ProductTemplate,
 } from '../types';
 import { API_URL } from '../helpers/constants';
 
@@ -120,10 +121,43 @@ class StrapiService {
     return res.data;
   }
 
+  async getProductTemplates() {
+    try {
+      const res = await this.api.get('/product-templates');
+      return res.data
+    } catch (error) {
+      console.error('Error fetching product templates:', error);
+      return [];
+    }
+  }
+
+  async getMyShopOrders() {
+    try {
+      const res = await this.api.get('/orders/my-shop');
+      return res.data;
+    } catch (error) {
+      console.error('Error fetching shop orders:', error);
+      return [];
+    }
+  }
+
   async updateMyPrintShop(
     data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours'>>,
   ): Promise<CopyShop> {
     const res = await this.api.put('/print-shop/me', data);
+    return res.data;
+  }
+
+  async upsertProductPricing(payload: {
+    product_template: number;
+    base_price: number;
+    option_price_modifiers: any;
+    is_active?: boolean;
+  }) {
+    const res = await this.api.post(
+      '/pricing/upsert',
+      payload,
+    );
     return res.data;
   }
 }

@@ -249,4 +249,107 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
     ctx.send({ completedOnTime });
   },
+  async findForMyShop(ctx) {
+    const printShopId = ctx.state.printShopId;
+
+    if (!printShopId) {
+      return ctx.forbidden('Print shop context missing');
+    }
+
+    const orders = await strapi.db
+      .query('api::order.order')
+      .findMany({
+        where: {
+          print_shop_id: printShopId,
+          status_code: {
+            $in: ['paid', 'printing', 'ready', 'picked_up'],
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        populate: {
+          order_items: {
+            populate: {
+              product_template: {
+                select: ['id', 'name', 'allowed_options'],
+              },
+            },
+          },
+        },
+      });
+
+    return orders.map((order) => ({
+      id: order.id,
+      order_code: order.order_code,
+      status_code: order.status_code,
+      finish_code: order.finish_code,
+      total_price: order.total_price,
+      customer_email: order.customer_email,
+      customer_phone: order.customer_phone,
+      expires_at: order.expires_at,
+      estimated_completion_at: order.estimated_completion_at,
+      completed_at: order.completed_at,
+      completed_on_time: order.completed_on_time,
+      createdAt: order.createdAt,
+
+      items: order.order_items.map((item) => {
+        const template = item.product_template;
+        const allowedOptions = template?.allowed_options || {};
+
+        /**
+         * Mapiranje selected_options -> sa labelama
+         */
+        const selected_options_with_labels = Object.entries(
+          item.selected_options || {}
+        ).map(([key, value]) => {
+          const optionDef = allowedOptions[key];
+
+          if (!optionDef) {
+            return {
+              key,
+              value,
+              label: key,
+              optionLabel: String(value),
+            };
+          }
+
+          const matchedOption = optionDef.options?.find(
+            (opt) => opt.value === value
+          );
+
+          return {
+            key,
+            value,
+            label: optionDef.label,
+            optionLabel: matchedOption
+              ? matchedOption.label
+              : String(value),
+          };
+        });
+
+        return {
+          id: item.id,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total_price: item.total_price,
+          status_code: item.status_code,
+          document_name: item.document_name,
+          document_url: item.document_url,
+          document_pages: item.document_pages,
+          document_mime: item.document_mime,
+
+          selected_options: item.selected_options,
+          selected_options_with_labels,
+
+          product_template: template
+            ? {
+              id: template.id,
+              name: template.name,
+            }
+            : null,
+        };
+      }),
+    }));
+  }
 }));

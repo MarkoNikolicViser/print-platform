@@ -5,7 +5,6 @@ import {
   Typography,
   Card,
   CardContent,
-  CardHeader,
   Grid,
   TextField,
   Select,
@@ -15,310 +14,200 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  IconButton,
+  CircularProgress,
+  Stack,
+  Divider,
 } from '@mui/material';
-import { Search, Clock, CheckCircle, Mail, Eye, Filter } from 'lucide-react';
+import { Search, Eye, Filter, Download, CheckCircle, XCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useMyShopOrders } from '@/hooks/useMyShopOrders';
+
+interface SelectedOptionWithLabel {
+  key: string;
+  value: any;
+  label: string;
+  optionLabel: string;
+}
+
+interface OrderItem {
+  id: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  status_code: string;
+  document_name: string;
+  document_url: string;
+  selected_options_with_labels?: SelectedOptionWithLabel[];
+  product_template: {
+    id: string;
+    name: string;
+  } | null;
+}
 
 interface Order {
   id: string;
-  customer: string;
-  email: string;
-  phone: string;
-  fileName: string;
-  pages: number;
-  quantity: number;
-  copies: number;
-  isColor: boolean;
-  isDoubleSided: boolean;
-  binding: string;
-  amount: number;
-  status: 'pending' | 'processing' | 'ready' | 'completed' | 'cancelled';
+  order_code: string;
+  status_code: string;
+  total_price: number;
+  customer_email?: string;
+  customer_phone?: string;
   createdAt: string;
-  estimatedCompletion: string;
+  items: OrderItem[];
 }
 
-const mockOrders: Order[] = [
-  {
-    id: 'PS1234567',
-    customer: 'Ana Marković',
-    email: 'ana.markovic@email.com',
-    phone: '+381 64 123-4567',
-    fileName: 'prezentacija.pdf',
-    pages: 15,
-    quantity: 2,
-    copies: 1,
-    isColor: true,
-    isDoubleSided: false,
-    binding: 'spiral',
-    amount: 450,
-    status: 'pending',
-    createdAt: '2024-01-15 14:30',
-    estimatedCompletion: '2024-01-15 16:00',
-  },
-  {
-    id: 'PS1234568',
-    customer: 'Petar Nikolić',
-    email: 'petar.nikolic@email.com',
-    phone: '+381 63 987-6543',
-    fileName: 'dokument.docx',
-    pages: 8,
-    quantity: 1,
-    copies: 3,
-    isColor: false,
-    isDoubleSided: true,
-    binding: 'staple',
-    amount: 120,
-    status: 'processing',
-    createdAt: '2024-01-15 13:15',
-    estimatedCompletion: '2024-01-15 15:30',
-  },
-  {
-    id: 'PS1234569',
-    customer: 'Milica Jovanović',
-    email: 'milica.jovanovic@email.com',
-    phone: '+381 65 456-7890',
-    fileName: 'katalog.pdf',
-    pages: 24,
-    quantity: 1,
-    copies: 1,
-    isColor: true,
-    isDoubleSided: true,
-    binding: 'thermal',
-    amount: 680,
-    status: 'ready',
-    createdAt: '2024-01-15 11:45',
-    estimatedCompletion: '2024-01-15 14:00',
-  },
-  {
-    id: 'PS1234570',
-    customer: 'Stefan Popović',
-    email: 'stefan.popovic@email.com',
-    phone: '+381 62 321-0987',
-    fileName: 'izvestaj.pdf',
-    pages: 12,
-    quantity: 3,
-    copies: 1,
-    isColor: false,
-    isDoubleSided: false,
-    binding: 'none',
-    amount: 180,
-    status: 'completed',
-    createdAt: '2024-01-14 16:20',
-    estimatedCompletion: '2024-01-14 18:00',
-  },
-];
-
 const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'pending':
-    case 'pending':
-      return <Chip label="Na čekanju" sx={{ bgcolor: '#FFE0B2', color: '#E65100' }} />;
-    case 'processing':
-      return <Chip label="U obradi" sx={{ bgcolor: '#BBDEFB', color: '#0D47A1' }} />;
-    case 'ready':
-      return <Chip label="Spremno" sx={{ bgcolor: '#FFF9C4', color: '#F57F17' }} />;
-    case 'completed':
-      return <Chip label="Završeno" sx={{ bgcolor: '#C8E6C9', color: '#1B5E20' }} />;
-    case 'cancelled':
-      return <Chip label="Otkazano" sx={{ bgcolor: '#FFCDD2', color: '#B71C1C' }} />;
-    default:
-      return <Chip label={status} variant="outlined" />;
-  }
+  const map: Record<string, { label: string; color: string }> = {
+    paid: { label: 'Plaćeno', color: '#2e7d32' },
+    printing: { label: 'Štampa', color: '#f9a825' },
+    ready: { label: 'Spremno', color: '#ef6c00' },
+    picked_up: { label: 'Preuzeto', color: '#2e7d32' },
+    cancelled: { label: 'Otkazano', color: '#c62828' },
+  };
+
+  const cfg = map[status];
+  return (
+    <Chip
+      label={cfg?.label ?? status}
+      sx={{
+        bgcolor: cfg ? `${cfg.color}22` : undefined,
+        color: cfg?.color,
+      }}
+      size="small"
+    />
+  );
 };
 
 export function OrderManagement() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const { data: orders = [], isLoading } = useMyShopOrders();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" mt={10}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.fileName.toLowerCase().includes(searchTerm.toLowerCase());
+      order.order_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (order.customer_email ?? '').toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'all' || order.status_code === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
 
-  const updateOrderStatus = (orderId: string, newStatus: Order['status']) => {
-    setOrders((prev) =>
-      prev.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order)),
-    );
-
-    // Send email notification (simulated)
-    const order = orders.find((o) => o.id === orderId);
-    if (order && newStatus === 'ready') {
-      console.log(`Sending email to ${order.email}: Your order ${orderId} is ready for pickup!`);
-    }
+  const handleDownload = (url: string, filename: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.target = '_blank';
+    link.click();
   };
 
-  const sendNotification = (order: Order) => {
-    console.log(`Sending notification to ${order.email} for order ${order.id}`);
-    // In a real app, this would send an actual email
+  /** TODO: poveži sa mutation hook-om */
+  const markAsReady = (orderId: string) => {
+    console.log('MARK READY', orderId);
+  };
+
+  const cancelOrder = (orderId: string) => {
+    console.log('CANCEL ORDER', orderId);
   };
 
   return (
-    <Box display="flex" flexDirection="column" gap={6}>
-      {/* Header */}
-      <Box>
-        <Typography variant="h5" color="primary" fontWeight="bold" gutterBottom>
-          Upravljanje narudžbinama
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Pratite i upravljajte svim narudžbinama
-        </Typography>
-      </Box>
+    <Box display="flex" flexDirection="column" gap={4}>
+      <Typography variant="h5" fontWeight="bold">
+        Upravljanje porudžbinama
+      </Typography>
 
       {/* Filters */}
       <Card>
-        <CardContent>
-          <Box display="flex" flexWrap="wrap" gap={2}>
-            <Box flex={1} minWidth={200} position="relative">
-              <Search
-                size={16}
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: 10,
-                  transform: 'translateY(-50%)',
-                  color: '#888',
-                }}
-              />
-              <TextField
-                placeholder="Pretražite narudžbine..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                fullWidth
-                sx={{ pl: 4 }}
-              />
-            </Box>
-            <Select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              displayEmpty
-              sx={{ minWidth: 180 }}
-            >
-              <MenuItem value="all">Svi statusi</MenuItem>
-              <MenuItem value="pending">Na čekanju</MenuItem>
-              <MenuItem value="processing">U obradi</MenuItem>
-              <MenuItem value="ready">Spremno</MenuItem>
-              <MenuItem value="completed">Završeno</MenuItem>
-              <MenuItem value="cancelled">Otkazano</MenuItem>
-            </Select>
-          </Box>
+        <CardContent sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            fullWidth
+            placeholder="Pretraga..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: <Search size={16} />,
+            }}
+          />
+          <Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            sx={{ minWidth: 180 }}
+          >
+            <MenuItem value="all">Svi statusi</MenuItem>
+            <MenuItem value="paid">Plaćeno</MenuItem>
+            <MenuItem value="printing">Štampa</MenuItem>
+            <MenuItem value="ready">Spremno</MenuItem>
+            <MenuItem value="picked_up">Preuzeto</MenuItem>
+            <MenuItem value="cancelled">Otkazano</MenuItem>
+          </Select>
         </CardContent>
       </Card>
 
-      {/* Orders List */}
+      {/* Orders */}
       <Grid container spacing={2}>
         {filteredOrders.map((order) => (
           <Grid size={{ xs: 12 }} key={order.id}>
             <Card>
               <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="flex-start">
-                  <Box flex={1}>
-                    <Box display="flex" alignItems="center" gap={2} mb={1}>
-                      <Typography variant="subtitle1" color="primary" fontWeight="bold">
-                        {order.customer}
+                <Box display="flex" justifyContent="space-between">
+                  <Box>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography fontWeight="bold">
+                        {order.customer_email ?? 'Nepoznat korisnik'}
                       </Typography>
-                      {getStatusBadge(order.status)}
-                      <Chip label={order.id} variant="outlined" size="small" />
-                    </Box>
+                      {getStatusBadge(order.status_code)}
+                      <Chip label={order.order_code} size="small" variant="outlined" />
+                    </Stack>
 
-                    <Grid container spacing={2}>
-                      <Grid size={{ xs: 12, md: 4 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Kontakt:
-                        </Typography>
-                        <Typography variant="body2">{order.email}</Typography>
-                        <Typography variant="body2">{order.phone}</Typography>
-                      </Grid>
-                      <Grid size={{ xs: 12, md: 4 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Detalji:
-                        </Typography>
-                        <Typography variant="body2">Fajl: {order.fileName}</Typography>
-                        <Typography variant="body2">
-                          {order.pages} str × {order.copies} kopija × {order.quantity} primeraka
-                        </Typography>
-                        <Box display="flex" gap={1} mt={1}>
-                          {order.isColor && <Chip label="Boja" size="small" variant="outlined" />}
-                          {order.isDoubleSided && (
-                            <Chip label="Obostrano" size="small" variant="outlined" />
-                          )}
-                          {order.binding !== 'none' && (
-                            <Chip label={order.binding} size="small" variant="outlined" />
-                          )}
-                        </Box>
-                      </Grid>
-                      <Grid size={{ xs: 12, md: 4 }}>
-                        <Typography variant="caption" color="text.secondary">
-                          Vreme:
-                        </Typography>
-                        <Typography variant="body2">Naručeno: {order.createdAt}</Typography>
-                        <Typography variant="body2">
-                          Završetak: {order.estimatedCompletion}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </Box>
-
-                  <Box textAlign="right" ml={2}>
-                    <Typography variant="h6" color="primary" fontWeight="bold" mb={1}>
-                      {order.amount} RSD
+                    <Typography variant="body2" mt={1}>
+                      Ukupno: <strong>{order.total_price} RSD</strong>
                     </Typography>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                      {order.status === 'pending' && (
-                        <Button
-                          size="small"
-                          variant="contained"
-                          onClick={() => updateOrderStatus(order.id, 'processing')}
-                        >
-                          <Clock size={16} style={{ marginRight: 4 }} />
-                          Počni
-                        </Button>
-                      )}
-                      {order.status === 'processing' && (
-                        <Button
-                          size="small"
-                          variant="contained"
-                          onClick={() => updateOrderStatus(order.id, 'ready')}
-                        >
-                          <CheckCircle size={16} style={{ marginRight: 4 }} />
-                          Završi
-                        </Button>
-                      )}
-                      {order.status === 'ready' && (
-                        <Button
-                          size="small"
-                          variant="contained"
-                          onClick={() => updateOrderStatus(order.id, 'completed')}
-                        >
-                          Preuzeto
-                        </Button>
-                      )}
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => sendNotification(order)}
-                      >
-                        <Mail size={16} style={{ marginRight: 4 }} />
-                        Obavesti
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => setSelectedOrder(order)}
-                      >
-                        <Eye size={16} style={{ marginRight: 4 }} />
-                        Detalji
-                      </Button>
-                    </Box>
                   </Box>
+
+                  <Stack direction="row" spacing={1}>
+                    {['paid', 'printing'].includes(order.status_code) && (
+                      <Button
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                        startIcon={<CheckCircle size={16} />}
+                        onClick={() => markAsReady(order.id)}
+                      >
+                        Gotovo
+                      </Button>
+                    )}
+
+                    {order.status_code !== 'cancelled' &&
+                      order.status_code !== 'picked_up' && (
+                        <Button
+                          size="small"
+                          color="error"
+                          variant="outlined"
+                          startIcon={<XCircle size={16} />}
+                          onClick={() => cancelOrder(order.id)}
+                        >
+                          Odbij
+                        </Button>
+                      )}
+
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<Eye size={16} />}
+                      onClick={() => setSelectedOrder(order)}
+                    >
+                      Detalji
+                    </Button>
+                  </Stack>
                 </Box>
               </CardContent>
             </Card>
@@ -326,75 +215,57 @@ export function OrderManagement() {
         ))}
       </Grid>
 
-      {/* No Orders Message */}
       {filteredOrders.length === 0 && (
         <Card sx={{ p: 4, textAlign: 'center' }}>
-          <Filter size={32} color="#888" style={{ marginBottom: 8 }} />
-          <Typography variant="body2" color="text.secondary">
-            Nema narudžbina koje odgovaraju kriterijumima
-          </Typography>
+          <Filter size={32} />
+          <Typography>Nema porudžbina</Typography>
         </Card>
       )}
 
-      {/* Order Details Modal */}
+      {/* DETAILS MODAL */}
       {selectedOrder && (
-        <Dialog open={true} onClose={() => setSelectedOrder(null)} fullWidth maxWidth="md">
-          <DialogTitle
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <Typography variant="h6" color="primary">
-              Detalji narudžbine {selectedOrder.id}
-            </Typography>
-            <Button variant="outlined" onClick={() => setSelectedOrder(null)}>
-              Zatvori
-            </Button>
+        <Dialog
+          open
+          onClose={() => setSelectedOrder(null)}
+          fullWidth
+          maxWidth="md"
+        >
+          <DialogTitle>
+            Porudžbina {selectedOrder.order_code}
           </DialogTitle>
           <DialogContent dividers>
-            <Grid container spacing={4}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="subtitle2" color="primary" gutterBottom>
-                  Informacije o korisniku
+            {(selectedOrder.items ?? []).map((item) => (
+              <Box key={item.id} mb={3}>
+                <Typography fontWeight="bold">
+                  {item.product_template?.name}
                 </Typography>
-                <Typography>
-                  <strong>Ime:</strong> {selectedOrder.customer}
+
+                <Typography variant="body2">
+                  Fajl: {item.document_name}
                 </Typography>
-                <Typography>
-                  <strong>Email:</strong> {selectedOrder.email}
-                </Typography>
-                <Typography>
-                  <strong>Telefon:</strong> {selectedOrder.phone}
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="subtitle2" color="primary" gutterBottom>
-                  Detalji štampanja
-                </Typography>
-                <Typography>
-                  <strong>Fajl:</strong> {selectedOrder.fileName}
-                </Typography>
-                <Typography>
-                  <strong>Stranica:</strong> {selectedOrder.pages}
-                </Typography>
-                <Typography>
-                  <strong>Količina:</strong> {selectedOrder.quantity} primeraka
-                </Typography>
-                <Typography>
-                  <strong>Kopije:</strong> {selectedOrder.copies} po primeru
-                </Typography>
-                <Typography>
-                  <strong>Boja:</strong> {selectedOrder.isColor ? 'Da' : 'Ne'}
-                </Typography>
-                <Typography>
-                  <strong>Obostrano:</strong> {selectedOrder.isDoubleSided ? 'Da' : 'Ne'}
-                </Typography>
-                <Typography>
-                  <strong>Povezivanje:</strong> {selectedOrder.binding}
-                </Typography>
-                <Typography>
-                  <strong>Ukupno:</strong> {selectedOrder.amount} RSD
-                </Typography>
-              </Grid>
-            </Grid>
+
+                <Button
+                  size="small"
+                  startIcon={<Download size={16} />}
+                  onClick={() =>
+                    handleDownload(item.document_url, item.document_name)
+                  }
+                >
+                  Preuzmi fajl
+                </Button>
+
+
+                <Stack spacing={0.5}>
+                  {item.selected_options_with_labels?.map((opt) => (
+                    <Typography key={opt.key} variant="body2">
+                      <strong>{opt.label}:</strong> {opt.optionLabel}
+                    </Typography>
+                  ))}
+                </Stack>
+                <Divider sx={{ my: 1 }} />
+
+              </Box>
+            ))}
           </DialogContent>
         </Dialog>
       )}
