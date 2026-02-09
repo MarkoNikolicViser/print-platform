@@ -55,12 +55,12 @@ export default function CheckoutPage() {
   const handlePaymentComplete = () => {
     // Redirect to success page or back to home
     setTimeout(() => {
-      router.push('/');
+      router.push('/home');
     }, 3000);
   };
 
   const handleCancel = () => {
-    router.push('/');
+    router.push('/home');
   };
 
   if (!orderSummary) {

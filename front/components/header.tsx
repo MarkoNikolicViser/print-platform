@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import { User } from 'lucide-react';
+import GoogleIcon from '@mui/icons-material/Google';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -48,7 +48,7 @@ export function Header() {
     localStorage.removeItem('admin');
     setUser(null);
     setAdmin(null);
-    router.push('/');
+    router.push('/home');
   };
 
   return (
@@ -65,7 +65,7 @@ export function Header() {
             color="primary"
             fontWeight="bold"
             sx={{ cursor: 'pointer' }}
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/home')}
           >
             Go2Copy
           </Typography>
@@ -73,12 +73,36 @@ export function Header() {
 
         <Box display="flex" alignItems="center" gap={isMobile ? 0 : 2}>
           <Button
-            variant="text"
-            size="small"
             onClick={() => router.push('/login')}
-            startIcon={<User size={16} />}
+            startIcon={<GoogleIcon size={18} />}
+            sx={{
+              textTransform: 'none',
+              fontSize: 15,
+              fontWeight: 500,
+              letterSpacing: '-0.3px',
+
+              borderRadius: '999px',
+              bgcolor: '#fff',
+              color: 'rgba(0,0,0,0.87)',
+              border: '1px solid rgba(0,0,0,0.12)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.18)',
+
+              px: 2.2,
+              py: 0.9,
+              minHeight: 40,
+
+              '&:hover': {
+                bgcolor: '#fff',
+                borderColor: 'rgba(0,0,0,0.18)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.20)',
+              },
+
+              '& .MuiButton-startIcon': {
+                marginRight: !isMobile ? 1 : 0,
+              },
+            }}
           >
-            {!isMobile && 'Za kopirnice'}
+            {!isMobile && 'Login'}
           </Button>
           <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push('/cart')} />
         </Box>

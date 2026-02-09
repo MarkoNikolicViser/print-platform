@@ -91,7 +91,7 @@ export default function SuccessPage() {
           <Button
             variant="contained"
             startIcon={<Print />}
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/home')}
             sx={{ bgcolor: '#f97316', '&:hover': { bgcolor: '#ea580c' } }}
           >
             Nova porudžbina

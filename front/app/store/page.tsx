@@ -9,12 +9,12 @@ import { ShopSettings } from '@/components/admin/shop-settings';
 import { useState } from 'react';
 
 export default function StorePage() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('orders');
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return <Analytics />;
+      // case 'dashboard':
+      //   return <Analytics />;
       case 'orders':
         return <OrderManagement />;
       case 'pricing':
@@ -22,7 +22,7 @@ export default function StorePage() {
       case 'settings':
         return <ShopSettings />;
       default:
-        return <Analytics />;
+        return <OrderManagement />;
     }
   };
 
