@@ -6,6 +6,7 @@ import { Analytics } from '@/components/admin/analytics';
 import { OrderManagement } from '@/components/admin/order-management';
 import { PricingSettings } from '@/components/admin/pricing-settings';
 import { ShopSettings } from '@/components/admin/shop-settings';
+import { PusherProvider } from '@/context/PusherContext';
 import { useState } from 'react';
 
 export default function StorePage() {
@@ -27,12 +28,15 @@ export default function StorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminHeader />
-      <div className="flex">
-        <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1 p-6">{renderContent()}</main>
+    <PusherProvider>
+      <div className="min-h-screen bg-background">
+        <AdminHeader />
+        <div className="flex">
+          <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+          <main className="flex-1 p-6">{renderContent()}</main>
+        </div>
       </div>
-    </div>
+    </PusherProvider>
+
   );
 }

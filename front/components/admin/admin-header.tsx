@@ -24,7 +24,9 @@ export function AdminHeader() {
 
   const handleLogout = () => {
     logout()
-    router.push('/login')
+    setTimeout(() =>
+      router.push('/')
+      , 500)
   }
 
   return (

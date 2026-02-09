@@ -313,7 +313,7 @@ export function ShopSelectionSection() {
                     fullWidth
                     onClick={() => {
                       handleAddToCart();
-                      router.push('/checkout');
+                      router.push('/home/cart');
                     }}
                   >
                     {/* {estimatedCost

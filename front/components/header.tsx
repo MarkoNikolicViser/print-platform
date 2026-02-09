@@ -48,7 +48,9 @@ export function Header() {
     localStorage.removeItem('admin');
     setUser(null);
     setAdmin(null);
-    router.push('/home');
+    setTimeout(() =>
+      router.push('/')
+      , 500)
   };
 
   return (
@@ -104,7 +106,7 @@ export function Header() {
           >
             {!isMobile && 'Login'}
           </Button>
-          <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push('/cart')} />
+          <CartButton quantity={cartCounter?.count ?? 0} onClick={() => router.push('/home/cart')} />
         </Box>
       </Toolbar>
     </AppBar>

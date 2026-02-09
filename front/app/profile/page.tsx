@@ -83,7 +83,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    router.push('/home');
+    router.push('/');
   };
 
   const getStatusColor = (status: string) => {

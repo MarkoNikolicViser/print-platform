@@ -1,89 +1,204 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { PaymentSection } from '@/components/payment-section';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Stack,
+  Button,
+  Container,
+  Divider,
+} from '@mui/material';
 
-interface OrderSummary {
-  shopName: string;
-  shopAddress: string;
-  totalCost: number;
-  email: string;
-  fileInfo: {
-    name: string;
-    pages: number;
-  };
-  printConfig: {
-    quantity: number;
-    copies: number;
-    isColor: boolean;
-    isDoubleSided: boolean;
-    paperSize: string; // e.g. 'a4'
-    binding: string; // e.g. 'staple'
-  };
-}
+import { useOrderItems } from '@/hooks/useOrderItems';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const [orderSummary, setOrderSummary] = useState<OrderSummary | null>(null);
+  const [orderCode, setOrderCode] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, this would come from state management or URL params
-
-    const mockOrderSummary: OrderSummary = {
-      shopName: 'Copy Centar Beograd',
-      shopAddress: 'Knez Mihailova 15, Beograd',
-      totalCost: 240,
-      email: 'test@example.com',
-      fileInfo: {
-        name: 'dokument.pdf',
-        pages: 5,
-      },
-      printConfig: {
-        quantity: 2,
-        copies: 1,
-        isColor: true,
-        isDoubleSided: false,
-        paperSize: 'a4',
-        binding: 'staple',
-      },
-    };
-    setOrderSummary(mockOrderSummary);
-  }, []);
-
-  const handlePaymentComplete = () => {
-    // Redirect to success page or back to home
-    setTimeout(() => {
+    const code = localStorage.getItem('order_code');
+    if (!code) {
       router.push('/home');
-    }, 3000);
-  };
+      return;
+    }
+    setOrderCode(code);
+  }, [router]);
 
-  const handleCancel = () => {
-    router.push('/home');
-  };
+  const { data, isLoading, isError } = useOrderItems(orderCode ?? undefined);
 
-  if (!orderSummary) {
+  const currencyFmt = useMemo(
+    () =>
+      new Intl.NumberFormat('sr-RS', {
+        style: 'currency',
+        currency: 'RSD',
+      }),
+    [],
+  );
+
+  if (isLoading || !orderCode) {
     return (
-      <div className="min-h-screen bg-background">
+      <Box minHeight="100vh" bgcolor="background.default">
         <Header />
-        <main className="container mx-auto px-4 py-8 max-w-2xl">
-          <div className="text-center">Učitava se...</div>
-        </main>
-      </div>
+        <Container maxWidth="sm" sx={{ py: 4 }}>
+          <Typography align="center">Učitava se checkout…</Typography>
+        </Container>
+      </Box>
     );
   }
 
+  if (isError || !data) {
+    return (
+      <Box minHeight="100vh" bgcolor="background.default">
+        <Header />
+        <Container maxWidth="sm" sx={{ py: 4 }}>
+          <Typography align="center" color="error">
+            Greška pri učitavanju narudžbine.
+          </Typography>
+        </Container>
+      </Box>
+    );
+  }
+
+  /** -------------------------
+   *  AGREGACIJE
+   *  -------------------------
+   */
+
+  // Ukupna količina (svi item-i)
+  const totalQuantity = data.items.reduce(
+    (sum: number, item: any) => sum + item.quantity,
+    0,
+  );
+
+  // Grupisanje po usluzi (product_template)
+  const servicesMap = data.items.reduce((acc: Record<string, any>, item: any) => {
+    const key = item.product_template?.id ?? 'unknown';
+
+    if (!acc[key]) {
+      acc[key] = {
+        name:
+          item.product_template?.description ??
+          item.product_template?.name ??
+          'Nepoznata usluga',
+        quantity: 0,
+      };
+    }
+
+    acc[key].quantity += item.quantity;
+    return acc;
+  }, {});
+
+  const services = Object.values(servicesMap);
+  const hasMultipleServices = services.length > 1;
+
   return (
-    <div className="min-h-screen bg-background">
+    <Box minHeight="100vh" bgcolor="background.default">
       <Header />
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <PaymentSection
-          orderSummary={orderSummary}
-          onPaymentComplete={handlePaymentComplete}
-          onCancel={handleCancel}
-        />
-      </main>
-    </div>
+
+      <Container maxWidth="sm" sx={{ py: 4 }}>
+        <Typography variant="h5" fontWeight={600} gutterBottom>
+          Plaćanje
+        </Typography>
+
+        {/* ORDER SUMMARY */}
+        <Paper variant="outlined" sx={{ p: 3 }}>
+          <Stack spacing={2}>
+            {/* USLUGA / USLUGE */}
+            <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+              <Typography color="text.secondary">Usluga</Typography>
+
+              <Stack alignItems="flex-end" spacing={0.5}>
+                {hasMultipleServices ? (
+                  <>
+                    <Typography fontWeight={500}>
+                      Više usluga ({services.length})
+                    </Typography>
+
+                    {services.map((s: any, idx: number) => (
+                      <Typography
+                        key={idx}
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        • {s.name} × {s.quantity}
+                      </Typography>
+                    ))}
+                  </>
+                ) : (
+                  <Typography fontWeight={500}>
+                    {services[0]?.name}
+                  </Typography>
+                )}
+              </Stack>
+            </Stack>
+
+            {/* KOLIČINA */}
+            <Stack direction="row" justifyContent="space-between">
+              <Typography color="text.secondary">Ukupna količina</Typography>
+              <Typography fontWeight={500}>{totalQuantity}</Typography>
+            </Stack>
+
+            <Divider />
+
+            {/* TOTAL */}
+            <Stack direction="row" justifyContent="space-between">
+              <Typography fontWeight={600}>Ukupno za plaćanje</Typography>
+              <Typography variant="h6">
+                {currencyFmt.format(Number(data.total))}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Paper>
+
+        {/* PAYPAL */}
+        <Paper variant="outlined" sx={{ p: 3, mt: 3 }}>
+          <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+            Plaćanje karticom
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Sigurno plaćanje putem PayPal sistema.
+            PayPal nalog nije potreban.
+          </Typography>
+
+          {/* ovde ide PayPalButtons */}
+          <Box
+            sx={{
+              border: '1px dashed',
+              borderColor: 'divider',
+              p: 2,
+              borderRadius: 1,
+              textAlign: 'center',
+              mb: 2,
+            }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              PayPal Card Payment UI
+            </Typography>
+          </Box>
+
+          <Button
+            fullWidth
+            size="large"
+            variant="contained"
+            onClick={() => {
+              console.log('Start PayPal payment for', orderCode);
+            }}
+          >
+            Plati {currencyFmt.format(Number(data.total))}
+          </Button>
+        </Paper>
+
+        <Stack direction="row" justifyContent="flex-end" mt={2}>
+          <Button variant="text" onClick={() => router.push('/home/cart')}>
+            Nazad na korpu
+          </Button>
+        </Stack>
+      </Container>
+    </Box>
   );
 }

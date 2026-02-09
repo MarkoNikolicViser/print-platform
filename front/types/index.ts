@@ -199,3 +199,12 @@ export interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
+
+export type MarkPaidPayload = {
+  order_code: string;
+  customer_email?: string;
+  provider: 'PayPal' | 'Stripe';
+  provider_payment_id: string;
+  amount: number;
+  fee?: number;
+};

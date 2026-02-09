@@ -7,6 +7,7 @@ import type {
   Order,
   PrintOptions,
   ProductTemplate,
+  MarkPaidPayload,
 } from '../types';
 import { API_URL } from '../helpers/constants';
 
@@ -80,6 +81,16 @@ class StrapiService {
       return res.data;
     } catch {
       return null;
+    }
+  }
+
+
+  async markOrderPaid(payload: MarkPaidPayload): Promise<boolean> {
+    try {
+      await this.api.post('/orders/success', payload);
+      return true;
+    } catch {
+      return false;
     }
   }
 
