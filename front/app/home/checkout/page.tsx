@@ -3,21 +3,28 @@
 import { Header } from '@/components/header';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Stack,
-  Button,
-  Container,
-  Divider,
-} from '@mui/material';
+import { Box, Typography, Paper, Stack, Button, Container, Divider } from '@mui/material';
 
 import { useOrderItems } from '@/hooks/useOrderItems';
+import { useMarkOrderPaid } from '@/hooks/useMarkOrderPaid';
 
 export default function CheckoutPage() {
   const router = useRouter();
   const [orderCode, setOrderCode] = useState<string | null>(null);
+
+  const { mutate: payment } = useMarkOrderPaid();
+
+  const handlePayment = () => {
+    const payload = {
+      order_code: 'aca5063a-1af0-451a-83e1-cc23f9f6c2ed',
+      customer_email: 'kupac@test.com',
+      provider: 'PayPal',
+      provider_payment_id: 'PAYID-MOCK-9ABCD12345',
+      amount: 1499.0,
+      fee: 59.0,
+    };
+    payment(payload);
+  };
 
   useEffect(() => {
     const code = localStorage.getItem('order_code');
@@ -69,10 +76,7 @@ export default function CheckoutPage() {
    */
 
   // Ukupna količina (svi item-i)
-  const totalQuantity = data.items.reduce(
-    (sum: number, item: any) => sum + item.quantity,
-    0,
-  );
+  const totalQuantity = data.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
 
   // Grupisanje po usluzi (product_template)
   const servicesMap = data.items.reduce((acc: Record<string, any>, item: any) => {
@@ -81,9 +85,7 @@ export default function CheckoutPage() {
     if (!acc[key]) {
       acc[key] = {
         name:
-          item.product_template?.description ??
-          item.product_template?.name ??
-          'Nepoznata usluga',
+          item.product_template?.description ?? item.product_template?.name ?? 'Nepoznata usluga',
         quantity: 0,
       };
     }
@@ -114,24 +116,16 @@ export default function CheckoutPage() {
               <Stack alignItems="flex-end" spacing={0.5}>
                 {hasMultipleServices ? (
                   <>
-                    <Typography fontWeight={500}>
-                      Više usluga ({services.length})
-                    </Typography>
+                    <Typography fontWeight={500}>Više usluga ({services.length})</Typography>
 
                     {services.map((s: any, idx: number) => (
-                      <Typography
-                        key={idx}
-                        variant="caption"
-                        color="text.secondary"
-                      >
+                      <Typography key={idx} variant="caption" color="text.secondary">
                         • {s.name} × {s.quantity}
                       </Typography>
                     ))}
                   </>
                 ) : (
-                  <Typography fontWeight={500}>
-                    {services[0]?.name}
-                  </Typography>
+                  <Typography fontWeight={500}>{services[0]?.name}</Typography>
                 )}
               </Stack>
             </Stack>
@@ -147,9 +141,7 @@ export default function CheckoutPage() {
             {/* TOTAL */}
             <Stack direction="row" justifyContent="space-between">
               <Typography fontWeight={600}>Ukupno za plaćanje</Typography>
-              <Typography variant="h6">
-                {currencyFmt.format(Number(data.total))}
-              </Typography>
+              <Typography variant="h6">{currencyFmt.format(Number(data.total))}</Typography>
             </Stack>
           </Stack>
         </Paper>
@@ -161,8 +153,7 @@ export default function CheckoutPage() {
           </Typography>
 
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Sigurno plaćanje putem PayPal sistema.
-            PayPal nalog nije potreban.
+            Sigurno plaćanje putem PayPal sistema. PayPal nalog nije potreban.
           </Typography>
 
           {/* ovde ide PayPalButtons */}
@@ -181,14 +172,7 @@ export default function CheckoutPage() {
             </Typography>
           </Box>
 
-          <Button
-            fullWidth
-            size="large"
-            variant="contained"
-            onClick={() => {
-              console.log('Start PayPal payment for', orderCode);
-            }}
-          >
+          <Button fullWidth size="large" variant="contained" onClick={handlePayment}>
             Plati {currencyFmt.format(Number(data.total))}
           </Button>
         </Paper>

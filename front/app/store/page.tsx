@@ -26,9 +26,11 @@ export default function StorePage() {
         return <OrderManagement />;
     }
   };
-
   return (
-    <PusherProvider>
+    <PusherProvider
+      printShopId={1}
+      token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzcwNzE3NjY3LCJleHAiOjE3NzMzMDk2Njd9.fleL3AIvXGjypMAbjpQTVi4ph56HBI1IYqipAzHvGAM"
+    >
       <div className="min-h-screen bg-background">
         <AdminHeader />
         <div className="flex">
@@ -37,6 +39,5 @@ export default function StorePage() {
         </div>
       </div>
     </PusherProvider>
-
   );
 }

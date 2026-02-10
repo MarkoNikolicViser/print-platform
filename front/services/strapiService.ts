@@ -84,10 +84,9 @@ class StrapiService {
     }
   }
 
-
   async markOrderPaid(payload: MarkPaidPayload): Promise<boolean> {
     try {
-      await this.api.post('/orders/success', payload);
+      await this.api.post('/checkout/success', payload);
       return true;
     } catch {
       return false;
@@ -135,7 +134,7 @@ class StrapiService {
   async getProductTemplates() {
     try {
       const res = await this.api.get('/product-templates');
-      return res.data
+      return res.data;
     } catch (error) {
       console.error('Error fetching product templates:', error);
       return [];
@@ -165,10 +164,7 @@ class StrapiService {
     option_price_modifiers: any;
     is_active?: boolean;
   }) {
-    const res = await this.api.post(
-      '/pricing/upsert',
-      payload,
-    );
+    const res = await this.api.post('/pricing/upsert', payload);
     return res.data;
   }
 }

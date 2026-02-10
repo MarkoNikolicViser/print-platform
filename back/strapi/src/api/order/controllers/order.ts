@@ -253,31 +253,29 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
     const printShopId = ctx.state.printShopId;
 
     if (!printShopId) {
-      return ctx.forbidden('Print shop context missing');
+      return ctx.forbidden("Print shop context missing");
     }
 
-    const orders = await strapi.db
-      .query('api::order.order')
-      .findMany({
-        where: {
-          print_shop_id: printShopId,
-          status_code: {
-            $in: ['paid', 'printing', 'ready', 'picked_up'],
-          },
+    const orders = await strapi.db.query("api::order.order").findMany({
+      where: {
+        print_shop_id: printShopId,
+        status_code: {
+          $in: ["paid", "printing", "ready", "picked_up"],
         },
-        orderBy: {
-          createdAt: 'desc',
-        },
-        populate: {
-          order_items: {
-            populate: {
-              product_template: {
-                select: ['id', 'name', 'allowed_options'],
-              },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      populate: {
+        order_items: {
+          populate: {
+            product_template: {
+              select: ["id", "name", "allowed_options"],
             },
           },
         },
-      });
+      },
+    });
 
     return orders.map((order) => ({
       id: order.id,
@@ -322,9 +320,7 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
             key,
             value,
             label: optionDef.label,
-            optionLabel: matchedOption
-              ? matchedOption.label
-              : String(value),
+            optionLabel: matchedOption ? matchedOption.label : String(value),
           };
         });
 
@@ -344,12 +340,12 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
           product_template: template
             ? {
-              id: template.id,
-              name: template.name,
-            }
+                id: template.id,
+                name: template.name,
+              }
             : null,
         };
       }),
     }));
-  }
+  },
 }));
