@@ -16,7 +16,7 @@ export default function CheckoutPage() {
 
   const handlePayment = () => {
     const payload = {
-      order_code: 'aca5063a-1af0-451a-83e1-cc23f9f6c2ed',
+      order_code: '7312176b-e267-4b4d-988b-07d445be4ccf',
       customer_email: 'kupac@test.com',
       provider: 'PayPal',
       provider_payment_id: 'PAYID-MOCK-9ABCD12345',
@@ -26,14 +26,7 @@ export default function CheckoutPage() {
     payment(payload);
   };
 
-  useEffect(() => {
-    const code = localStorage.getItem('order_code');
-    if (!code) {
-      router.push('/home');
-      return;
-    }
-    setOrderCode(code);
-  }, [router]);
+
 
   const { data, isLoading, isError } = useOrderItems(orderCode ?? undefined);
 
@@ -46,7 +39,7 @@ export default function CheckoutPage() {
     [],
   );
 
-  if (isLoading || !orderCode) {
+  if (isLoading) {
     return (
       <Box minHeight="100vh" bgcolor="background.default">
         <Header />
@@ -76,10 +69,10 @@ export default function CheckoutPage() {
    */
 
   // Ukupna količina (svi item-i)
-  const totalQuantity = data.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+  const totalQuantity = data.items?.reduce((sum: number, item: any) => sum + item.quantity, 0);
 
   // Grupisanje po usluzi (product_template)
-  const servicesMap = data.items.reduce((acc: Record<string, any>, item: any) => {
+  const servicesMap = data.items?.reduce((acc: Record<string, any>, item: any) => {
     const key = item.product_template?.id ?? 'unknown';
 
     if (!acc[key]) {
@@ -94,8 +87,17 @@ export default function CheckoutPage() {
     return acc;
   }, {});
 
-  const services = Object.values(servicesMap);
+  const services = Object.values(servicesMap || {});
   const hasMultipleServices = services.length > 1;
+
+  useEffect(() => {
+    const code = localStorage.getItem('order_code');
+    if (!code || !services) {
+      router.push('/home');
+      return;
+    }
+    setOrderCode(code);
+  }, [router]);
 
   return (
     <Box minHeight="100vh" bgcolor="background.default">

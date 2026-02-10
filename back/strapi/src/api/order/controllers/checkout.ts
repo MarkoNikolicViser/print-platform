@@ -1,6 +1,6 @@
 'use strict';
 
-import Pusher = require("pusher");
+import Pusher from 'pusher';
 
 module.exports = {
     async success(ctx) {
@@ -23,11 +23,9 @@ module.exports = {
         });
 
         if (!order) return ctx.notFound('Order not found');
-        if (order.status_code === 'paid') {
-            return ctx.send({ ok: true });
-        }
+        if (order.status_code === 'paid') return ctx.send({ ok: true });
 
-        // update order
+        // Update order
         const updatedOrder = await strapi.db.query('api::order.order').update({
             where: { id: order.id },
             data: {
@@ -36,7 +34,7 @@ module.exports = {
             },
         });
 
-        // create payment
+        // Create payment
         await strapi.db.query('api::payment.payment').create({
             data: {
                 provider,
@@ -47,22 +45,25 @@ module.exports = {
                 order_id: updatedOrder.id,
             },
         });
-        const pusher = new Pusher({
-            appId: process.env.PUSHER_APP_ID,
-            key: process.env.PUSHER_KEY,
-            secret: process.env.PUSHER_SECRET,
-            cluster: process.env.PUSHER_CLUSTER,
-            useTLS: true,
-        });
-        // 🔔 PUSHER NOTIFICATION
+
+        // 🔔 Pusher notification
         if (order.print_shop_id?.id) {
+            const pusher = new Pusher({
+                appId: process.env.PUSHER_APP_ID,
+                key: process.env.PUSHER_KEY,
+                secret: process.env.PUSHER_SECRET,
+                cluster: process.env.PUSHER_CLUSTER,
+                useTLS: true,
+            });
+
             await pusher.trigger(
-                `print-shop-${order.print_shop_id.id}`,
+                `private-print-shop-${order.print_shop_id.id}`,
                 'new-order',
                 {
                     orderId: updatedOrder.id,
                     orderCode: order.order_code,
                     total: order.total_price,
+                    message: 'Novi order je kreiran!',
                 }
             );
         }

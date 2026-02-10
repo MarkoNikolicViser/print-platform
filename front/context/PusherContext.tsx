@@ -1,68 +1,28 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useRef } from 'react';
 import Pusher from 'pusher-js';
-import { API_URL } from '@/helpers/constants';
+import { createContext, useEffect, useState, ReactNode } from 'react';
 
-type PusherContextType = {
-  pusher: Pusher | null;
-  channel: Pusher.Channel | null;
+export const PusherContext = createContext<Pusher | null>(null);
+
+export const PusherProvider = ({ children }: { children: ReactNode }) => {
+    const [pusher, setPusher] = useState<Pusher | null>(null);
+
+    useEffect(() => {
+        const p = new Pusher('0b9b3b0d66441f14597d', {
+            cluster: 'eu',
+            forceTLS: true,
+            authEndpoint: 'strapi/pusher/auth',
+            authTransport: 'ajax',
+        });
+
+        setPusher(p);
+
+        return () => {
+            p.disconnect();
+            setPusher(null);
+        };
+    }, []);
+
+    return <PusherContext.Provider value={pusher}>{children}</PusherContext.Provider>;
 };
-
-const PusherContext = createContext<PusherContextType>({
-  pusher: null,
-  channel: null,
-});
-
-export function PusherProvider({
-  printShopId,
-  token,
-  children,
-}: {
-  printShopId: number;
-  token: string;
-  children: React.ReactNode;
-}) {
-  const pusherRef = useRef<Pusher | null>(null);
-  const channelRef = useRef<Pusher.Channel | null>(null);
-
-  useEffect(() => {
-    if (!printShopId || !token) return;
-
-    const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
-      authEndpoint: `${API_URL}/pusher/auth`,
-      auth: {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    });
-
-    const channelName = `private-print-shop-${printShopId}`;
-    const channel = pusher.subscribe(channelName);
-
-    pusherRef.current = pusher;
-    channelRef.current = channel;
-
-    return () => {
-      if (channel) pusher.unsubscribe(channelName);
-      pusher.disconnect();
-    };
-  }, [printShopId, token]);
-
-  return (
-    <PusherContext.Provider
-      value={{
-        pusher: pusherRef.current,
-        channel: channelRef.current,
-      }}
-    >
-      {children}
-    </PusherContext.Provider>
-  );
-}
-
-export function usePusher() {
-  return useContext(PusherContext);
-}
