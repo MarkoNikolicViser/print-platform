@@ -6,6 +6,8 @@ import type {
   SyncCartPayload,
   Order,
   PrintOptions,
+  ProductTemplate,
+  MarkPaidPayload,
 } from '../types';
 import { API_URL } from '../helpers/constants';
 
@@ -82,6 +84,15 @@ class StrapiService {
     }
   }
 
+  async markOrderPaid(payload: MarkPaidPayload): Promise<boolean> {
+    try {
+      await this.api.post('/checkout/success', payload);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async syncCart(payload: SyncCartPayload): Promise<Order> {
     const res = await this.api.put('/order/sync', payload);
     return res.data;
@@ -120,10 +131,40 @@ class StrapiService {
     return res.data;
   }
 
+  async getProductTemplates() {
+    try {
+      const res = await this.api.get('/product-templates');
+      return res.data;
+    } catch (error) {
+      console.error('Error fetching product templates:', error);
+      return [];
+    }
+  }
+
+  async getMyShopOrders() {
+    try {
+      const res = await this.api.get('/orders/my-shop');
+      return res.data;
+    } catch (error) {
+      console.error('Error fetching shop orders:', error);
+      return [];
+    }
+  }
+
   async updateMyPrintShop(
     data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours'>>,
   ): Promise<CopyShop> {
     const res = await this.api.put('/print-shop/me', data);
+    return res.data;
+  }
+
+  async upsertProductPricing(payload: {
+    product_template: number;
+    base_price: number;
+    option_price_modifiers: any;
+    is_active?: boolean;
+  }) {
+    const res = await this.api.post('/pricing/upsert', payload);
     return res.data;
   }
 }

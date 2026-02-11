@@ -23,6 +23,7 @@ import { allowedFileTypes } from '@/hooks/useFileUpload';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { PreviewModal } from './PreviewRenderer';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { isItImage } from '@/helpers/formatters';
 
 export function FileUploadSection() {
   const { file, setFile, fileInfo, setFileInfo } = usePrintContext();
@@ -245,7 +246,7 @@ export function FileUploadSection() {
                     <Box>
                       <Typography fontWeight={600}>{fileInfo?.name}</Typography>
                       <Typography variant="caption">
-                        {formatSize(fileInfo!.size)} {fileInfo?.pages && fileInfo?.pages > 1 ? `• ${fileInfo?.pages} stranica` : null}
+                        {formatSize(fileInfo!.size)} {fileInfo?.pages && !isItImage(fileInfo?.type) ? `• ${fileInfo?.pages} stranica` : null}
                       </Typography>
                       <Box mt={1} display="flex" gap={1} flexWrap="wrap">
                         {uploading ? (

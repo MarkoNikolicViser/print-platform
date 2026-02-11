@@ -6,15 +6,17 @@ import { Analytics } from '@/components/admin/analytics';
 import { OrderManagement } from '@/components/admin/order-management';
 import { PricingSettings } from '@/components/admin/pricing-settings';
 import { ShopSettings } from '@/components/admin/shop-settings';
+import { OrderNotificationsListener } from '@/components/order-notifications-listener';
+import { PusherProvider } from '@/context/PusherContext';
 import { useState } from 'react';
 
 export default function StorePage() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('orders');
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return <Analytics />;
+      // case 'dashboard':
+      //   return <Analytics />;
       case 'orders':
         return <OrderManagement />;
       case 'pricing':
@@ -22,17 +24,21 @@ export default function StorePage() {
       case 'settings':
         return <ShopSettings />;
       default:
-        return <Analytics />;
+        return <OrderManagement />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminHeader />
-      <div className="flex">
-        <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        <main className="flex-1 p-6">{renderContent()}</main>
+    <PusherProvider>
+      <div className="min-h-screen bg-background">
+        <AdminHeader />
+        <div className="flex">
+          <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+          <main className="flex-1 p-6">{renderContent()}</main>
+          <OrderNotificationsListener />
+        </div>
       </div>
-    </div>
+    </PusherProvider>
+
   );
 }

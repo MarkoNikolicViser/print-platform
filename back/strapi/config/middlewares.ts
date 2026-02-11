@@ -7,6 +7,7 @@ export default [
       origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       headers: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+      enableTypes: ['json', 'form', 'text'],
       credentials: true,
     },
   },

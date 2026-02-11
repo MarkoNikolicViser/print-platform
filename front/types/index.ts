@@ -37,10 +37,7 @@ export interface CopyShop {
   name: string;
   address: string;
   city: string;
-
-  // UI koristi ovo
   templates: string[];
-
   is_open_now: boolean;
   working_time_today: string | null;
   is_open_today: boolean;
@@ -189,12 +186,7 @@ export interface FileInfo {
   pages?: number;
   url?: string;
 }
-export type PrintType =
-  | "application/pdf"
-  | "image/jpeg"
-  | "mug"
-  | "tshirt"
-  | "image/png";
+export type PrintType = 'application/pdf' | 'image/jpeg' | 'mug' | 'tshirt' | 'image/png';
 
 export interface PreviewProps {
   fileUrl: string;
@@ -207,3 +199,12 @@ export interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
 }
+
+export type MarkPaidPayload = {
+  order_code: string;
+  customer_email?: string;
+  provider: 'PayPal' | 'Stripe';
+  provider_payment_id: string;
+  amount: number;
+  fee?: number;
+};

@@ -3,7 +3,6 @@
 import {
   Drawer,
   Box,
-  Button,
   List,
   ListItem,
   ListItemButton,
@@ -21,7 +20,7 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { id: 'dashboard', label: 'Pregled', icon: <BarChart3 size={20} /> },
+  // { id: 'dashboard', label: 'Pregled', icon: <BarChart3 size={20} /> },
   { id: 'orders', label: 'Narudžbine', icon: <ShoppingCart size={20} /> },
   { id: 'pricing', label: 'Cene', icon: <DollarSign size={20} /> },
   { id: 'settings', label: 'Podešavanja', icon: <Settings size={20} /> },
@@ -45,23 +44,6 @@ export function AdminSidebar({ activeTab, onTabChange }: AdminSidebarProps) {
       }}
     >
       <Box p={2}>
-        <Tooltip title="Nazad na sajt" placement="right" disableHoverListener={!isMobile}>
-          <Button
-            // variant="outlined"
-            fullWidth={!isMobile}
-            onClick={() => (window.location.href = '/')}
-            sx={{
-              mb: 2,
-              justifyContent: isMobile ? 'center' : 'flex-start',
-              minWidth: 0,
-              // px: isMobile ? 0 : 2,
-            }}
-          >
-            {/* <Home size={20} /> */}
-            {!isMobile && <Box ml={1}>Nazad na sajt</Box>}
-          </Button>
-        </Tooltip>
-
         <List>
           {menuItems.map((item) => (
             <ListItem key={item.id} disablePadding>

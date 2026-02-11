@@ -22,6 +22,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import { toast } from 'react-toastify';
+import { isItImage } from '@/helpers/formatters';
 
 interface OptionField {
   type: 'number' | 'select' | 'radio' | 'checkbox';
@@ -40,6 +41,7 @@ export function PrintConfigSection() {
     setPrintConfig,
     quantity,
     setQuantity,
+    fileInfo,
     setFileInfo,
   } = usePrintContext();
   const { uploadFile, loading: uploading } = useFileUpload();
@@ -190,7 +192,7 @@ export function PrintConfigSection() {
             )}
         </Grid>
         <>
-          {file ? (
+          {file && isItImage(fileInfo?.type) ? (
             <Button
               variant="contained"
               onClick={() => {
