@@ -1,100 +1,65 @@
+'use client';
+
 import { createTheme } from '@mui/material/styles';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+});
 
 export const theme = createTheme({
+  cssVariables: true,
   palette: {
+    mode: 'light',
     primary: {
-      main: '#1e3a8a', // Navy blue from design inspiration
-      light: '#3b82f6',
-      dark: '#1e40af',
+      main: '#202020', // Approximating oklch(0.205 0 0)
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#f97316', // Coral/orange accent from design inspiration
-      light: '#fb923c',
-      dark: '#ea580c',
-      contrastText: '#ffffff',
-    },
-    background: {
-      default: '#fefefe',
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#1e3a8a',
-      secondary: '#64748b',
+      main: '#f5f5f5', // Approximating oklch(0.97 0 0)
+      contrastText: '#202020',
     },
     error: {
       main: '#ef4444',
     },
-    warning: {
-      main: '#f59e0b',
+    background: {
+      default: '#ffffff',
+      paper: '#ffffff',
     },
-    info: {
-      main: '#3b82f6',
-    },
-    success: {
-      main: '#10b981',
+    text: {
+      primary: '#202020',
+      secondary: '#666666',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: inter.style.fontFamily,
     h1: {
-      fontSize: '2.5rem',
       fontWeight: 700,
-      color: '#1e3a8a',
-      textTransform: 'uppercase',
-      letterSpacing: '0.02em',
     },
     h2: {
-      fontSize: '2rem',
-      fontWeight: 600,
-      color: '#1e3a8a',
-      textTransform: 'uppercase',
-      letterSpacing: '0.02em',
+      fontWeight: 700,
     },
     h3: {
-      fontSize: '1.5rem',
       fontWeight: 600,
-      color: '#1e3a8a',
-      textTransform: 'uppercase',
-      letterSpacing: '0.02em',
-    },
-    body1: {
-      fontSize: '1rem',
-      lineHeight: 1.6,
-      color: '#1e3a8a',
-    },
-    button: {
-      textTransform: 'uppercase',
-      fontWeight: 600,
-      letterSpacing: '0.025em',
     },
   },
   shape: {
-    borderRadius: 8,
+    borderRadius: 10, // 0.625rem ~ 10px
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
-          padding: '12px 24px',
-          fontSize: '0.875rem',
+          textTransform: 'none',
           fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: '0.025em',
-          border: '2px solid transparent',
+          borderRadius: '0.625rem',
+          padding: '0.5rem 1rem',
         },
-        contained: {
-          boxShadow: 'none',
+        containedPrimary: {
+          backgroundColor: '#202020',
           '&:hover': {
-            boxShadow: '0 4px 8px rgba(0,0,0,0.12)',
-          },
-        },
-        outlined: {
-          border: '2px solid #1e3a8a',
-          '&:hover': {
-            border: '2px solid #1e40af',
-            backgroundColor: 'rgba(30, 58, 138, 0.04)',
+            backgroundColor: '#000000',
           },
         },
       },
@@ -102,38 +67,23 @@ export const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          border: '2px solid #1e3a8a',
-          borderRadius: 12,
-          boxShadow: 'none',
-          '&:hover': {
-            boxShadow: '0 4px 12px rgba(30, 58, 138, 0.15)',
-          },
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            border: '2px solid #1e3a8a',
-            borderRadius: 8,
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#1e40af',
-            },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#f97316',
-              borderWidth: '2px',
-            },
-          },
+          borderRadius: '0.625rem',
+          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)', // Tailwind shadow-sm approximation
+          border: '1px solid #e5e5e5',
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          border: '2px solid #1e3a8a',
-          borderRadius: 12,
+          backgroundImage: 'none',
         },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        size: 'small',
+        variant: 'outlined',
       },
     },
   },

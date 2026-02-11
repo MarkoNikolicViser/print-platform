@@ -11,9 +11,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sr" className="antialiased" suppressHydrationWarning>
-      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
-      <body className="min-h-screen bg-background font-sans" suppressHydrationWarning>
+    <html lang="sr" suppressHydrationWarning>
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        strategy="afterInteractive"
+      />
+      <body suppressHydrationWarning>
         <Providers>{children}</Providers>
       </body>
     </html>

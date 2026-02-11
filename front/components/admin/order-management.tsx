@@ -18,7 +18,7 @@ import {
   Stack,
   Divider,
 } from '@mui/material';
-import { Search, Eye, Filter, Download, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Eye, Download, CheckCircle, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useMyShopOrders } from '@/hooks/useMyShopOrders';
 import { NoOrdersEmptyState } from '../ui/NoOrdersEmptyState';
@@ -221,10 +221,6 @@ export function OrderManagement() {
       {isNoResults && (
         <NoOrdersEmptyState
           isTrulyEmpty={isTrulyEmpty}
-          onResetFilters={() => {
-            setSearchTerm('');
-            setStatusFilter('all');
-          }}
           onPrimaryAction={() => {
             if (isTrulyEmpty) {
               // e.g. route to product create page
@@ -234,10 +230,6 @@ export function OrderManagement() {
               // broaden search suggestion: clear search term only
               setSearchTerm('');
             }
-          }}
-          onPromoAction={() => {
-            // open promo dialog / route / whatever
-            console.log('Start promo');
           }}
         />
       )}

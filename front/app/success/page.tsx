@@ -34,7 +34,9 @@ export default function SuccessPage() {
   return (
     <Container maxWidth="md" sx={{ py: 8 }}>
       <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-        <CheckCircle sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
+        <Box sx={{ mb: 2, color: 'success.main', display: 'flex', justifyContent: 'center' }}>
+          <CheckCircle size={80} />
+        </Box>
 
         <Typography
           variant="h4"

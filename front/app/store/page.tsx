@@ -2,12 +2,12 @@
 
 import { AdminHeader } from '@/components/admin/admin-header';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
-import { Analytics } from '@/components/admin/analytics';
 import { OrderManagement } from '@/components/admin/order-management';
 import { PricingSettings } from '@/components/admin/pricing-settings';
 import { ShopSettings } from '@/components/admin/shop-settings';
 import { OrderNotificationsListener } from '@/components/order-notifications-listener';
 import { PusherProvider } from '@/context/PusherContext';
+import { Box } from '@mui/material';
 import { useState } from 'react';
 
 export default function StorePage() {
@@ -15,8 +15,6 @@ export default function StorePage() {
 
   const renderContent = () => {
     switch (activeTab) {
-      // case 'dashboard':
-      //   return <Analytics />;
       case 'orders':
         return <OrderManagement />;
       case 'pricing':
@@ -30,15 +28,16 @@ export default function StorePage() {
 
   return (
     <PusherProvider>
-      <div className="min-h-screen bg-background">
+      <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
         <AdminHeader />
-        <div className="flex">
+        <Box sx={{ display: 'flex' }}>
           <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-          <main className="flex-1 p-6">{renderContent()}</main>
+          <Box component="main" sx={{ flex: 1, p: 3 }}>
+            {renderContent()}
+          </Box>
           <OrderNotificationsListener />
-        </div>
-      </div>
+        </Box>
+      </Box>
     </PusherProvider>
-
   );
 }

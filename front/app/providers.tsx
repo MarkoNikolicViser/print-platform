@@ -1,6 +1,8 @@
 'use client';
 
 import { AuthProvider } from '@/context/AuthContext';
+import { theme } from '@/theme/theme';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { ToastContainer } from 'react-toastify';
@@ -11,8 +13,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
-        {children}
-        <ToastContainer />
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          {children}
+          <ToastContainer />
+        </ThemeProvider>
       </QueryClientProvider>
     </AuthProvider>
   );

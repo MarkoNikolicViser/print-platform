@@ -76,7 +76,7 @@ export function Header() {
         <Box display="flex" alignItems="center" gap={isMobile ? 0 : 2}>
           <Button
             onClick={() => router.push('/login')}
-            startIcon={<GoogleIcon size={18} />}
+            startIcon={<GoogleIcon />}
             sx={{
               textTransform: 'none',
               fontSize: 15,
