@@ -15,8 +15,9 @@ export default function CheckoutPage() {
   const { mutate: payment } = useMarkOrderPaid();
 
   const handlePayment = () => {
+    const orderCode = localStorage.getItem('order_code');
     const payload = {
-      order_code: '7312176b-e267-4b4d-988b-07d445be4ccf',
+      order_code: orderCode,
       customer_email: 'kupac@test.com',
       provider: 'PayPal',
       provider_payment_id: 'PAYID-MOCK-9ABCD12345',
@@ -25,8 +26,6 @@ export default function CheckoutPage() {
     };
     payment(payload);
   };
-
-
 
   const { data, isLoading, isError } = useOrderItems(orderCode ?? undefined);
 
