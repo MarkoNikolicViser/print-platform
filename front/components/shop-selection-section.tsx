@@ -190,12 +190,11 @@ export function ShopSelectionSection() {
                 </Typography>
               </Box>
 
-              {/* ⭐ PROSLEDJUJEMO visible, da AddressPicker zna kad da invalidateSize() */}
-              <AddressPicker
+              {/* <AddressPicker
                 apiKey={GEOAPIFY_KEY}
                 onSelect={(data) => console.log('selected address', data)}
                 visible={showMap}
-              />
+              /> */}
             </CardContent>
           </Card>
         )}
@@ -278,7 +277,7 @@ export function ShopSelectionSection() {
       {selectedShop && (
         <Card
           variant="outlined"
-          sx={{ borderColor: 'primary.main', backgroundColor: 'action.hover' }}
+          sx={{ borderColor: 'primary.main', backgroundColor: 'action.hover', m: 2 }}
         >
           <CardHeader
             title={
@@ -287,11 +286,21 @@ export function ShopSelectionSection() {
               </Typography>
             }
           />
-          <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <CardContent sx={{ display: 'flex', gap: 2 }}>
             {/* ... ostalo ne menjam */}
             <Button
               variant="contained"
               color="primary"
+              fullWidth
+              disabled={isPending}
+              onClick={handleAddToCart}
+            >
+              Dodaj u korpu i nastavi kupovinu
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={isPending}
               onClick={() => {
                 handleAddToCart();
                 router.push('/home/cart');

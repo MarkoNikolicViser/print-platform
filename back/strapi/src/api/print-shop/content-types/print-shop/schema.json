@@ -66,6 +66,18 @@
       "relation": "oneToMany",
       "target": "api::print-shop-price.print-shop-price",
       "mappedBy": "print_shop_id"
+    },
+    "latitude": {
+      "type": "decimal",
+      "required": false
+    },
+    "longitude": {
+      "type": "decimal",
+      "required": false
+    },
+    "full_address": {
+      "type": "string",
+      "required": false
     }
   }
 }

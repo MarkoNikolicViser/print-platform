@@ -152,7 +152,7 @@ class StrapiService {
   }
 
   async updateMyPrintShop(
-    data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours'>>,
+    data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours' | 'latitude' | 'longitude'>>,
   ): Promise<CopyShop> {
     const res = await this.api.put('/print-shop/me', data);
     return res.data;

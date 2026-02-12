@@ -210,6 +210,11 @@ module.exports = {
   },
   async me(ctx) {
     const printShopId = ctx.state.printShopId;
+
+    if (!printShopId) {
+      return ctx.unauthorized('No shop linked');
+    }
+
     const printShop = await strapi.entityService.findOne(
       'api::print-shop.print-shop',
       printShopId,
@@ -220,6 +225,10 @@ module.exports = {
       }
     );
 
+    if (!printShop) {
+      return ctx.notFound('Print shop not found');
+    }
+
     return {
       id: printShop.id,
       name: printShop.name,
@@ -229,6 +238,8 @@ module.exports = {
       phone: printShop.phone,
       is_active: printShop.is_active,
       working_hours: printShop.working_hours,
+      latitude: printShop.latitude,
+      longitude: printShop.longitude,
       stats: {
         total_completed_orders: printShop.total_completed_orders,
         on_time_rate: printShop.on_time_rate,
@@ -248,6 +259,8 @@ module.exports = {
       'city',
       'phone',
       'working_hours',
+      'latitude',
+      'longitude',
     ];
 
     const data = Object.keys(ctx.request.body).reduce((acc, key) => {
@@ -256,6 +269,15 @@ module.exports = {
       }
       return acc;
     }, {} as Record<string, any>);
+
+    // Optional safety: ensure lat/lng are numbers
+    if (data.latitude !== undefined) {
+      data.latitude = Number(data.latitude);
+    }
+
+    if (data.longitude !== undefined) {
+      data.longitude = Number(data.longitude);
+    }
 
     const updated = await strapi.entityService.update(
       'api::print-shop.print-shop',
@@ -270,6 +292,8 @@ module.exports = {
       city: updated.city,
       phone: updated.phone,
       working_hours: updated.working_hours,
+      latitude: updated.latitude,
+      longitude: updated.longitude,
     };
   }
 };

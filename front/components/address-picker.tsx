@@ -1,4 +1,3 @@
-// components/address-picker.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -11,177 +10,136 @@ import {
   ListItemText,
   Button,
   Stack,
-  Typography,
+  CircularProgress,
 } from '@mui/material';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix za Next.js i Leaflet marker ikone
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl:
+    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 type Suggestion = {
   formatted: string;
   lat: number;
   lon: number;
+  city?: string;
 };
 
 interface AddressPickerProps {
-  apiKey: string; // Geoapify API key (MUST be defined)
-  onSelect: (data: { address: string; lat: number; lng: number }) => void;
-  visible?: boolean; // parent visibility for invalidateSize
+  apiKey: string;
+  onSelect: (data: { address: string; lat: number; lng: number; city?: string }) => void;
+  visible?: boolean;
+  initial?: { lat: number; lng: number; address: string; city?: string }; // Novi inicijalni stejt
 }
 
-export default function AddressPicker({ apiKey, onSelect, visible = true }: AddressPickerProps) {
-  const LRef = useRef<typeof import('leaflet') | null>(null);
-
-  const mapRef = useRef<import('leaflet').Map | null>(null);
-  const markerRef = useRef<import('leaflet').Marker | null>(null);
+export default function AddressPicker({
+  apiKey,
+  onSelect,
+  visible = true,
+  initial,
+}: AddressPickerProps) {
+  const mapRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initial?.address ?? '');
+  const [selected, setSelected] = useState<boolean>(!!initial); // ako imamo inicijalnu lokaciju
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [autoErr, setAutoErr] = useState<string | null>(null);
   const [loadingAuto, setLoadingAuto] = useState(false);
-
-  // Keep a ref to abort previous autocomplete fetch
   const autoAbortRef = useRef<AbortController | null>(null);
 
-  // ---- Map init ----
+  // ---- Initialize map ----
   useEffect(() => {
-    let disposed = false;
+    if (!mapContainerRef.current || mapRef.current) return;
 
-    (async () => {
-      if (!LRef.current) {
-        const L = await import('leaflet');
-        if (!disposed) LRef.current = L;
-      }
-      if (disposed) return;
-      if (!mapContainerRef.current || mapRef.current || !LRef.current) return;
+    const map = L.map(mapContainerRef.current, {
+      center: [44.8176, 20.4569],
+      zoom: 7,
+      zoomControl: true,
+      attributionControl: true,
+    });
 
-      const L = LRef.current;
-      const map = L.map(mapContainerRef.current, {
-        center: [44.7866, 20.4489], // Belgrade
-        zoom: 13,
-        zoomControl: true,
-        attributionControl: true,
-      });
+    L.tileLayer(
+      `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`,
+      { attribution: '© OpenStreetMap contributors, © Geoapify' }
+    ).addTo(map);
 
-      // Use Geoapify tiles (prevents OSM 403)
-      L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`, {
-        attribution: '© OpenStreetMap contributors, © Geoapify',
-      }).addTo(map);
-
-      mapRef.current = map;
-
-      // Ensure correct size after layout
-      setTimeout(() => {
-        map.invalidateSize();
-      }, 150);
-    })();
-
-    return () => {
-      disposed = true;
-      try {
-        mapRef.current?.remove();
-      } catch {}
-      mapRef.current = null;
-      markerRef.current = null;
-    };
+    mapRef.current = map;
+    setTimeout(() => map.invalidateSize(), 150);
   }, [apiKey]);
 
-  // Invalidate on visibility change (parent toggles map)
-  useEffect(() => {
-    if (!mapRef.current) return;
-    requestAnimationFrame(() => {
-      mapRef.current!.invalidateSize(false);
-      setTimeout(() => mapRef.current?.invalidateSize(false), 250);
-    });
-  }, [visible]);
-
-  // ResizeObserver to keep map responsive
+  // ---- ResizeObserver ----
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    const el = mapContainerRef.current;
-    const ro = new ResizeObserver(() => mapRef.current?.invalidateSize(false));
-    ro.observe(el);
+    const ro = new ResizeObserver(() => mapRef.current?.invalidateSize());
+    ro.observe(mapContainerRef.current);
     return () => ro.disconnect();
   }, []);
 
+  // ---- Postavi marker ako postoji inicijalna lokacija ----
+  useEffect(() => {
+    if (initial) {
+      setMarker(initial.lat, initial.lng);
+    }
+  }, [initial]);
+
   // ---- Autocomplete ----
   useEffect(() => {
-    // Reset errors
-    setAutoErr(null);
+    if (selected) return; // ne prikazuj autocomplete ako je selektovano
 
-    // Do not call API for very short inputs
     if (!query || query.trim().length < 3) {
-      if (autoAbortRef.current) autoAbortRef.current.abort();
+      autoAbortRef.current?.abort();
       setSuggestions([]);
       setLoadingAuto(false);
       return;
     }
 
-    // Abort previous fetch
-    if (autoAbortRef.current) {
-      autoAbortRef.current.abort();
-    }
+    autoAbortRef.current?.abort();
     const controller = new AbortController();
     autoAbortRef.current = controller;
 
     const fetchSuggestions = async () => {
       setLoadingAuto(true);
       try {
-        if (!apiKey) {
-          throw new Error('Missing Geoapify API key.');
-        }
-
         const url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
           query,
-        )}&limit=8&apiKey=${apiKey}`;
+        )}&limit=8&filter=countrycode:rs&apiKey=${apiKey}`;
 
-        const res = await fetch(url, {
-          method: 'GET',
-          signal: controller.signal,
-          headers: {
-            // Some corporate networks need explicit accept
-            Accept: 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          // Common cases: 401 (bad key), 403 (referrer policy), 429 (rate limit)
-          throw new Error(`Autocomplete HTTP ${res.status}: ${text || res.statusText}`);
-        }
+        const res = await fetch(url, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const data = await res.json();
-        const features = Array.isArray(data?.features) ? data.features : [];
-
-        const results: Suggestion[] = features.map((f: any) => ({
-          formatted: f?.properties?.formatted ?? 'Nepoznata adresa',
-          lat: f?.properties?.lat,
-          lon: f?.properties?.lon,
+        const results: Suggestion[] = (data.features ?? []).map((f: any) => ({
+          formatted: f.properties.formatted,
+          lat: f.properties.lat,
+          lon: f.properties.lon,
+          city: f.properties.city || f.properties.state,
         }));
 
         setSuggestions(results);
-      } catch (err: any) {
-        if (err?.name === 'AbortError') {
-          // aborted due to new keystroke; ignore
-          return;
-        }
-        console.error('Geoapify autocomplete error:', err);
-        setAutoErr(err?.message || 'Greška pri autocomplete pretrazi.');
+      } catch (err) {
+        if ((err as any)?.name !== 'AbortError') console.error(err);
         setSuggestions([]);
       } finally {
         setLoadingAuto(false);
       }
     };
 
-    // Small debounce
-    const t = setTimeout(fetchSuggestions, 300);
-    return () => clearTimeout(t);
-  }, [query, apiKey]);
+    const timer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(timer);
+  }, [query, apiKey, selected]);
 
-  // ---- Marker helpers ----
+  // ---- Marker helper ----
   const setMarker = (lat: number, lng: number) => {
-    if (!mapRef.current || !LRef.current) return;
-    const L = LRef.current;
+    if (!mapRef.current) return;
 
     mapRef.current.setView([lat, lng], 16, { animate: true });
 
@@ -196,87 +154,74 @@ export default function AddressPicker({ apiKey, onSelect, visible = true }: Addr
     setQuery(item.formatted);
     setSuggestions([]);
     setMarker(item.lat, item.lon);
-    onSelect({ address: item.formatted, lat: item.lat, lng: item.lon });
+    setSelected(true);
+    onSelect({ address: item.formatted, lat: item.lat, lng: item.lon, city: item.city });
   };
 
   // ---- Current location ----
-  async function getBrowserLocation(
-    opts: PositionOptions = { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 },
-  ): Promise<GeolocationPosition> {
-    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      throw new Error('Geolokacija nije podržana u ovom pregledaču.');
-    }
-    return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, opts);
-    });
-  }
-
   const handleCurrentLocation = async () => {
     try {
-      const pos = await getBrowserLocation();
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject)
+      );
+      const { latitude, longitude } = pos.coords;
+      setMarker(latitude, longitude);
 
-      setMarker(lat, lng);
+      const res = await fetch(
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`
+      );
+      const data = await res.json();
+      const address = data.features?.[0]?.properties?.formatted || '';
+      const city = data.features?.[0]?.properties?.city || data.features?.[0]?.properties?.state;
 
-      try {
-        const res = await fetch(
-          `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=${apiKey}`,
-        );
-        if (!res.ok) {
-          console.error('Reverse geocoding HTTP error:', res.status);
-        }
-        const data = await res.json();
-        const address = data.features?.[0]?.properties?.formatted || 'Nepoznata adresa';
-        setQuery(address);
-        onSelect({ address, lat, lng });
-      } catch (rgErr) {
-        console.error('Reverse geocoding error:', rgErr);
-        onSelect({ address: 'Nepoznata adresa', lat, lng });
-      }
+      setQuery(address);
+      setSelected(true);
+      onSelect({ address, lat: latitude, lng: longitude, city });
     } catch (err: any) {
-      if (err?.code === 1) alert('Pristup lokaciji odbijen.');
-      else if (err?.code === 2) alert('Lokacija nije dostupna.');
-      else if (err?.code === 3) alert('Vreme je isteklo. Pokušajte ponovo.');
-      else alert(err?.message || 'Ne možemo dobiti lokaciju.');
-      console.error('Geolocation error:', err);
+      console.error(err);
+      alert('Ne možemo dobiti lokaciju.');
     }
   };
 
   return (
     <Box sx={{ width: '100%', position: 'relative' }}>
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" spacing={2} mb={1}>
         <TextField
           fullWidth
           label="Adresa kopirnice"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setSelected(false); // reset autocomplete kada korisnik kuca novo
+          }}
           placeholder="Unesite najmanje 3 slova…"
-          helperText={loadingAuto ? 'Pretraga…' : autoErr ? `Greška: ${autoErr}` : ' '}
-          FormHelperTextProps={{ sx: { minHeight: 20 } }}
         />
-
-        <Button variant="outlined" startIcon={<MyLocationIcon />} onClick={handleCurrentLocation}>
+        <Button
+          variant="outlined"
+          startIcon={<MyLocationIcon />}
+          onClick={handleCurrentLocation}
+        >
           Moja lokacija
         </Button>
       </Stack>
 
-      {/* Suggestions dropdown */}
+      {loadingAuto && <CircularProgress size={20} sx={{ position: 'absolute', top: 45, right: 10 }} />}
+
       {suggestions.length > 0 && (
         <Paper
           elevation={6}
           sx={{
             position: 'absolute',
             width: '100%',
-            zIndex: 1400, // above Leaflet & MUI cards
+            zIndex: 1400,
             maxHeight: 280,
             overflow: 'auto',
             mt: 1,
           }}
         >
           <List>
-            {suggestions.map((item, index) => (
-              <ListItemButton key={`${item.formatted}-${index}`} onClick={() => handleSelect(item)}>
+            {suggestions.map((item, i) => (
+              <ListItemButton key={i} onClick={() => handleSelect(item)}>
                 <ListItemText primary={item.formatted} />
               </ListItemButton>
             ))}
@@ -284,7 +229,6 @@ export default function AddressPicker({ apiKey, onSelect, visible = true }: Addr
         </Paper>
       )}
 
-      {/* Map container */}
       <Box
         ref={mapContainerRef}
         sx={{

@@ -8,3 +8,8 @@
 .leaflet-container {
   font: inherit;
 }
+
+.leaflet-control-attribution {
+  font-size: 9px;
+  opacity: 0.5;
+}
