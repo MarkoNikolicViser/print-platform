@@ -18,7 +18,7 @@
     "allowJs": true,
     "incremental": true,
     "esModuleInterop": true,
-
+    "types": [],
     "baseUrl": ".",
     "paths": {
       "@/*": ["*"]

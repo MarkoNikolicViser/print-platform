@@ -122,9 +122,9 @@ export default function LandingPage() {
                   fontSize: { xs: '2.5rem', md: '3.5rem', lg: '4.5rem' },
                 }}
               >
-                Štampanje bez{' '}
+                Štampanje{' '}
                 <Box component="span" sx={{ color: theme.palette.primary.main }}>
-                  čekanja u redu
+                  bez čekanja u redu
                 </Box>
               </Typography>
 
