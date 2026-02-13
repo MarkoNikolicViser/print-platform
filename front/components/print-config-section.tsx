@@ -17,6 +17,7 @@ import {
   Radio,
   Checkbox,
   Button,
+  Box,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
@@ -33,7 +34,7 @@ interface OptionField {
   label?: string;
 }
 
-export function PrintConfigSection() {
+export function PrintConfigSection({ onNextStep }) {
   const {
     file,
     selectedTemplate,
@@ -88,19 +89,15 @@ export function PrintConfigSection() {
   }, []);
 
   return (
-    <Card>
+    <Card sx={{ boxShadow: 'none' }}>
       <CardHeader
         title={
           <Typography
             variant="h6"
             color="primary"
+            align='center'
             sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
           >
-            2. Konfigurišite štampanje
-          </Typography>
-        }
-        subheader={
-          <Typography variant="body2" color="text.secondary">
             Popunite opcije da vidite procenu
           </Typography>
         }
@@ -214,6 +211,15 @@ export function PrintConfigSection() {
             />
           )}
         </>
+        <Box mt={4} textAlign="center">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => onNextStep?.()}
+          >
+            Sledeći korak
+          </Button>
+        </Box>
       </CardContent>
     </Card>
   );

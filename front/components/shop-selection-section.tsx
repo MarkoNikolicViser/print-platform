@@ -34,10 +34,15 @@ const AddressPicker = dynamic(() => import('./address-picker'), { ssr: false });
 type SortBy = 'distance' | 'price' | 'rating';
 
 export function ShopSelectionSection() {
-  const { file, selectedTemplate, printConfig, quantity, fileInfo } = usePrintContext();
+  const { file,
+    selectedTemplate,
+    printConfig,
+    quantity,
+    fileInfo,
+    selectedShop,
+    setSelectedShop } = usePrintContext();
   const disabled = !file || !selectedTemplate;
 
-  const [selectedShop, setSelectedShop] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('distance');
   const [filterCity, setFilterCity] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -86,19 +91,15 @@ export function ShopSelectionSection() {
   if (isError) return <ErrorState queryKey={['copyShops']} message={error.message} />;
 
   return (
-    <Card>
+    <Card sx={{ boxShadow: 'none' }}>
       <CardHeader
         title={
           <Typography
             variant="h6"
             color="primary"
+            align='center'
             sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
           >
-            3. Izaberite štampariju
-          </Typography>
-        }
-        subheader={
-          <Typography variant="body2" color="text.secondary">
             Pronađite najbližu ili najjeftiniju štampariju
           </Typography>
         }
@@ -127,6 +128,7 @@ export function ShopSelectionSection() {
             />
             <TextField
               placeholder="Pretražite štamparije..."
+              size='small'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               fullWidth
@@ -135,7 +137,7 @@ export function ShopSelectionSection() {
           </Box>
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Grad</InputLabel>
-            <Select value={filterCity} onChange={(e) => setFilterCity(e.target.value)} label="Grad">
+            <Select size='small' value={filterCity} onChange={(e) => setFilterCity(e.target.value)} label="Grad">
               <MenuItem value="all">Svi gradovi</MenuItem>
             </Select>
           </FormControl>
@@ -274,42 +276,43 @@ export function ShopSelectionSection() {
       </CardContent>
 
       {/* Rezime */}
-      {selectedShop && (
-        <Card
-          variant="outlined"
-          sx={{ borderColor: 'primary.main', backgroundColor: 'action.hover', m: 2 }}
+      {selectedShop && file && selectedTemplate && (
+        <Box
+          sx={{
+            position: { xs: 'fixed', md: 'sticky' },
+            bottom: { xs: 0, md: 'auto' },
+            left: 0,
+            right: 0,
+            zIndex: 99,
+            p: 2,
+            bgcolor: 'background.paper',
+            boxShadow: { xs: 6, md: 0 },
+          }}
         >
-          <CardHeader
-            title={
-              <Typography variant="subtitle1" color="primary" fontWeight="bold">
-                Rezime narudžbine
-              </Typography>
-            }
-          />
-          <CardContent sx={{ display: 'flex', gap: 2 }}>
-            {/* ... ostalo ne menjam */}
+          <Card variant="outlined" sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
             <Button
               variant="contained"
               color="primary"
               fullWidth
-              disabled={isPending}
               onClick={handleAddToCart}
+              disabled={isPending}
             >
               Dodaj u korpu i nastavi kupovinu
             </Button>
             <Button
               variant="contained"
-              color="primary"
-              disabled={isPending}
+              color="secondary"
+              fullWidth
               onClick={() => {
                 handleAddToCart();
                 router.push('/home/cart');
               }}
+              disabled={isPending}
             >
               Plati i poruči odmah
             </Button>
-          </CardContent>
-        </Card>
+          </Card>
+        </Box>
       )}
     </Card>
   );
