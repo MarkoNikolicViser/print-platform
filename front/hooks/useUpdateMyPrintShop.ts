@@ -4,7 +4,7 @@ import type { CopyShop } from '../types';
 import { toast } from 'react-toastify';
 
 type UpdatePrintShopPayload = Partial<
-    Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours'>
+    Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours' | 'latitude' | 'longitude'>
 >;
 
 export function useUpdateMyPrintShop() {

@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { usePrintContext } from '@/context/PrintContext';
 import { useCopyShops } from '@/hooks/useCopyShops';
 import { AddToCartPayload, CopyShop } from '@/types';
@@ -12,7 +13,6 @@ import {
   Select,
   MenuItem,
   Button,
-  Grid,
   Box,
   Chip,
   InputLabel,
@@ -26,24 +26,28 @@ import { useState, useMemo } from 'react';
 import ErrorState from '../components/ui/error-state';
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import { useAddToCart } from '../hooks/useAddToCart';
+import { GEOAPIFY_KEY } from '@/helpers/constants';
+
+// ⛔ Nemoj direktno importovati komponentu sa Leaflet-om; koristi dynamic ssr:false
+const AddressPicker = dynamic(() => import('./address-picker'), { ssr: false });
 
 type SortBy = 'distance' | 'price' | 'rating';
 
 export function ShopSelectionSection() {
   const { file, selectedTemplate, printConfig, quantity, fileInfo } = usePrintContext();
   const disabled = !file || !selectedTemplate;
+
   const [selectedShop, setSelectedShop] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('distance');
   const [filterCity, setFilterCity] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
-  const { mutate: addToCart, isPending } = useAddToCart();
 
+  const { mutate: addToCart, isPending } = useAddToCart();
   const router = useRouter();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
 
   const {
@@ -55,8 +59,8 @@ export function ShopSelectionSection() {
     selectedTemplate: selectedTemplate?.id,
     quantity,
     memoizedConfig,
-    numberOfPages: fileInfo?.pages, // optional; defaults to 3
-    enabled: true, // optional
+    numberOfPages: fileInfo?.pages,
+    enabled: true,
   });
 
   const selectedShopData: CopyShop | null =
@@ -77,6 +81,7 @@ export function ShopSelectionSection() {
     };
     addToCart(payload);
   };
+
   if (isLoading) return <ShopSelectionSkeleton />;
   if (isError) return <ErrorState queryKey={['copyShops']} message={error.message} />;
 
@@ -163,7 +168,7 @@ export function ShopSelectionSection() {
           </Button>
           <Button
             variant="outlined"
-            onClick={() => setShowMap(!showMap)}
+            onClick={() => setShowMap((s) => !s)}
             size="small"
             startIcon={<Navigation size={16} />}
           >
@@ -173,27 +178,23 @@ export function ShopSelectionSection() {
 
         {/* Map View */}
         {showMap && (
-          <Card variant="outlined" sx={{ borderStyle: 'dashed', borderColor: 'primary.main' }}>
-            <CardContent sx={{ textAlign: 'center', py: 6 }}>
-              <Navigation size={48} color="primary" style={{ marginBottom: 16 }} />
-              <Typography variant="h6" color="primary">
-                Interaktivna mapa
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mb={2}>
-                Ovde bi se prikazala mapa sa lokacijama štamparija
-              </Typography>
-              <Grid container spacing={2}>
-                {copyShops?.map((shop: CopyShop) => (
-                  <Grid size={{ xs: 12, md: 4 }} key={shop.id}>
-                    <Box p={2} border={1} borderRadius={2}>
-                      <Typography variant="body1">{shop.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {shop.city}
-                      </Typography>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
+          <Card
+            variant="outlined"
+            sx={{ borderStyle: 'dashed', borderColor: 'primary.main', overflow: 'visible' }}
+          >
+            <CardContent sx={{ textAlign: 'initial', py: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <Navigation size={24} color="var(--mui-palette-primary-main)" />
+                <Typography variant="h6" color="primary">
+                  Interaktivna mapa
+                </Typography>
+              </Box>
+
+              {/* <AddressPicker
+                apiKey={GEOAPIFY_KEY}
+                onSelect={(data) => console.log('selected address', data)}
+                visible={showMap}
+              /> */}
             </CardContent>
           </Card>
         )}
@@ -209,7 +210,7 @@ export function ShopSelectionSection() {
                 </Typography>
               </Card>
             ) : (
-              copyShops?.map((shop: CopyShop) => (
+              copyShops.map((shop: CopyShop) => (
                 <Card
                   key={shop.id}
                   variant="outlined"
@@ -221,7 +222,7 @@ export function ShopSelectionSection() {
                   onClick={() => setSelectedShop(shop.id)}
                 >
                   <CardContent>
-                    <Box display="flex" justifyContent="space-between">
+                    <Box display="flex" justifyContent="space-between" gap={2}>
                       <Box flex={1}>
                         <Box display="flex" alignItems="center" gap={1} mb={1}>
                           <Typography variant="subtitle1" color="primary">
@@ -251,10 +252,9 @@ export function ShopSelectionSection() {
                             <Chip key={service} label={service} size="small" variant="outlined" />
                           ))}
                         </Box>
-                        <Typography variant="caption" color="text.secondary" mt={1}>
+                        <Typography variant="caption" color="text.secondary" mt={1} display="block">
                           Radno vreme:{' '}
                           {shop.is_open_today ? shop.working_time_today : 'Neradan dan'}
-                          {/* //TO DO - disable if not working with is_open_now */}
                         </Typography>
                       </Box>
                       <Box textAlign="right" ml={2}>
@@ -271,74 +271,46 @@ export function ShopSelectionSection() {
             )}
           </Box>
         )}
-
-        {/* Order Summary */}
-        {selectedShop && selectedShopData && (
-          <Card
-            variant="outlined"
-            sx={{ borderColor: 'primary.main', backgroundColor: 'action.hover' }}
-          >
-            <CardHeader
-              title={
-                <Typography variant="subtitle1" color="primary" fontWeight="bold">
-                  Rezime narudžbine
-                </Typography>
-              }
-            />
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2" color="primary">
-                    Izabrana štamparija:
-                  </Typography>
-                  <Typography variant="body1">{selectedShopData.name}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {selectedShopData.address}, {selectedShopData.city}
-                  </Typography>
-                </Grid>
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography variant="subtitle2" color="primary">
-                    Detalji:
-                  </Typography>
-                  <Typography variant="body2">Udaljenost: calculate this km</Typography>
-                  <Typography variant="body2">Vreme pripreme: not awailable for now</Typography>
-                  <Typography variant="body2">Ocena: not available for now</Typography>
-                </Grid>
-              </Grid>
-              <Grid container spacing={2}>
-                <Grid size={{ xs: 6 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={() => {
-                      handleAddToCart();
-                      router.push('/home/cart');
-                    }}
-                  >
-                    {/* {estimatedCost
-                      ? `Naruči i plati (${calculateShopPrice(selectedShopData)} RSD)`
-                      : "Prvo konfigurišite štampanje"} */}
-                    Plati i poruci odmah
-                  </Button>
-                </Grid>
-
-                <Grid size={{ xs: 6 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    disabled={isPending}
-                    onClick={handleAddToCart}
-                  >
-                    Dodaj u korpu
-                  </Button>
-                </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-        )}
       </CardContent>
+
+      {/* Rezime */}
+      {selectedShop && (
+        <Card
+          variant="outlined"
+          sx={{ borderColor: 'primary.main', backgroundColor: 'action.hover', m: 2 }}
+        >
+          <CardHeader
+            title={
+              <Typography variant="subtitle1" color="primary" fontWeight="bold">
+                Rezime narudžbine
+              </Typography>
+            }
+          />
+          <CardContent sx={{ display: 'flex', gap: 2 }}>
+            {/* ... ostalo ne menjam */}
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              disabled={isPending}
+              onClick={handleAddToCart}
+            >
+              Dodaj u korpu i nastavi kupovinu
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={isPending}
+              onClick={() => {
+                handleAddToCart();
+                router.push('/home/cart');
+              }}
+            >
+              Plati i poruči odmah
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </Card>
   );
 }

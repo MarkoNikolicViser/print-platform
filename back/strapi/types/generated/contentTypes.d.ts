@@ -719,15 +719,18 @@ export interface ApiPrintShopPrintShop extends Struct.CollectionTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     email: Schema.Attribute.Email & Schema.Attribute.Required;
+    full_address: Schema.Attribute.String;
     is_active: Schema.Attribute.Boolean &
       Schema.Attribute.Required &
       Schema.Attribute.DefaultTo<false>;
+    latitude: Schema.Attribute.Decimal;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::print-shop.print-shop'
     > &
       Schema.Attribute.Private;
+    longitude: Schema.Attribute.Decimal;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;

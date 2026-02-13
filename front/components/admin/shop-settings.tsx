@@ -9,10 +9,15 @@ import {
   Stack,
   Paper,
   Chip,
+  Divider,
+  Skeleton,
 } from '@mui/material';
 
 import { useMyPrintShop } from '@/hooks/useMyPrintShop';
 import { useUpdateMyPrintShop } from '@/hooks/useUpdateMyPrintShop';
+import AddressPicker from '../address-picker';
+import { GEOAPIFY_KEY } from '@/helpers/constants';
+import NoPrintShopCard from '../ui/NoPrintShopCard';
 
 /* =========================
    Working hours mappers
@@ -70,6 +75,7 @@ export function ShopSettings() {
 
   const [config, setConfig] = useState<any>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [editingLocation, setEditingLocation] = useState(false);
 
   useEffect(() => {
     if (shop) {
@@ -80,14 +86,13 @@ export function ShopSettings() {
         phone: shop.phone,
         email: shop.email,
         isActive: shop.is_active,
+        latitude: shop.latitude,
+        longitude: shop.longitude,
         workingHours: apiToUIWorkingHours(shop.working_hours),
       });
     }
   }, [shop]);
 
-  if (isLoading || !config) {
-    return <Typography>Učitavanje...</Typography>;
-  }
 
   const updateField = (field: string, value: any) => {
     setConfig((prev: any) => ({ ...prev, [field]: value }));
@@ -118,11 +123,28 @@ export function ShopSettings() {
       address: config.address,
       city: config.city,
       phone: config.phone,
+      latitude: config.latitude,
+      longitude: config.longitude,
       working_hours: uiToApiWorkingHours(config.workingHours),
     });
-    setHasChanges(false);
-  };
 
+    setHasChanges(false);
+    setEditingLocation(false);
+  };
+  if (isLoading || !config) {
+    return (
+      <Box maxWidth={900} sx={{ p: 3 }}>
+        <Skeleton variant="text" width={200} height={40} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" width="100%" height={60} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" width="100%" height={360} sx={{ mb: 2, borderRadius: 2 }} />
+        <Skeleton variant="rectangular" width="100%" height={200} sx={{ mb: 2 }} />
+        <Skeleton variant="rectangular" width={120} height={40} />
+      </Box>
+    )
+  }
+  if (!shop) {
+    return <NoPrintShopCard />;
+  }
   return (
     <Box maxWidth={900}>
       <Typography variant="h5" mb={3}>
@@ -130,6 +152,7 @@ export function ShopSettings() {
       </Typography>
 
       <Stack spacing={3}>
+        {/* OSNOVNI PODACI */}
         <Paper sx={{ p: 3 }}>
           <Stack spacing={2}>
             <TextField
@@ -140,27 +163,12 @@ export function ShopSettings() {
             />
 
             <TextField
-              label="Adresa"
-              value={config.address}
-              onChange={(e) => updateField('address', e.target.value)}
-              fullWidth
-            />
-
-            <TextField
-              label="Grad"
-              value={config.city}
-              onChange={(e) => updateField('city', e.target.value)}
-              fullWidth
-            />
-
-            <TextField
               label="Telefon"
               value={config.phone}
               onChange={(e) => updateField('phone', e.target.value)}
               fullWidth
             />
 
-            {/* READ ONLY */}
             <TextField
               label="Email"
               value={config.email}
@@ -176,6 +184,79 @@ export function ShopSettings() {
           </Stack>
         </Paper>
 
+        {/* LOKACIJA */}
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h6" mb={2}>
+            📍 Lokacija
+          </Typography>
+
+          {!editingLocation ? (
+            <Stack spacing={2}>
+              <TextField
+                label="Adresa"
+                value={config.address}
+                disabled
+                fullWidth
+              />
+
+              <TextField
+                label="Grad"
+                value={config.city}
+                disabled
+                fullWidth
+              />
+
+              <Button
+                variant="outlined"
+                onClick={() => setEditingLocation(true)}
+              >
+                Promeni lokaciju
+              </Button>
+            </Stack>
+          ) : (
+            <Stack spacing={2}>
+              <AddressPicker
+                apiKey={GEOAPIFY_KEY}
+                visible={true}
+                initial={{
+                  lat: config.latitude,
+                  lng: config.longitude,
+                  address: config.address,
+                  city: config.city,
+                }}
+                onSelect={(data) => {
+                  setConfig((prev: any) => ({
+                    ...prev,
+                    address: data.address,
+                    city: data.city ?? prev.city, // grad sada ispravno ažuriran
+                    latitude: data.lat,
+                    longitude: data.lng,
+                  }));
+                  setHasChanges(true);
+                }}
+              />
+
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="contained"
+                  onClick={() => setEditingLocation(false)}
+                >
+                  Potvrdi lokaciju
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => setEditingLocation(false)}
+                >
+                  Otkaži
+                </Button>
+              </Stack>
+            </Stack>
+          )}
+        </Paper>
+
+        {/* RADNO VREME */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" mb={2}>
             Radno vreme
@@ -227,6 +308,7 @@ export function ShopSettings() {
           </Stack>
         </Paper>
 
+        {/* SAVE */}
         <Box textAlign="right">
           <Button
             variant="contained"

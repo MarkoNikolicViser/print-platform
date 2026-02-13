@@ -1,1 +1,15 @@
 /* Global styles can be added here if needed, but MUI handles most via CssBaseline and Theme */
+
+.leaflet-container img,
+.leaflet-container .leaflet-tile {
+  max-width: none !important;
+}
+
+.leaflet-container {
+  font: inherit;
+}
+
+.leaflet-control-attribution {
+  font-size: 9px;
+  opacity: 0.5;
+}
