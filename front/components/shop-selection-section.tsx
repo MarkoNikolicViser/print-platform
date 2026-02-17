@@ -27,7 +27,11 @@ import ErrorState from '../components/ui/error-state';
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import { useAddToCart } from '../hooks/useAddToCart';
 import { GEOAPIFY_KEY } from '@/helpers/constants';
-import CopyshopsMap from './shops-map';
+
+const CopyshopsMap = dynamic(
+  () => import('./shops-map'),
+  { ssr: false }
+);
 
 type SortBy = 'distance' | 'price' | 'rating';
 
