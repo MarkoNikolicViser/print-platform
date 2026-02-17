@@ -124,16 +124,19 @@ export function FileUploadSection() {
 
         setDone(true);
 
-        window.dispatchEvent(
-          new CustomEvent('fileCalculated', {
-            detail: {
-              file,
-              pages: finalPages,
-              estimatedCost: finalPages * 10,
-              url: res.url,
-            },
-          }),
-        );
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('fileCalculated', {
+              detail: {
+                file,
+                pages: finalPages,
+                estimatedCost: finalPages * 10,
+                url: res.url,
+              },
+            }),
+          );
+        }
+
       } catch (e: any) {
         setError(e?.message || 'Greška pri otpremanju.');
         setFile(null);
