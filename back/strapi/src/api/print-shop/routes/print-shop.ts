@@ -26,5 +26,13 @@ module.exports = {
                 policies: ['api::print-shop.is-shop-owner'],
             },
         },
+        {
+            method: 'POST',
+            path: '/print-shop/create',
+            handler: 'print-shop.createMe',
+            config: {
+                auth: { required: true }
+            },
+        },
     ],
 };

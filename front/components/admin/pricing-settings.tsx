@@ -66,8 +66,7 @@ function buildInitialPricing(template: TemplateWithPricing): PricingValues {
 
 /* ---------------- COMPONENT ---------------- */
 
-export function PricingSettings() {
-  const { data: templates = [], isLoading } = useProductTemplates();
+export function PricingSettings({ templates, isLoading }) {
   const { mutate: savePricing, isLoading: isSaving } =
     useUpsertProductPricing();
 

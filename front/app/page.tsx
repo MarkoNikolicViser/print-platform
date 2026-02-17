@@ -86,7 +86,7 @@ export default function LandingPage() {
           >
             <Stack direction="row" spacing={1} alignItems="center">
               <Printer size={20} color={theme.palette.primary.main} />
-              <Typography sx={{ fontWeight: 800 }}>PrintGo</Typography>
+              <Typography sx={{ fontWeight: 800 }} color={theme.palette.primary.main}>Go2Copy</Typography>
             </Stack>
 
             <Stack direction="row" spacing={4} sx={{ display: { xs: 'none', md: 'flex' } }}>

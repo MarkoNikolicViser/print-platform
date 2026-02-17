@@ -32,11 +32,12 @@ class StrapiService {
     return { user: res.data.user };
   }
 
-  async register(username: string, email: string, password: string): Promise<{ user: User }> {
+  async register(username: string, email: string, password: string, app_role: string): Promise<{ user: User }> {
     const res = await this.api.post('/auth/register-cookie', {
       username,
       email,
       password,
+      app_role
     });
     return { user: res.data.user };
   }
@@ -155,6 +156,13 @@ class StrapiService {
     data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours' | 'latitude' | 'longitude'>>,
   ): Promise<CopyShop> {
     const res = await this.api.put('/print-shop/me', data);
+    return res.data;
+  }
+
+  async createMyPrintShop(
+    data: Partial<Pick<CopyShop, 'name' | 'address' | 'city' | 'phone' | 'working_hours' | 'latitude' | 'longitude'>>,
+  ): Promise<CopyShop> {
+    const res = await this.api.post('/print-shop/create', data);
     return res.data;
   }
 

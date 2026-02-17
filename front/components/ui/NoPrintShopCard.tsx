@@ -8,11 +8,24 @@ import { useRouter } from 'next/navigation';
 interface Props {
     createUrl?: string; // gde vodi dugme (default: /dashboard/print-shop/create)
 }
+interface Props {
+    createUrl?: string;
+    onCreate?: () => void;
+}
 
 export default function NoPrintShopCard({
     createUrl = '/dashboard/print-shop/create',
+    onCreate,
 }: Props) {
     const router = useRouter();
+
+    const handleClick = () => {
+        if (onCreate) {
+            onCreate();
+        } else {
+            router.push(createUrl);
+        }
+    };
 
     return (
         <Card
@@ -43,12 +56,7 @@ export default function NoPrintShopCard({
                         variant="contained"
                         size="large"
                         startIcon={<AddIcon />}
-                        onClick={() => router.push(createUrl)}
-                        sx={{
-                            px: 4,
-                            py: 1.2,
-                            borderRadius: 2,
-                        }}
+                        onClick={handleClick}
                     >
                         Kreiraj kopirnicu
                     </Button>

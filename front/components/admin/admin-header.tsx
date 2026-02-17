@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/useLogout';
 import {
   AppBar,
@@ -12,99 +13,157 @@ import {
   Badge,
   useMediaQuery,
   useTheme,
+  Container,
+  Stack,
 } from '@mui/material';
-import { Bell, Settings, LogOut, User } from 'lucide-react';
+import { Bell, LogOut, User, Printer } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { alpha } from '@mui/material/styles';
+import { Menu as MenuIcon, Moon, Sun } from 'lucide-react';
+import { Menu, MenuItem, Divider, ListItemIcon, ListItemText, Switch } from '@mui/material';
+import { useState } from 'react';
 
-export function AdminHeader() {
+export function AdminHeader({ shopInfo }) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const { user } = useAuth();
   const router = useRouter();
   const theme = useTheme();
-  const { mutate: logout } = useLogout()
-  const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md')); // md = 960px
+  const { mutate: logout } = useLogout();
+  const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleLogout = () => {
-    logout()
-    setTimeout(() =>
-      router.push('/')
-      , 500)
-  }
+    logout();
+    setTimeout(() => router.push('/'), 500);
+  };
 
   return (
     <AppBar
-      position="static"
+      position="sticky"
       elevation={0}
       sx={{
-        borderBottom: 2,
-        borderColor: 'primary.main',
-        bgcolor: 'background.default',
+        bgcolor: alpha(theme.palette.background.paper, 0.8),
+        backdropFilter: 'blur(8px)',
+        borderBottom: `1px solid ${alpha(theme.palette.divider, 0.6)}`,
       }}
     >
-      <Toolbar sx={{ px: 3, py: 2, justifyContent: 'space-between' }}>
-        {/* Left Section */}
-        <Box display="flex" alignItems="center" gap={3}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Box
-              width={32}
-              height={32}
-              bgcolor="primary.main"
-              borderRadius="50%"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Typography variant="caption" fontWeight="bold" color="primary.contrastText">
-                PS
+      <Toolbar sx={{ minHeight: 64 }}>
+        <Container
+          maxWidth="xl"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* LEFT */}
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Printer size={20} color={theme.palette.primary.main} />
+
+            <Box>
+              <Typography fontWeight={800} color="primary.main">
+                Go2Copy Admin
+              </Typography>
+              {!isMobileOrTablet && (
+                <Typography variant="caption" color="text.secondary">
+                  {shopInfo?.name || 'Prodavnica nije kreirana'}
+                </Typography>
+              )}
+            </Box>
+
+            {shopInfo && (
+              <Chip
+                label={shopInfo?.is_active ? 'Aktivno' : 'Neaktivno'}
+                size="small"
+                sx={{
+                  ml: 1,
+                  fontWeight: 600,
+                  bgcolor: shopInfo?.is_active
+                    ? alpha(theme.palette.success.main, 0.15)
+                    : alpha(theme.palette.error.main, 0.15),
+                  color: shopInfo?.is_active
+                    ? theme.palette.success.main
+                    : theme.palette.error.main,
+                }}
+              />
+            )}
+          </Stack>
+
+          {/* RIGHT */}
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <IconButton size="small">
+              <Badge badgeContent={3} color="error">
+                <Bell size={18} />
+              </Badge>
+            </IconButton>
+
+            <IconButton onClick={handleMenuOpen} size="small">
+              <MenuIcon size={20} />
+            </IconButton>
+          </Stack>
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleMenuClose}
+            PaperProps={{
+              sx: {
+                minWidth: 220,
+                mt: 1,
+                borderRadius: 2,
+              },
+            }}
+          >
+            {/* USER INFO */}
+            <Box px={2} py={1.5}>
+              <Typography fontWeight={700}>{user?.username}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {user?.email}
               </Typography>
             </Box>
-            {!isMobileOrTablet && (
-              <Box>
-                <Typography variant="h6" color="primary" fontWeight="bold">
-                  PrintSerbia Admin
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Copy Centar Beograd
-                </Typography>
-              </Box>
-            )}
-          </Box>
-          {!isMobileOrTablet && (
-            <Chip label="Aktivno" size="small" sx={{ bgcolor: '#C8E6C9', color: '#1B5E20' }} />
-          )}
-        </Box>
 
-        {/* Right Section */}
-        <Box display="flex" alignItems="center" gap={2}>
-          <IconButton size="small" color="default">
-            <Badge badgeContent={3} color="error">
-              <Bell size={18} />
-            </Badge>
-          </IconButton>
-          {isMobileOrTablet ? (
-            <>
-              <IconButton size="small" color="default">
-                <User size={18} />
-              </IconButton>
-              <IconButton size="small" color="default">
-                <Settings size={18} />
-              </IconButton>
-              <IconButton onClick={handleLogout} size="small" color="default">
+            <Divider />
+
+            {/* THEME SWITCH */}
+            <MenuItem>
+              <ListItemIcon>
+                {theme.palette.mode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </ListItemIcon>
+              <ListItemText>Promeni temu</ListItemText>
+              <Switch
+                checked={theme.palette.mode === 'dark'}
+                onChange={() => {
+                  // 👇 Ovde pozovi svoju toggleTheme funkciju
+                  console.log('toggle theme');
+                }}
+              />
+            </MenuItem>
+
+            <Divider />
+
+            {/* LOGOUT */}
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                handleLogout();
+              }}
+            >
+              <ListItemIcon>
                 <LogOut size={18} />
-              </IconButton>
-            </>
-          ) : (
-            <>
-              <Button variant="text" size="small" startIcon={<User size={18} />}>
-                Marko Petrović
-              </Button>
-              <Button variant="text" size="small" startIcon={<Settings size={18} />}>
-                Podešavanja
-              </Button>
-              <Button onClick={handleLogout} variant="outlined" size="small" startIcon={<LogOut size={18} />}>
-                Odjavi se
-              </Button>
-            </>
-          )}
-        </Box>
+              </ListItemIcon>
+              <ListItemText>Odjavi se</ListItemText>
+            </MenuItem>
+          </Menu>
+
+        </Container>
       </Toolbar>
     </AppBar>
   );

@@ -19,7 +19,13 @@ import { useState } from 'react';
 import type React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import GoogleIcon from '@mui/icons-material/Google';
-import { GOOGLE_CLIENT_ID, GOOGLE_URI, STRAPI_REDIRECT_URI } from '@/helpers/constants';
+import {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_URI,
+  STRAPI_REDIRECT_URI,
+} from '@/helpers/constants';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -33,12 +39,13 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 }
 
 export default function LoginPage() {
-  const { login, register } = useAuth();
+  const { login, register, loading } = useAuth();
   const router = useRouter();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [tabValue, setTabValue] = useState(0);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const [loginData, setLoginData] = useState({
     email: '',
@@ -55,15 +62,11 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
       await login(loginData.email, loginData.password);
-      router.push('/store');
     } catch (err: any) {
       setError(err.message || 'Greška pri prijavi');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -75,6 +78,7 @@ export default function LoginPage() {
       scope: 'openid email profile',
       access_type: 'offline',
       prompt: 'select_account',
+      app_role: 'shop',
     };
 
     const queryString = new URLSearchParams(options).toString();
@@ -90,195 +94,337 @@ export default function LoginPage() {
       return;
     }
 
-    setLoading(true);
-
     try {
-      await register(registerData.email, registerData.password, registerData.name);
-      router.push('/store');
+      await register(
+        registerData.email,
+        registerData.password,
+        registerData.name,
+        'shop'
+      );
     } catch (err: any) {
       setError(err.message || 'Greška pri registraciji');
-    } finally {
-      setLoading(false);
     }
   };
-
-  return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-      }}
-    >
-      <Paper
-        elevation={6}
+  if (loading) {
+    return (
+      <Box
         sx={{
-          p: 4,
-          borderRadius: 3,
-          width: '100%',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background:
+            'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
         }}
       >
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h4" fontWeight={700}>
-            PrintSerbia
-          </Typography>
-          <Typography color="text.secondary">Online štamparija za profesionalce</Typography>
-        </Box>
-
-        <Tabs
-          value={tabValue}
-          onChange={(_, v) => {
-            setTabValue(v);
-            setError('');
+        <Box
+          sx={{
+            p: 4,
+            borderRadius: 4,
+            backdropFilter: 'blur(10px)',
+            background: 'rgba(255,255,255,0.7)',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
+            textAlign: 'center',
           }}
-          centered
         >
-          <Tab label="Prijava" />
-          <Tab label="Registracija" />
-        </Tabs>
-
-        <Divider sx={{ my: 2 }} />
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {/* LOGIN */}
-        <TabPanel value={tabValue} index={0}>
-          <Button
-            fullWidth
-            variant="outlined"
-            size="large"
-            onClick={handleGoogleLogin}
-            startIcon={<GoogleIcon />}
+          <CircularProgress
+            size={40}
             sx={{
-              backgroundColor: '#fff',
-              color: '#3c4043',
-              borderColor: '#dadce0',
-              '&:hover': {
-                backgroundColor: '#f7f8f8',
+              color: '#f97316',
+            }}
+          />
+          <Typography
+            sx={{
+              mt: 2,
+              fontSize: '0.9rem',
+              color: 'text.secondary',
+            }}
+          >
+            Učitavanje...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background:
+          'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
+        display: 'flex',
+        alignItems: { xs: 'flex-start', md: 'center' },
+        pt: { xs: 6, md: 0 },
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={0}
+          sx={{
+            p: { xs: 3, sm: 4 },
+            borderRadius: 4,
+            backdropFilter: 'blur(10px)',
+            background: 'rgba(255,255,255,0.75)',
+            border: '1px solid rgba(255,255,255,0.6)',
+            boxShadow:
+              '0 10px 40px rgba(0,0,0,0.08)',
+          }}
+        >
+          {/* HEADER */}
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography
+              fontWeight={800}
+              sx={{
+                fontSize: {
+                  xs: '1.6rem',
+                  sm: '1.9rem',
+                  md: '2.2rem',
+                },
+                letterSpacing: '-0.5px',
+              }}
+            >
+              PrintSerbia
+            </Typography>
+
+            <Typography
+              color="text.secondary"
+              sx={{
+                mt: 1,
+                fontSize: { xs: '0.85rem', md: '0.95rem' },
+              }}
+            >
+              Profesionalno online štampanje bez čekanja
+            </Typography>
+          </Box>
+
+          {/* TABS */}
+          <Tabs
+            value={tabValue}
+            onChange={(_, v) => {
+              setTabValue(v);
+              setError('');
+            }}
+            variant="fullWidth"
+            sx={{
+              mb: 1,
+              '& .MuiTabs-indicator': {
+                height: 3,
+                borderRadius: 3,
+              },
+              '& .MuiTab-root': {
+                fontWeight: 600,
+                fontSize: { xs: '0.85rem', md: '0.95rem' },
+                textTransform: 'none',
               },
             }}
           >
-            Nastavi sa Google nalogom
-          </Button>
+            <Tab label="Prijava" />
+            <Tab label="Registracija" />
+          </Tabs>
 
-          <Divider sx={{ my: 2 }}>ili</Divider>
+          <Divider sx={{ mb: 2 }} />
 
-          <Box component="form" onSubmit={handleLogin}>
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              required
-              margin="normal"
-              autoComplete="email"
-              value={loginData.email}
-              onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Lozinka"
-              type="password"
-              required
-              margin="normal"
-              autoComplete="current-password"
-              value={loginData.password}
-              onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-            />
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
 
+          {/* LOGIN */}
+          <TabPanel value={tabValue} index={0}>
             <Button
-              type="submit"
               fullWidth
-              size="large"
-              variant="contained"
-              disabled={loading}
+              variant="outlined"
+              onClick={handleGoogleLogin}
+              startIcon={<GoogleIcon />}
               sx={{
-                mt: 3,
-                py: 1.3,
+                py: 1.2,
                 fontWeight: 600,
-                bgcolor: '#f97316',
-                ':hover': { bgcolor: '#ea580c' },
+                borderRadius: 2,
+                textTransform: 'none',
+                backgroundColor: '#fff',
+                borderColor: '#e5e7eb',
+                '&:hover': {
+                  backgroundColor: '#f9fafb',
+                },
               }}
             >
-              {loading ? <CircularProgress size={24} /> : 'Prijavite se'}
+              {isMobile ? 'Google' : 'Nastavi sa Google nalogom'}
             </Button>
-          </Box>
-        </TabPanel>
 
-        {/* REGISTER */}
-        <TabPanel value={tabValue} index={1}>
-          <Box component="form" onSubmit={handleRegister}>
-            <TextField
-              fullWidth
-              label="Ime i prezime"
-              required
-              margin="normal"
-              value={registerData.name}
-              onChange={(e) => setRegisterData({ ...registerData, name: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Email"
-              type="email"
-              required
-              margin="normal"
-              autoComplete="email"
-              value={registerData.email}
-              onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Lozinka"
-              type="password"
-              required
-              margin="normal"
-              value={registerData.password}
-              onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="Potvrdite lozinku"
-              type="password"
-              required
-              margin="normal"
-              value={registerData.confirmPassword}
-              onChange={(e) =>
-                setRegisterData({
-                  ...registerData,
-                  confirmPassword: e.target.value,
-                })
-              }
-            />
+            <Divider sx={{ my: 3 }}>ili</Divider>
 
-            <Button
-              type="submit"
-              fullWidth
-              size="large"
-              variant="contained"
-              disabled={loading}
+            <Box component="form" onSubmit={handleLogin}>
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                margin="normal"
+                size='small'
+                required
+                value={loginData.email}
+                onChange={(e) =>
+                  setLoginData({ ...loginData, email: e.target.value })
+                }
+              />
+
+              <TextField
+                fullWidth
+                label="Lozinka"
+                type="password"
+                margin="normal"
+                size='small'
+                required
+                value={loginData.password}
+                onChange={(e) =>
+                  setLoginData({ ...loginData, password: e.target.value })
+                }
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading}
+                size='small'
+                sx={{
+                  mt: 3,
+                  py: 1.3,
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  fontSize: '0.95rem',
+                  background:
+                    'linear-gradient(135deg, #f97316, #ea580c)',
+                  boxShadow:
+                    '0 8px 20px rgba(249,115,22,0.3)',
+                  '&:hover': {
+                    background:
+                      'linear-gradient(135deg, #ea580c, #c2410c)',
+                  },
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={22} sx={{ color: '#fff' }} />
+                ) : (
+                  'Prijavite se'
+                )}
+              </Button>
+            </Box>
+          </TabPanel>
+
+          {/* REGISTER */}
+          <TabPanel value={tabValue} index={1}>
+            <Box component="form" onSubmit={handleRegister}>
+              <TextField
+                fullWidth
+                label="Ime i prezime"
+                margin="normal"
+                required
+                value={registerData.name}
+                size='small'
+                onChange={(e) =>
+                  setRegisterData({
+                    ...registerData,
+                    name: e.target.value,
+                  })
+                }
+              />
+
+              <TextField
+                fullWidth
+                label="Email"
+                type="email"
+                margin="normal"
+                size='small'
+                required
+                value={registerData.email}
+                onChange={(e) =>
+                  setRegisterData({
+                    ...registerData,
+                    email: e.target.value,
+                  })
+                }
+              />
+
+              <TextField
+                fullWidth
+                label="Lozinka"
+                type="password"
+                margin="normal"
+                size='small'
+                required
+                value={registerData.password}
+                onChange={(e) =>
+                  setRegisterData({
+                    ...registerData,
+                    password: e.target.value,
+                  })
+                }
+              />
+
+              <TextField
+                fullWidth
+                label="Potvrdite lozinku"
+                type="password"
+                margin="normal"
+                size='small'
+                required
+                value={registerData.confirmPassword}
+                onChange={(e) =>
+                  setRegisterData({
+                    ...registerData,
+                    confirmPassword: e.target.value,
+                  })
+                }
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading}
+                size='small'
+                sx={{
+                  mt: 3,
+                  py: 1.3,
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  fontSize: '0.95rem',
+                  background:
+                    'linear-gradient(135deg, #f97316, #ea580c)',
+                  boxShadow:
+                    '0 8px 20px rgba(249,115,22,0.3)',
+                  '&:hover': {
+                    background:
+                      'linear-gradient(135deg, #ea580c, #c2410c)',
+                  },
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={22} sx={{ color: '#fff' }} />
+                ) : (
+                  'Napravite nalog'
+                )}
+              </Button>
+            </Box>
+          </TabPanel>
+
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <Link
+              href="/"
+              underline="hover"
               sx={{
-                mt: 3,
-                py: 1.3,
-                fontWeight: 600,
-                bgcolor: '#f97316',
-                ':hover': { bgcolor: '#ea580c' },
+                fontSize: '0.85rem',
+                color: 'text.secondary',
               }}
             >
-              {loading ? <CircularProgress size={24} /> : 'Napravite nalog'}
-            </Button>
+              ← Nazad na početnu
+            </Link>
           </Box>
-        </TabPanel>
-
-        <Box sx={{ textAlign: 'center', mt: 3 }}>
-          <Link href="/" underline="hover">
-            ← Nazad na početnu
-          </Link>
-        </Box>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </Box>
   );
 }

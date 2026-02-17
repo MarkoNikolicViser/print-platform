@@ -101,7 +101,7 @@ export default {
   },
 
   async register(ctx) {
-    const { username, email, password } = ctx.request.body;
+    const { username, email, password, app_role = 'customer' } = ctx.request.body;
 
     if (!username || !email || !password) {
       return ctx.badRequest("Missing required fields");
@@ -125,6 +125,7 @@ export default {
       confirmed: true,
       provider: "local",
       role: role.id,
+      app_role
     });
 
     const jwt = strapi
@@ -137,7 +138,7 @@ export default {
   },
 
   async googleCallback(ctx) {
-    const { code } = ctx.query;
+    const { code, app_role = 'customer' } = ctx.query;
 
     if (!code) {
       return ctx.badRequest("Missing code");
@@ -173,6 +174,7 @@ export default {
           provider: "google",
           confirmed: true,
           role: role.id,
+          app_role
         });
       }
 

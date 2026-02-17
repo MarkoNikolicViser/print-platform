@@ -123,7 +123,7 @@ module.exports = {
         .query("api::print-shop.print-shop")
         .findMany({
           where: { is_active: true },
-          select: ["id", "name", "city", "email", "address", "working_hours"],
+          select: ["id", "name", "city", "email", "address", "working_hours", "longitude", "latitude"],
         });
 
       const templateMap = await getTemplatesByShopIds(shops.map((s) => s.id));
@@ -137,6 +137,8 @@ module.exports = {
           city: shop.city,
           email: shop.email,
           address: shop.address,
+          latitude: shop.latitude,
+          longitude: shop.longitude,
           templates: templateMap[shop.id] || [],
           ...workingTime,
         };
@@ -162,7 +164,7 @@ module.exports = {
         },
         populate: {
           print_shop: {
-            select: ["id", "name", "city", "email", "address", "working_hours"],
+            select: ["id", "name", "city", "email", "address", "working_hours", "longitude", "latitude"],
           },
           product_template: {
             select: ["id", "name", "allowed_options"],
@@ -202,6 +204,8 @@ module.exports = {
           email: pricing.print_shop.email,
           address: pricing.print_shop.address,
           total_price: totalPrice,
+          latitude: pricing.print_shop.latitude,
+          longitude: pricing.print_shop.longitude,
           templates: templateMap[pricing.print_shop.id] || [],
           ...workingTime,
         };
@@ -295,5 +299,63 @@ module.exports = {
       latitude: updated.latitude,
       longitude: updated.longitude,
     };
-  }
+  },
+  async createMe(ctx) {
+    const user = ctx.state.user;
+
+    if (!user) {
+      return ctx.unauthorized('Unauthorized');
+    }
+
+    if (user.print_shop_id) {
+      return ctx.badRequest('Print shop already exists');
+    }
+
+    const {
+      name,
+      address,
+      city,
+      phone,
+      working_hours,
+      latitude,
+      longitude,
+      email,
+      bank_account
+    } = ctx.request.body;
+
+    if (!name || !address) {
+      return ctx.badRequest('Name and address are required');
+    }
+
+    // 1️⃣ Kreiraj shop
+    const created = await strapi
+      .documents('api::print-shop.print-shop')
+      .create({
+        data: {
+          name,
+          address,
+          city,
+          phone,
+          working_hours,
+          email,
+          bank_account,
+          is_active: true,
+          latitude: latitude ? Number(latitude) : undefined,
+          longitude: longitude ? Number(longitude) : undefined,
+        },
+      });
+
+    // 2️⃣ Poveži ga sa user-om
+    await strapi
+      .documents('plugin::users-permissions.user')
+      .update({
+        documentId: user.documentId,
+        data: {
+          print_shop_id: created.id,
+          app_role: 'shop',
+        },
+      });
+
+    return created;
+  },
 };

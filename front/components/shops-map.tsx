@@ -4,64 +4,96 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+// Fix default marker icons when bundling
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
 interface Copyshop {
-    id: string;
-    name: string;
-    lat: number;
-    lng: number;
+  id: string;
+  name: string;
+  lat: number | null; // allow nulls
+  lng: number | null; // allow nulls
 }
 
 interface Props {
-    apiKey: string;
-    shops: Copyshop[];
+  apiKey: string;
+  shops: Copyshop[];
 }
 
 export default function CopyshopsMap({ apiKey, shops }: Props) {
-    const mapRef = useRef<L.Map | null>(null);
-    const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-        if (!containerRef.current || mapRef.current) return;
+  // Initial map setup
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
 
-        const map = L.map(containerRef.current).setView([44.8, 20.45], 12);
+    const map = L.map(containerRef.current, {
+      // Optional: prevent errors if container is tiny at first render
+      preferCanvas: true,
+    }).setView([44.8, 20.45], 12); // fallback center: Belgrade
 
-        L.tileLayer(
-            `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`,
-            { attribution: '© OpenStreetMap contributors, © Geoapify' }
-        ).addTo(map);
+    L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`, {
+      attribution: '© OpenStreetMap contributors, © Geoapify',
+    }).addTo(map);
 
-        mapRef.current = map;
+    // Create a layer group for markers
+    const markerGroup = L.layerGroup().addTo(map);
 
-        return () => {
-            map.remove();
-            mapRef.current = null;
-        };
-    }, [apiKey]);
+    mapRef.current = map;
+    markersRef.current = markerGroup;
 
-    // Add markers
-    useEffect(() => {
-        if (!mapRef.current) return;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+      markersRef.current = null;
+    };
+  }, [apiKey]);
 
-        const map = mapRef.current;
+  // Add/update markers when shops change
+  useEffect(() => {
+    const map = mapRef.current;
+    const markerGroup = markersRef.current;
+    if (!map || !markerGroup) return;
 
-        // Clear old markers
-        map.eachLayer((layer) => {
-            if (layer instanceof L.Marker) {
-                map.removeLayer(layer);
-            }
-        });
+    // Clear previous markers safely
+    markerGroup.clearLayers();
 
-        shops.forEach((shop) => {
-            L.marker([shop.lat, shop.lng])
-                .addTo(map)
-                .bindPopup(`<b>${shop.name}</b>`);
-        });
-    }, [shops]);
+    // Filter out invalid coordinates
+    const validShops = shops.filter(
+      (s) =>
+        typeof s.lat === 'number' &&
+        typeof s.lng === 'number' &&
+        isFinite(s.lat) &&
+        isFinite(s.lng),
+    ) as Array<Required<Pick<Copyshop, 'lat' | 'lng'>> & Copyshop>;
 
-    return (
-        <div
-            ref={containerRef}
-            style={{ width: '100%', height: 500, borderRadius: 12 }}
-        />
-    );
+    // Add markers for valid shops
+    validShops.forEach((shop) => {
+      L.marker([shop.lat, shop.lng]).addTo(markerGroup).bindPopup(`<b>${shop.name}</b>`);
+    });
+
+    // Adjust view:
+    // - Fit to bounds if we have at least 1 valid marker
+    // - Else keep fallback center/zoom (no crash)
+    if (validShops.length > 0) {
+      const bounds = L.latLngBounds(validShops.map((s) => [s.lat!, s.lng!] as [number, number]));
+      // If only one marker, set a nice zoom; else fit bounds
+      if (validShops.length === 1) {
+        map.setView(bounds.getCenter(), 15);
+      } else {
+        map.fitBounds(bounds.pad(0.1), { maxZoom: 16 });
+      }
+    } else {
+      // Optional: reset to default view if no valid shops
+      map.setView([44.8, 20.45], 12);
+    }
+  }, [shops]);
+
+  return <div ref={containerRef} style={{ width: '100%', height: 500, borderRadius: 12 }} />;
 }

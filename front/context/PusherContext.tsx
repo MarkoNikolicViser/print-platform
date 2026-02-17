@@ -3,9 +3,23 @@
 import Pusher from 'pusher-js';
 import { createContext, useEffect, useState, ReactNode } from 'react';
 
-export const PusherContext = createContext<Pusher | null>(null);
+type PusherContextType = {
+    pusher: Pusher | null;
+    printShopId?: number;
+};
 
-export const PusherProvider = ({ children }: { children: ReactNode }) => {
+export const PusherContext = createContext<PusherContextType>({
+    pusher: null,
+    printShopId: undefined,
+});
+
+export const PusherProvider = ({
+    children,
+    printShopId,
+}: {
+    children: ReactNode;
+    printShopId?: number;
+}) => {
     const [pusher, setPusher] = useState<Pusher | null>(null);
 
     useEffect(() => {
@@ -24,5 +38,9 @@ export const PusherProvider = ({ children }: { children: ReactNode }) => {
         };
     }, []);
 
-    return <PusherContext.Provider value={pusher}>{children}</PusherContext.Provider>;
+    return (
+        <PusherContext.Provider value={{ pusher, printShopId }}>
+            {children}
+        </PusherContext.Provider>
+    );
 };

@@ -84,10 +84,14 @@ export default function AddressPicker({
     return () => ro.disconnect();
   }, []);
 
-  // ---- Postavi marker ako postoji inicijalna lokacija ----
   useEffect(() => {
-    if (initial) {
+    if (
+      initial &&
+      typeof initial.lat === 'number' &&
+      typeof initial.lng === 'number'
+    ) {
       setMarker(initial.lat, initial.lng);
+      setSelected(true);
     }
   }, [initial]);
 

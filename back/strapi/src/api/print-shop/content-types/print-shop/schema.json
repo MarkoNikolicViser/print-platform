@@ -78,6 +78,12 @@
     "full_address": {
       "type": "string",
       "required": false
+    },
+    "city_relation": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::city.city",
+      "inversedBy": "print_shops"
     }
   }
 }
