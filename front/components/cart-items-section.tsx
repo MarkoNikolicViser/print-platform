@@ -83,9 +83,12 @@ export default function CartItemsSection() {
 
   const router = useRouter();
   const [orderId, setOrderId] = useState<string | undefined>(undefined);
-  const [customerNotificationEmail, setCustomerNotificationEmail] = useState(
-    () => localStorage.getItem('customer_email') || '',
-  );
+  const [customerNotificationEmail, setCustomerNotificationEmail] = useState('');
+
+  useEffect(() => {
+    const customersEmail = localStorage.getItem('customer_email')
+    setCustomerNotificationEmail(customersEmail || '')
+  }, [])
 
   const isLoggedIn = false; // TODO: zameni realnom auth logikom
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerNotificationEmail);
@@ -125,12 +128,12 @@ export default function CartItemsSection() {
       prev.map((it) =>
         it.id === itemId
           ? {
-              ...it,
-              selected_options: {
-                ...it.selected_options,
-                [key]: value,
-              },
-            }
+            ...it,
+            selected_options: {
+              ...it.selected_options,
+              [key]: value,
+            },
+          }
           : it,
       ),
     );
