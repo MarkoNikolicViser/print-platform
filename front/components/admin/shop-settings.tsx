@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import {
   Box,
@@ -12,10 +13,12 @@ import {
   Divider,
   Skeleton,
 } from '@mui/material';
-
 import { useMyPrintShop } from '@/hooks/useMyPrintShop';
 import { useUpdateMyPrintShop } from '@/hooks/useUpdateMyPrintShop';
-import AddressPicker from '../address-picker';
+const AddressPicker = dynamic(
+  () => import('../address-picker'),
+  { ssr: false }
+);
 import { GEOAPIFY_KEY } from '@/helpers/constants';
 import NoPrintShopCard from '../ui/NoPrintShopCard';
 import { useCreateMyPrintShop } from '@/hooks/useCreateMyPrintShop';
