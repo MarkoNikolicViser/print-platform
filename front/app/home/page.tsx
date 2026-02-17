@@ -9,6 +9,8 @@ import {
   StepButton,
   Card,
   CardContent,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
 
@@ -29,88 +31,152 @@ export default function HomePage() {
   const [completed, setCompleted] = useState<{ [k: number]: boolean }>({});
   const { selectedTemplate, selectedShop } = usePrintContext();
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   const handleStep = (step: number) => () => {
     setActiveStep(step);
   };
 
-  // Automatski markiraj stepove i prelazak
   useEffect(() => {
     if (!selectedTemplate) return;
 
-    // Obeleži prve dve kao completed
-    setCompleted({ 0: true, 1: true });
+    setCompleted({ 0: true });
 
-    // Delay pre prelaska na sledeći step
     const timer = setTimeout(() => {
       setActiveStep(1);
-    }, 700);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [selectedTemplate]);
 
   useEffect(() => {
-    if (!selectedShop) {
-      return
-    }
-    setCompleted(prev => { return { ...prev, 2: true } })
-  }, [selectedShop])
+    if (!selectedShop) return;
+    setCompleted((prev) => ({ ...prev, 2: true }));
+  }, [selectedShop]);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Header />
 
-      <Container maxWidth="md" sx={{ py: 6 }}>
-        <Box textAlign="center" mb={6}>
+      <Container
+        maxWidth="md"
+        sx={{
+          py: { xs: 3, md: 6 },
+          px: { xs: 2, sm: 3 },
+        }}
+      >
+        {/* Hero */}
+        <Box
+          textAlign="center"
+          mb={{ xs: 3, sm: 4, md: 6 }}
+          px={{ xs: 2, sm: 0 }} // padding horizontal za mobile
+        >
           <Typography
-            variant="h3"
+            variant={isMobile ? 'h6' : 'h3'}
             fontWeight={800}
             color="primary.main"
             gutterBottom
+            sx={{
+              fontSize: {
+                xs: '1.5rem', // mobile
+                sm: '2rem',   // small tablets
+                md: '2.5rem', // desktop
+              },
+              lineHeight: 1.2,
+            }}
           >
-            Štampanje bez čekanja u redu
+            Štampanje bez čekanja
           </Typography>
-          <Typography color="text.secondary">
-            Otpremite fajlove, platite online i pokupite gotove kopije
+
+          <Typography
+            variant={isMobile ? 'body2' : 'body1'}
+            color="text.secondary"
+            sx={{
+              fontSize: {
+                xs: '0.85rem',
+                sm: '0.95rem',
+                md: '1rem',
+              },
+              lineHeight: 1.5,
+            }}
+          >
+            Otpremite fajlove, platite online i pokupite kopije
           </Typography>
         </Box>
 
-        <Card elevation={4} sx={{ borderRadius: 3 }}>
-          <CardContent sx={{ p: 4 }}>
+
+        <Card
+          elevation={isMobile ? 2 : 4}
+          sx={{
+            borderRadius: 3,
+          }}
+        >
+          <CardContent
+            sx={{
+              p: { xs: 2, md: 4 },
+            }}
+          >
             {/* Stepper */}
-            <Stepper
-              nonLinear
-              activeStep={activeStep}
-              alternativeLabel
-              sx={{ mb: 5 }}
-            >
-              {steps.map((label, index) => (
-                <Step key={label} completed={completed[index]}>
-                  <StepButton
-                    onClick={handleStep(index)}
-                    sx={{
-                      '& .MuiStepLabel-label': {
-                        fontWeight: 600,
-                        transition: 'all 0.4s ease',
-                        opacity: completed[index] ? 1 : 0.7,
-                        color: completed[index] ? 'primary.main' : 'text.primary',
-                        borderBottom: activeStep === index ? '2px solid' : 'none',
-                        borderColor: activeStep === index ? 'primary.main' : 'transparent',
-                      },
-
-                    }}
-                  >
-                    {label}
-                  </StepButton>
-                </Step>
-              ))}
-            </Stepper>
-
-            {/* Step content sa fade-in animacijom */}
             <Box
               sx={{
-                transition: 'opacity 0.5s ease, transform 0.5s ease',
+                mb: { xs: 3, md: 5 },
+                overflowX: 'visible', // no forced scroll
+              }}
+            >
+              <Stepper
+                nonLinear
+                activeStep={activeStep}
+                alternativeLabel={!isMobile}
+                sx={{
+                  width: '100%',
+                  flexWrap: isMobile ? 'wrap' : 'nowrap', // wrap steps on mobile
+                  justifyContent: isMobile ? 'center' : 'flex-start',
+                }}
+              >
+                {steps.map((label, index) => {
+                  const isDisabled = !completed[index] && index !== activeStep;
+
+                  return (
+                    <Step key={label} completed={completed[index]}>
+                      <StepButton
+                        onClick={handleStep(index)}
+                        disabled={isDisabled}
+                        sx={{
+                          '& .MuiStepLabel-label': {
+                            fontWeight: 600,
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            transition: 'all 0.3s ease',
+                            opacity: isDisabled ? 0.4 : 1,
+                            color: completed[index]
+                              ? 'primary.main'
+                              : isDisabled
+                                ? 'text.disabled'
+                                : 'text.primary',
+                            borderBottom:
+                              activeStep === index ? '2px solid' : 'none',
+                            borderColor:
+                              activeStep === index ? 'primary.main' : 'transparent',
+                          },
+                        }}
+                      >
+                        {!isMobile && label}
+                      </StepButton>
+                    </Step>
+                  );
+                })}
+              </Stepper>
+            </Box>
+
+            {/* Step content */}
+            <Box
+              sx={{
+                transition: 'opacity 0.4s ease, transform 0.4s ease',
                 opacity: activeStep === 0 ? 1 : 0,
-                transform: activeStep === 0 ? 'translateY(0)' : 'translateY(10px)',
+                transform:
+                  activeStep === 0
+                    ? 'translateY(0)'
+                    : 'translateY(10px)',
                 mb: 2,
               }}
             >
@@ -119,21 +185,35 @@ export default function HomePage() {
 
             <Box
               sx={{
-                transition: 'opacity 0.5s ease, transform 0.5s ease',
+                transition: 'opacity 0.4s ease, transform 0.4s ease',
                 opacity: activeStep === 1 ? 1 : 0,
-                transform: activeStep === 1 ? 'translateY(0)' : 'translateY(10px)',
+                transform:
+                  activeStep === 1
+                    ? 'translateY(0)'
+                    : 'translateY(10px)',
                 mb: 2,
               }}
             >
-              {activeStep === 1 && <PrintConfigSection onNextStep={() => setActiveStep((prev) => prev + 1)} />
-              }
+              {activeStep === 1 && (
+                <PrintConfigSection
+                  onNextStep={() => {
+                    setActiveStep((prev) => prev + 1);
+                    setCompleted((prev) => ({
+                      ...prev,
+                      1: true,
+                    }));
+                  }}
+                />
+              )}
             </Box>
-
             <Box
               sx={{
-                transition: 'opacity 0.5s ease, transform 0.5s ease',
+                transition: 'opacity 0.4s ease, transform 0.4s ease',
                 opacity: activeStep === 2 ? 1 : 0,
-                transform: activeStep === 2 ? 'translateY(0)' : 'translateY(10px)',
+                transform:
+                  activeStep === 2
+                    ? 'translateY(0)'
+                    : 'translateY(10px)',
               }}
             >
               {activeStep === 2 && <ShopSelectionSection />}

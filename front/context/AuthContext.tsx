@@ -51,10 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, password: string, username: string) => {
+  const register = async (email: string, password: string, username: string, app_role: string) => {
     setLoading(true);
     try {
-      const { user } = await strapiService.register(username, email, password);
+      const { user } = await strapiService.register(username, email, password, app_role);
       setUser(user);
       router.push('/store');
     } finally {
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
       }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

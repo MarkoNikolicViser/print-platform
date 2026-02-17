@@ -7,9 +7,8 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
-import { Grid, Card, CardActionArea, CardContent, Typography, Skeleton } from '@mui/material';
+import { Grid, Card, CardActionArea, CardContent, Typography, Skeleton, Box } from '@mui/material';
 import { useEffect, ReactElement } from 'react';
-
 import { useProductTemplatesByMime } from '../hooks/useProductTemplatesByMime';
 
 /* ---------------- ICON MAP ---------------- */
@@ -120,50 +119,103 @@ export function PrintTypeSelector({ fileUploaded, documentMime }: Props) {
   }, [fileUploaded]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={{ xs: 1.5, sm: 2 }}>
       {showSkeletons
         ? Array.from({ length: 6 }).map((_, idx) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={idx}>
-              <TemplateSkeleton />
-            </Grid>
-          ))
+          <Grid size={{ xs: 6, sm: 6, md: 4 }} key={idx}>
+            <TemplateSkeleton />
+          </Grid>
+        ))
         : templatesToRender.map((template) => {
-            const isSelected = selectedTemplate?.id === template.id;
+          const isSelected =
+            selectedTemplate?.id === template.id;
 
-            return (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={template.id}>
-                <Card
-                  variant={isSelected ? 'outlined' : undefined}
+          return (
+            <Grid
+              size={{ xs: 6, sm: 6, md: 4 }}
+              key={template.id}
+            >
+              <Card
+                elevation={0}
+                sx={{
+                  borderRadius: 3,
+                  border: '1px solid',
+                  borderColor: isSelected
+                    ? 'primary.main'
+                    : 'divider',
+                  bgcolor: isSelected
+                    ? 'primary.50'
+                    : 'background.paper',
+                  opacity: fileUploaded ? 1 : 0.5,
+                  transition: 'all .2s ease',
+                }}
+              >
+                <CardActionArea
+                  disabled={!fileUploaded}
+                  onClick={() =>
+                    setSelectedTemplate({
+                      id: template.id,
+                      allowedOptions:
+                        template?.allowed_options,
+                    })
+                  }
                   sx={{
-                    border: isSelected ? '2px solid #1976d2' : '1px solid transparent',
-                    opacity: fileUploaded ? 1 : 0.6,
-                    transition: '0.2s',
+                    py: { xs: 2, sm: 3 },
                   }}
                 >
-                  <CardActionArea
-                    disabled={!fileUploaded}
-                    onClick={() =>
-                      setSelectedTemplate({
-                        id: template.id,
-                        allowedOptions: template?.allowed_options,
-                      })
-                    }
+                  <CardContent
+                    sx={{
+                      textAlign: 'center',
+                      p: { xs: 1.5, sm: 2 },
+                    }}
                   >
-                    <CardContent sx={{ textAlign: 'center' }}>
-                      {iconMap[template.icon as IconKey] ?? <DescriptionIcon fontSize="large" />}
-                      <Typography variant="h6" mt={1}>
-                        {template.name}
-                      </Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        mb: 1,
+                        color: isSelected
+                          ? 'primary.main'
+                          : 'text.secondary',
+                      }}
+                    >
+                      {iconMap[
+                        template.icon as IconKey
+                      ] ?? (
+                          <DescriptionIcon fontSize="medium" />
+                        )}
+                    </Box>
 
-                      <Typography variant="body2" color="text.secondary">
-                        {template.description}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            );
-          })}
+                    <Typography
+                      fontWeight={700}
+                      fontSize={{
+                        xs: '0.85rem',
+                        sm: '1rem',
+                      }}
+                    >
+                      {template.name}
+                    </Typography>
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        display: {
+                          xs: 'none',
+                          sm: 'block',
+                        },
+                        mt: 0.5,
+                      }}
+                    >
+                      {template.description}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          );
+        })}
     </Grid>
   );
+
 }

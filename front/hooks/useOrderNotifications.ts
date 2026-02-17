@@ -7,24 +7,32 @@ type OrderNotification = {
     total: number;
 };
 
-export function useOrderNotifications(callback: (order: OrderNotification) => void) {
-    const pusher = useContext(PusherContext);
+export function useOrderNotifications(
+    callback: (order: OrderNotification) => void
+) {
+    const { pusher, printShopId } = useContext(PusherContext);
 
     useEffect(() => {
-        if (!pusher) return; // ⬅️ čekaj dok se Pusher inicijalizuje
+        if (!pusher || !printShopId) return;
 
-        const channel = pusher.subscribe('private-print-shop-1');
+        const channelName = `private-print-shop-${printShopId}`;
+        const channel = pusher.subscribe(channelName);
 
         const handler = (data: OrderNotification) => callback(data);
 
         channel.bind('new-order', handler);
 
-        channel.bind('pusher:subscription_succeeded', () => console.log('✅ SUBSCRIBED'));
-        channel.bind('pusher:subscription_error', (err: any) => console.error('❌ SUB ERROR', err));
+        channel.bind('pusher:subscription_succeeded', () =>
+            console.log('✅ SUBSCRIBED')
+        );
+
+        channel.bind('pusher:subscription_error', (err: any) =>
+            console.error('❌ SUB ERROR', err)
+        );
 
         return () => {
             channel.unbind('new-order', handler);
-            pusher.unsubscribe('private-print-shop-1');
+            pusher.unsubscribe(channelName);
         };
-    }, [pusher, callback]);
+    }, [pusher, printShopId, callback]);
 }

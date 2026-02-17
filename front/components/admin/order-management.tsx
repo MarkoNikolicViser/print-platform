@@ -219,19 +219,7 @@ export function OrderManagement() {
       </Grid>
 
       {isNoResults && (
-        <NoOrdersEmptyState
-          isTrulyEmpty={isTrulyEmpty}
-          onPrimaryAction={() => {
-            if (isTrulyEmpty) {
-              // e.g. route to product create page
-              // router.push('/shop/products/new')
-              console.log('Go add product');
-            } else {
-              // broaden search suggestion: clear search term only
-              setSearchTerm('');
-            }
-          }}
-        />
+        <NoOrdersEmptyState />
       )}
 
       {/* DETAILS MODAL */}

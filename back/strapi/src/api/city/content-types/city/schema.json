@@ -1,0 +1,47 @@
+{
+    "kind": "collectionType",
+    "collectionName": "cities",
+    "info": {
+        "singularName": "city",
+        "pluralName": "cities",
+        "displayName": "City"
+    },
+    "options": {
+        "draftAndPublish": false
+    },
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "slug": {
+            "type": "uid",
+            "targetField": "name",
+            "required": true
+        },
+        "region": {
+            "type": "enumeration",
+            "enum": [
+                "Beograd",
+                "Vojvodina",
+                "Centralna Srbija"
+            ]
+        },
+        "isActive": {
+            "type": "boolean",
+            "default": false
+        },
+        "seoTitle": {
+            "type": "string"
+        },
+        "seoDescription": {
+            "type": "text"
+        },
+        "print_shops": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "api::print-shop.print-shop",
+            "mappedBy": "city"
+        }
+    }
+}

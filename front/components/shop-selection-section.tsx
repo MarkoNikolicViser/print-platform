@@ -27,20 +27,22 @@ import ErrorState from '../components/ui/error-state';
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import { useAddToCart } from '../hooks/useAddToCart';
 import { GEOAPIFY_KEY } from '@/helpers/constants';
+import CopyshopsMap from './shops-map';
 
-// ⛔ Nemoj direktno importovati komponentu sa Leaflet-om; koristi dynamic ssr:false
 const AddressPicker = dynamic(() => import('./address-picker'), { ssr: false });
 
 type SortBy = 'distance' | 'price' | 'rating';
 
 export function ShopSelectionSection() {
-  const { file,
+  const {
+    file,
     selectedTemplate,
     printConfig,
     quantity,
     fileInfo,
     selectedShop,
-    setSelectedShop } = usePrintContext();
+    setSelectedShop,
+  } = usePrintContext();
   const disabled = !file || !selectedTemplate;
 
   const [sortBy, setSortBy] = useState<SortBy>('distance');
@@ -55,12 +57,7 @@ export function ShopSelectionSection() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
 
-  const {
-    data: copyShops = [],
-    isLoading,
-    error,
-    isError,
-  } = useCopyShops({
+  const { data: copyShops = [], isLoading, error, isError } = useCopyShops({
     selectedTemplate: selectedTemplate?.id,
     quantity,
     memoizedConfig,
@@ -68,8 +65,15 @@ export function ShopSelectionSection() {
     enabled: true,
   });
 
+  const mapShops = copyShops.map((shop) => ({
+    id: shop.id,
+    name: shop.name,
+    lat: shop.latitude,   // ovde koristiš shop.latitude
+    lng: shop.longitude,  // ovde koristiš shop.longitude
+  }));
+
   const selectedShopData: CopyShop | null =
-    selectedShop && copyShops ? (copyShops.find((s) => s.id === selectedShop) ?? null) : null;
+    selectedShop && copyShops ? copyShops.find((s) => s.id === selectedShop) ?? null : null;
 
   const handleAddToCart = () => {
     const orderCode = localStorage.getItem('order_code');
@@ -95,26 +99,32 @@ export function ShopSelectionSection() {
       <CardHeader
         title={
           <Typography
-            variant="h6"
+            variant={isMobile ? 'subtitle1' : 'h6'}
             color="primary"
-            align='center'
+            align="center"
             sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
           >
             Pronađite najbližu ili najjeftiniju štampariju
           </Typography>
         }
       />
+
       <CardContent
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 4,
+          gap: 3,
           opacity: disabled ? 0.5 : 1,
           pointerEvents: disabled ? 'none' : 'auto',
         }}
       >
         {/* Filters and Search */}
-        <Box display="flex" flexWrap="wrap" gap={2}>
+        <Box
+          display="flex"
+          flexDirection={isMobile ? 'column' : 'row'}
+          flexWrap="wrap"
+          gap={2}
+        >
           <Box flex={1} minWidth={200} position="relative">
             <Search
               size={16}
@@ -128,22 +138,34 @@ export function ShopSelectionSection() {
             />
             <TextField
               placeholder="Pretražite štamparije..."
-              size='small'
+              size="small"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               fullWidth
               sx={{ pl: 4 }}
             />
           </Box>
+
           <FormControl sx={{ minWidth: 150 }}>
             <InputLabel>Grad</InputLabel>
-            <Select size='small' value={filterCity} onChange={(e) => setFilterCity(e.target.value)} label="Grad">
+            <Select
+              size="small"
+              value={filterCity}
+              onChange={(e) => setFilterCity(e.target.value)}
+              label="Grad"
+            >
               <MenuItem value="all">Svi gradovi</MenuItem>
             </Select>
           </FormControl>
         </Box>
 
-        <Box display="flex" gap={2}>
+        {/* Sort Buttons */}
+        <Box
+          display="flex"
+          flexDirection={isMobile ? 'column' : 'row'}
+          flexWrap="wrap"
+          gap={1}
+        >
           <Button
             variant={sortBy === 'distance' ? 'contained' : 'outlined'}
             onClick={() => setSortBy('distance')}
@@ -165,6 +187,7 @@ export function ShopSelectionSection() {
             onClick={() => setSortBy('rating')}
             size="small"
             startIcon={<Star size={16} />}
+            disabled
           >
             {!isMobile && 'Najbolje ocenjene'}
           </Button>
@@ -178,11 +201,16 @@ export function ShopSelectionSection() {
           </Button>
         </Box>
 
-        {/* Map View */}
+        {/* Map */}
         {showMap && (
           <Card
             variant="outlined"
-            sx={{ borderStyle: 'dashed', borderColor: 'primary.main', overflow: 'visible' }}
+            sx={{
+              borderStyle: 'dashed',
+              borderColor: 'primary.main',
+              overflow: 'visible',
+              mt: 2,
+            }}
           >
             <CardContent sx={{ textAlign: 'initial', py: 3 }}>
               <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -191,12 +219,7 @@ export function ShopSelectionSection() {
                   Interaktivna mapa
                 </Typography>
               </Box>
-
-              {/* <AddressPicker
-                apiKey={GEOAPIFY_KEY}
-                onSelect={(data) => console.log('selected address', data)}
-                visible={showMap}
-              /> */}
+              <CopyshopsMap apiKey={GEOAPIFY_KEY} shops={mapShops} />
             </CardContent>
           </Card>
         )}
@@ -218,15 +241,22 @@ export function ShopSelectionSection() {
                   variant="outlined"
                   sx={{
                     cursor: 'pointer',
-                    borderColor: selectedShop === shop.id ? 'primary.main' : 'grey.300',
-                    backgroundColor: selectedShop === shop.id ? 'action.hover' : 'inherit',
+                    borderColor:
+                      selectedShop === shop.id ? 'primary.main' : 'grey.300',
+                    backgroundColor:
+                      selectedShop === shop.id ? 'action.hover' : 'inherit',
                   }}
                   onClick={() => setSelectedShop(shop.id)}
                 >
                   <CardContent>
-                    <Box display="flex" justifyContent="space-between" gap={2}>
+                    <Box
+                      display="flex"
+                      flexDirection={isMobile ? 'column' : 'row'}
+                      justifyContent="space-between"
+                      gap={2}
+                    >
                       <Box flex={1}>
-                        <Box display="flex" alignItems="center" gap={1} mb={1}>
+                        <Box display="flex" flexWrap="wrap" alignItems="center" gap={1} mb={1}>
                           <Typography variant="subtitle1" color="primary">
                             {shop.name}
                           </Typography>
@@ -246,20 +276,32 @@ export function ShopSelectionSection() {
                           </Box>
                           <Box display="flex" alignItems="center" gap={1}>
                             <Star size={14} color="#facc15" />
-                            <Typography variant="caption">not available for now</Typography>
+                            <Typography variant="caption">not available</Typography>
                           </Box>
                         </Box>
                         <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
                           {shop?.templates.map((service: string) => (
-                            <Chip key={service} label={service} size="small" variant="outlined" />
+                            <Chip
+                              key={service}
+                              label={service}
+                              size="small"
+                              variant="outlined"
+                            />
                           ))}
                         </Box>
-                        <Typography variant="caption" color="text.secondary" mt={1} display="block">
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          mt={1}
+                          display="block"
+                        >
                           Radno vreme:{' '}
-                          {shop.is_open_today ? shop.working_time_today : 'Neradan dan'}
+                          {shop.is_open_today
+                            ? shop.working_time_today
+                            : 'Neradan dan'}
                         </Typography>
                       </Box>
-                      <Box textAlign="right" ml={2}>
+                      <Box textAlign={isMobile ? 'left' : 'right'} ml={isMobile ? 0 : 2} mt={isMobile ? 1 : 0}>
                         {shop?.total_price ? (
                           <Typography variant="h6" color="primary">
                             {shop?.total_price} RSD
@@ -279,17 +321,19 @@ export function ShopSelectionSection() {
       {selectedShop && file && selectedTemplate && (
         <Box
           sx={{
-            position: { xs: 'fixed', md: 'sticky' },
-            bottom: { xs: 0, md: 'auto' },
-            left: 0,
-            right: 0,
-            zIndex: 99,
             p: 2,
             bgcolor: 'background.paper',
             boxShadow: { xs: 6, md: 0 },
           }}
         >
-          <Card variant="outlined" sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
+          <Card
+            variant="outlined"
+            sx={{
+              display: 'flex',
+              gap: 2,
+              flexDirection: { xs: 'column', md: 'row' },
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
