@@ -124,6 +124,7 @@ export function FileUploadSection() {
 
         setDone(true);
 
+
         if (typeof window !== 'undefined') {
           window.dispatchEvent(
             new CustomEvent('fileCalculated', {
