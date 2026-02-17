@@ -29,8 +29,6 @@ import { useAddToCart } from '../hooks/useAddToCart';
 import { GEOAPIFY_KEY } from '@/helpers/constants';
 import CopyshopsMap from './shops-map';
 
-const AddressPicker = dynamic(() => import('./address-picker'), { ssr: false });
-
 type SortBy = 'distance' | 'price' | 'rating';
 
 export function ShopSelectionSection() {
