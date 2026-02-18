@@ -105,6 +105,7 @@ export default function LoginPage() {
       setError(err.message || 'Greška pri registraciji');
     }
   };
+
   if (loading) {
     return (
       <Box
@@ -114,7 +115,9 @@ export default function LoginPage() {
           alignItems: 'center',
           justifyContent: 'center',
           background:
-            'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, #0f172a 0%, #111827 40%, #0b1120 100%)'
+              : 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
         }}
       >
         <Box
@@ -122,23 +125,20 @@ export default function LoginPage() {
             p: 4,
             borderRadius: 4,
             backdropFilter: 'blur(10px)',
-            background: 'rgba(255,255,255,0.7)',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
+            background:
+              theme.palette.mode === 'dark'
+                ? 'rgba(17,24,39,0.7)'
+                : 'rgba(255,255,255,0.7)',
+            boxShadow:
+              theme.palette.mode === 'dark'
+                ? '0 10px 40px rgba(0,0,0,0.6)'
+                : '0 10px 40px rgba(0,0,0,0.08)',
             textAlign: 'center',
           }}
         >
-          <CircularProgress
-            size={40}
-            sx={{
-              color: '#f97316',
-            }}
-          />
+          <CircularProgress size={40} sx={{ color: '#f97316' }} />
           <Typography
-            sx={{
-              mt: 2,
-              fontSize: '0.9rem',
-              color: 'text.secondary',
-            }}
+            sx={{ mt: 2, fontSize: '0.9rem', color: 'text.secondary' }}
           >
             Učitavanje...
           </Typography>
@@ -146,12 +146,15 @@ export default function LoginPage() {
       </Box>
     );
   }
+
   return (
     <Box
       sx={{
         minHeight: '100vh',
         background:
-          'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
+          theme.palette.mode === 'dark'
+            ? 'linear-gradient(135deg, #0f172a 0%, #111827 40%, #0b1120 100%)'
+            : 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
         display: 'flex',
         alignItems: { xs: 'flex-start', md: 'center' },
         pt: { xs: 6, md: 0 },
@@ -163,11 +166,19 @@ export default function LoginPage() {
           sx={{
             p: { xs: 3, sm: 4 },
             borderRadius: 4,
-            backdropFilter: 'blur(10px)',
-            background: 'rgba(255,255,255,0.75)',
-            border: '1px solid rgba(255,255,255,0.6)',
+            backdropFilter: 'blur(14px)',
+            background:
+              theme.palette.mode === 'dark'
+                ? 'rgba(17,24,39,0.85)'
+                : 'rgba(255,255,255,0.75)',
+            border:
+              theme.palette.mode === 'dark'
+                ? '1px solid rgba(255,255,255,0.06)'
+                : '1px solid rgba(255,255,255,0.6)',
             boxShadow:
-              '0 10px 40px rgba(0,0,0,0.08)',
+              theme.palette.mode === 'dark'
+                ? '0 10px 40px rgba(0,0,0,0.6)'
+                : '0 10px 40px rgba(0,0,0,0.08)',
           }}
         >
           {/* HEADER */}
@@ -181,9 +192,10 @@ export default function LoginPage() {
                   md: '2.2rem',
                 },
                 letterSpacing: '-0.5px',
+                color: theme.palette.mode === 'dark' ? '#fff' : 'inherit',
               }}
             >
-              PrintSerbia
+              Go2Copy
             </Typography>
 
             <Typography
@@ -210,11 +222,19 @@ export default function LoginPage() {
               '& .MuiTabs-indicator': {
                 height: 3,
                 borderRadius: 3,
+                backgroundColor: '#f97316',
               },
               '& .MuiTab-root': {
                 fontWeight: 600,
-                fontSize: { xs: '0.85rem', md: '0.95rem' },
                 textTransform: 'none',
+                color:
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.6)'
+                    : 'inherit',
+                fontSize: { xs: '0.85rem', md: '0.95rem' },
+                '&.Mui-selected': {
+                  color: theme.palette.mode === 'dark' ? '#fff' : 'inherit',
+                },
               },
             }}
           >
@@ -222,7 +242,7 @@ export default function LoginPage() {
             <Tab label="Registracija" />
           </Tabs>
 
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2, borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined }} />
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -242,17 +262,26 @@ export default function LoginPage() {
                 fontWeight: 600,
                 borderRadius: 2,
                 textTransform: 'none',
-                backgroundColor: '#fff',
-                borderColor: '#e5e7eb',
+                backgroundColor:
+                  theme.palette.mode === 'dark' ? '#1f2937' : '#fff',
+                borderColor:
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.1)'
+                    : '#e5e7eb',
+                color:
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.9)'
+                    : 'inherit',
                 '&:hover': {
-                  backgroundColor: '#f9fafb',
+                  backgroundColor:
+                    theme.palette.mode === 'dark' ? '#273549' : '#f9fafb',
                 },
               }}
             >
               {isMobile ? 'Google' : 'Nastavi sa Google nalogom'}
             </Button>
 
-            <Divider sx={{ my: 3 }}>ili</Divider>
+            <Divider sx={{ my: 3, borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined }}>ili</Divider>
 
             <Box component="form" onSubmit={handleLogin}>
               <TextField
@@ -260,12 +289,26 @@ export default function LoginPage() {
                 label="Email"
                 type="email"
                 margin="normal"
-                size='small'
+                size="small"
                 required
                 value={loginData.email}
                 onChange={(e) =>
                   setLoginData({ ...loginData, email: e.target.value })
                 }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'transparent',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.12)'
+                        : undefined,
+                  },
+                }}
               />
 
               <TextField
@@ -273,12 +316,26 @@ export default function LoginPage() {
                 label="Lozinka"
                 type="password"
                 margin="normal"
-                size='small'
+                size="small"
                 required
                 value={loginData.password}
                 onChange={(e) =>
                   setLoginData({ ...loginData, password: e.target.value })
                 }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'transparent',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.12)'
+                        : undefined,
+                  },
+                }}
               />
 
               <Button
@@ -286,7 +343,7 @@ export default function LoginPage() {
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                size='small'
+                size="small"
                 sx={{
                   mt: 3,
                   py: 1.3,
@@ -296,8 +353,7 @@ export default function LoginPage() {
                   fontSize: '0.95rem',
                   background:
                     'linear-gradient(135deg, #f97316, #ea580c)',
-                  boxShadow:
-                    '0 8px 20px rgba(249,115,22,0.3)',
+                  boxShadow: '0 8px 20px rgba(249,115,22,0.3)',
                   '&:hover': {
                     background:
                       'linear-gradient(135deg, #ea580c, #c2410c)',
@@ -321,14 +377,28 @@ export default function LoginPage() {
                 label="Ime i prezime"
                 margin="normal"
                 required
+                size="small"
                 value={registerData.name}
-                size='small'
                 onChange={(e) =>
                   setRegisterData({
                     ...registerData,
                     name: e.target.value,
                   })
                 }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'transparent',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.12)'
+                        : undefined,
+                  },
+                }}
               />
 
               <TextField
@@ -336,7 +406,7 @@ export default function LoginPage() {
                 label="Email"
                 type="email"
                 margin="normal"
-                size='small'
+                size="small"
                 required
                 value={registerData.email}
                 onChange={(e) =>
@@ -345,6 +415,20 @@ export default function LoginPage() {
                     email: e.target.value,
                   })
                 }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'transparent',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.12)'
+                        : undefined,
+                  },
+                }}
               />
 
               <TextField
@@ -352,7 +436,7 @@ export default function LoginPage() {
                 label="Lozinka"
                 type="password"
                 margin="normal"
-                size='small'
+                size="small"
                 required
                 value={registerData.password}
                 onChange={(e) =>
@@ -361,6 +445,20 @@ export default function LoginPage() {
                     password: e.target.value,
                   })
                 }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'transparent',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.12)'
+                        : undefined,
+                  },
+                }}
               />
 
               <TextField
@@ -368,7 +466,7 @@ export default function LoginPage() {
                 label="Potvrdite lozinku"
                 type="password"
                 margin="normal"
-                size='small'
+                size="small"
                 required
                 value={registerData.confirmPassword}
                 onChange={(e) =>
@@ -377,6 +475,20 @@ export default function LoginPage() {
                     confirmPassword: e.target.value,
                   })
                 }
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.03)'
+                        : 'transparent',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor:
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.12)'
+                        : undefined,
+                  },
+                }}
               />
 
               <Button
@@ -384,7 +496,7 @@ export default function LoginPage() {
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                size='small'
+                size="small"
                 sx={{
                   mt: 3,
                   py: 1.3,
@@ -394,8 +506,7 @@ export default function LoginPage() {
                   fontSize: '0.95rem',
                   background:
                     'linear-gradient(135deg, #f97316, #ea580c)',
-                  boxShadow:
-                    '0 8px 20px rgba(249,115,22,0.3)',
+                  boxShadow: '0 8px 20px rgba(249,115,22,0.3)',
                   '&:hover': {
                     background:
                       'linear-gradient(135deg, #ea580c, #c2410c)',
