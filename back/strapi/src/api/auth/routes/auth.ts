@@ -32,5 +32,13 @@ export default {
         auth: false,
       },
     },
+    {
+      method: "POST",
+      path: "/auth/google/one-tap",
+      handler: "auth.googleOneTap",
+      config: {
+        auth: false,
+      },
+    }
   ],
 };
