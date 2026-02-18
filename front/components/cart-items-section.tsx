@@ -25,6 +25,7 @@ import { useSyncCart } from '../hooks/useSyncCart';
 import ErrorState from './ui/error-state';
 import { OrderItemsSkeleton } from './ui/OrderItemsSkeleton';
 import EmptyCartState from './ui/EmptyCartState';
+import GoogleOneTapButton from './ui/GoogleOneTapButton';
 
 /** Memoized email input component */
 const CustomerEmailInput = React.memo(function CustomerEmailInput({
@@ -54,6 +55,8 @@ const CustomerEmailInput = React.memo(function CustomerEmailInput({
 
   return (
     <Stack spacing={2}>
+      <GoogleOneTapButton />
+      <Divider>ILI</Divider>
       <TextField
         label="Email za obaveštenja"
         type="email"
@@ -69,10 +72,7 @@ const CustomerEmailInput = React.memo(function CustomerEmailInput({
         required
         size="small"
       />
-      <Divider />
-      <Button variant="outlined" onClick={() => console.log('Go to login')} fullWidth>
-        Ili se uloguj
-      </Button>
+
     </Stack>
   );
 });
