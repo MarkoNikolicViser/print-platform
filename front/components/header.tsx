@@ -26,6 +26,7 @@ import { useEffect, useState } from 'react';
 
 import { useCartItemCount } from '../hooks/useCartItemCount';
 import CartButton from './ui/CartButton';
+import GoogleOneTapButton from './ui/GoogleOneTapButton';
 
 type LocalUser = {
   username?: string;
@@ -221,34 +222,7 @@ export function Header() {
           </Menu>
         </>
       ) : (
-        <Button
-          onClick={handleLogin}
-          startIcon={<GoogleIcon />}
-          sx={{
-            textTransform: 'none',
-            fontSize: 15,
-            fontWeight: 500,
-            letterSpacing: '-0.3px',
-            borderRadius: '999px',
-            bgcolor: '#fff',
-            color: 'rgba(0,0,0,0.87)',
-            border: '1px solid rgba(0,0,0,0.12)',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.18)',
-            px: 2.2,
-            py: 0.9,
-            minHeight: 40,
-            '&:hover': {
-              bgcolor: '#fff',
-              borderColor: 'rgba(0,0,0,0.18)',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.20)',
-            },
-            '& .MuiButton-startIcon': {
-              mr: 1,
-            },
-          }}
-        >
-          Login
-        </Button>
+        <GoogleOneTapButton />
       )}
     </>
   );

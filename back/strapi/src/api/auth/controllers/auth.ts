@@ -195,4 +195,68 @@ export default {
     ctx.cookies.set(COOKIE_NAME, "", clearCookieOptions());
     ctx.send({ ok: true });
   },
+
+  async googleOneTap(ctx) {
+    const { token, app_role = "customer" } = ctx.request.body;
+
+    if (!token) {
+      return ctx.badRequest("Missing Google token");
+    }
+
+    try {
+      // ✅ Verifikacija ID tokena koji dolazi sa fronta
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+
+      if (!payload?.email) {
+        return ctx.unauthorized("No email in Google payload");
+      }
+
+      const email = payload.email;
+
+      const userQuery = strapi.db.query("plugin::users-permissions.user");
+      let user = await userQuery.findOne({ where: { email } });
+
+      const role = await strapi
+        .query("plugin::users-permissions.role")
+        .findOne({ where: { type: "authenticated" } });
+
+      // ✅ Ako user ne postoji – kreiraj ga
+      if (!user) {
+        user = await strapi
+          .plugin("users-permissions")
+          .service("user")
+          .add({
+            username: email,
+            email,
+            provider: "google",
+            confirmed: true,
+            role: role.id,
+            app_role,
+          });
+      }
+
+      // ✅ Generiši Strapi JWT
+      const jwt = strapi
+        .plugin("users-permissions")
+        .service("jwt")
+        .issue({ id: user.id });
+
+      // ✅ Postavi httpOnly cookie
+      ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
+
+      // 👇 Za One Tap NE radimo redirect
+      ctx.send({
+        user,
+        jwt,
+      });
+    } catch (err) {
+      console.error("Google One Tap error:", err);
+      return ctx.unauthorized("Invalid Google token");
+    }
+  }
 };

@@ -78,7 +78,7 @@ export default function LoginPage() {
       scope: 'openid email profile',
       access_type: 'offline',
       prompt: 'select_account',
-      app_role: 'shop',
+      state: JSON.stringify({ app_role: 'shop' })
     };
 
     const queryString = new URLSearchParams(options).toString();
