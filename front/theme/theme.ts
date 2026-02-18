@@ -11,9 +11,7 @@ const getPalette = (mode: PaletteMode) => (mode === 'light' ? lightPalette : dar
 export const createAppTheme = (mode: PaletteMode = 'light') =>
   createTheme({
     palette: getPalette(mode),
-    shape: {
-      borderRadius: 12,
-    },
+    shape: { borderRadius: 12 },
     typography,
     breakpoints,
     components,
