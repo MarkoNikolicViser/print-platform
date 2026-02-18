@@ -56,4 +56,22 @@ export const components: Components<Theme> = {
   MuiContainer: {
     defaultProps: { maxWidth: 'lg' },
   },
+  MuiCssBaseline: {
+    styleOverrides: (theme: Theme) => ({
+      body: {
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.text.primary,
+        transition: 'background-color 0.3s, color 0.3s',
+      },
+    }),
+  },
+  MuiStepLabel: {
+    styleOverrides: {
+      label: ({ theme }) => ({
+        fontSize: '0.875rem',
+        fontWeight: 600,
+        color: theme.palette.text.primary,
+      }),
+    },
+  },
 };

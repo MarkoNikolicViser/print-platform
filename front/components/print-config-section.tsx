@@ -89,7 +89,7 @@ export function PrintConfigSection({ onNextStep }) {
   }, []);
 
   return (
-    <Card sx={{ boxShadow: 'none' }}>
+    <Card elevation={4} sx={{ boxShadow: 'none' }}>
       <CardHeader
         title={
           <Typography

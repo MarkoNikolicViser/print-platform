@@ -107,7 +107,7 @@ export default function HomePage() {
 
 
         <Card
-          elevation={isMobile ? 2 : 4}
+          elevation={4}
           sx={{
             borderRadius: 3,
           }}

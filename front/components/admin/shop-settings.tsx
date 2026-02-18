@@ -10,10 +10,8 @@ import {
   Stack,
   Paper,
   Chip,
-  Divider,
   Skeleton,
 } from '@mui/material';
-import { useMyPrintShop } from '@/hooks/useMyPrintShop';
 import { useUpdateMyPrintShop } from '@/hooks/useUpdateMyPrintShop';
 const AddressPicker = dynamic(
   () => import('../address-picker'),

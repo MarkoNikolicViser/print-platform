@@ -91,7 +91,7 @@ export function Header() {
     try {
       localStorage.removeItem('user');
       localStorage.removeItem('admin');
-    } catch {}
+    } catch { }
     setUser(null);
     setAdmin(null);
     setTimeout(() => router.push('/'), 500);
@@ -130,7 +130,7 @@ export function Header() {
   // Pre-mount placeholders (keeps tree stable)
   const renderPreMountActions = () => (
     <>
-      <CartButton quantity={0} onClick={() => {}} />
+      <CartButton quantity={0} onClick={() => { }} />
       <IconButton size="small" sx={{ ml: 0.5 }} aria-label="theme-toggle-placeholder">
         {isDark ? <Sun size={18} /> : <Moon size={18} />}
       </IconButton>

@@ -97,7 +97,7 @@ export function ShopSelectionSection() {
   if (isError) return <ErrorState queryKey={['copyShops']} message={error.message} />;
 
   return (
-    <Card sx={{ boxShadow: 'none' }}>
+    <Card elevation={4} sx={{ boxShadow: 'none' }}>
       <CardHeader
         title={
           <Typography

@@ -10,14 +10,14 @@ import {
   Alert,
   AlertTitle,
   IconButton,
-  Grid,
   Paper,
   Chip,
   CircularProgress,
   useMediaQuery,
   useTheme,
+  Divider,
 } from '@mui/material';
-import { Upload, FileText, AlertCircle, X } from 'lucide-react';
+import { Upload, FileText, AlertCircle, X, ShieldCheck } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { PrintTypeSelector } from './print-type-selector';
 import { allowedFileTypes } from '@/hooks/useFileUpload';
@@ -70,7 +70,6 @@ export function FileUploadSection() {
     if (ext === 'pdf') return Math.max(1, Math.round(kb / 100));
     if (ext === 'doc' || ext === 'docx') return Math.max(1, Math.round(kb / 50));
     if (ext === 'txt') return Math.max(1, Math.round(kb / 5));
-
     return 1;
   };
 
@@ -124,7 +123,6 @@ export function FileUploadSection() {
 
         setDone(true);
 
-
         if (typeof window !== 'undefined') {
           window.dispatchEvent(
             new CustomEvent('fileCalculated', {
@@ -137,7 +135,6 @@ export function FileUploadSection() {
             }),
           );
         }
-
       } catch (e: any) {
         setError(e?.message || 'Greška pri otpremanju.');
         setFile(null);
@@ -159,39 +156,17 @@ export function FileUploadSection() {
   };
 
   return (
-    <Card
-      elevation={3}
-      sx={{
-        boxShadow: 'none',
-        borderRadius: { xs: 2, md: 3 },
-      }}
-    >
-      <CardHeader
-        sx={{ pb: { xs: 1, md: 2 } }}
-        title={
-          <Typography
-            variant="h6"
-            color="primary"
-            align="center"
-            sx={{
-              textTransform: 'uppercase',
-              fontWeight: 700,
-              fontSize: { xs: '0.95rem', sm: '1.1rem' },
-              lineHeight: 1.4,
-            }}
-          >
-            Uploadujte dokument – cena se računa automatski
-          </Typography>
-        }
-      />
+    <Card elevation={4} sx={{ borderRadius: 3, boxShadow: 'none' }}>
+      <CardHeader title={
+        <Typography variant="h6" align="center"
+          sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.1rem' }, }} >
+          Bezbedan upload dokumenta
+        </Typography>} />
 
-      <CardContent sx={{ pt: 0 }}>
+      <CardContent>
+
         {error && (
-          <Alert
-            severity="error"
-            icon={<AlertCircle size={18} />}
-            sx={{ mb: 3 }}
-          >
+          <Alert severity="error" icon={<AlertCircle size={18} />} sx={{ mb: 3 }}>
             <AlertTitle>Greška</AlertTitle>
             {error}
           </Alert>
@@ -229,7 +204,6 @@ export function FileUploadSection() {
                 borderColor: dragOver ? 'primary.main' : 'divider',
                 bgcolor: dragOver ? 'action.hover' : 'background.default',
                 cursor: uploading ? 'not-allowed' : 'pointer',
-                transition: 'all .2s ease',
               }}
             >
               {uploading ? (
@@ -242,11 +216,7 @@ export function FileUploadSection() {
               ) : (
                 <>
                   <Upload size={isMobile ? 28 : 40} />
-                  <Typography
-                    mt={2}
-                    fontWeight={700}
-                    fontSize={{ xs: '0.9rem', sm: '1rem' }}
-                  >
+                  <Typography mt={2} fontWeight={700}>
                     Kliknite ili prevucite fajl
                   </Typography>
                   <Typography
@@ -340,8 +310,6 @@ export function FileUploadSection() {
                   </Box>
                 </Box>
               </Box>
-
-              {/* Reset button */}
               <IconButton
                 onClick={reset}
                 disabled={uploading}
@@ -354,6 +322,32 @@ export function FileUploadSection() {
             </Box>
           </Paper>
         )}
+
+        {/* SECURITY BOX */}
+        <Paper
+          elevation={0}
+          sx={{
+            mt: 3,
+            p: 3,
+            borderRadius: 3,
+            bgcolor: 'success.lighter',
+            border: '1px solid',
+            borderColor: 'success.light',
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <ShieldCheck size={18} />
+            <Typography fontWeight={700}>
+              Vaš dokument je zaštićen
+            </Typography>
+          </Box>
+
+          <Divider sx={{ my: 1 }} />
+
+          <Typography variant="body2">
+            Dokument je vidljiv samo izabranoj kopirnici i briše se nakon završetka štampe.
+          </Typography>
+        </Paper>
 
         <Box mt={{ xs: 3, md: 4 }}>
           <PrintTypeSelector
@@ -371,5 +365,4 @@ export function FileUploadSection() {
       </CardContent>
     </Card>
   );
-
 }
