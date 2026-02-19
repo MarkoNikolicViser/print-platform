@@ -46,6 +46,7 @@ export default function GoogleOneTapButton() {
             scope: 'openid email profile',
             access_type: 'offline',
             prompt: 'select_account',
+            state: JSON.stringify({ app_role: 'customer' })
         };
 
         const queryString = new URLSearchParams(options).toString();
