@@ -94,7 +94,7 @@ export default {
     const jwt = strapi
       .plugin("users-permissions")
       .service("jwt")
-      .issue({ id: user.id });
+      .issue({ id: user.id, role: user.app_role, });
 
     ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
     ctx.send({ user });
@@ -131,7 +131,7 @@ export default {
     const jwt = strapi
       .plugin("users-permissions")
       .service("jwt")
-      .issue({ id: user.id });
+      .issue({ id: user.id, role: user.app_role, });
 
     ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
     ctx.send({ user });
@@ -181,7 +181,7 @@ export default {
       const jwt = strapi
         .plugin("users-permissions")
         .service("jwt")
-        .issue({ id: user.id });
+        .issue({ id: user.id, role: user.app_role, });
 
       ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
       ctx.redirect(`${FRONTEND_URL}/store`);
@@ -244,7 +244,7 @@ export default {
       const jwt = strapi
         .plugin("users-permissions")
         .service("jwt")
-        .issue({ id: user.id });
+        .issue({ id: user.id, role: user.app_role, });
 
       // ✅ Postavi httpOnly cookie
       ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
