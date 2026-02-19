@@ -23,6 +23,7 @@
     "clsx": "^2.1.1",
     "eslint-plugin-prettier": "^5.5.5",
     "jiti": "latest",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
     "less": "latest",
     "lightningcss": "latest",
