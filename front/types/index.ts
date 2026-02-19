@@ -42,6 +42,7 @@ export interface CopyShop {
   working_time_today: string | null;
   is_open_today: boolean;
   total_price?: number;
+  is_active?: boolean;
 }
 
 export interface ShopPricing {
@@ -196,8 +197,8 @@ export interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => void;
+  register: (email: string, password: string, name: string, app_role: string) => Promise<void>;
+  logout: (route?: string) => void;
 }
 
 export type MarkPaidPayload = {

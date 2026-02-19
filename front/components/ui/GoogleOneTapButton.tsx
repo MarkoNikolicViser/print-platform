@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Box, useTheme } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { API_URL, GOOGLE_CLIENT_ID, GOOGLE_URI, STRAPI_REDIRECT_URI } from '@/helpers/constants';
 import Spinner from './spinner';
@@ -13,7 +13,6 @@ declare global {
 }
 
 export default function GoogleOneTapButton() {
-    const theme = useTheme();
     const [initialized, setInitialized] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -47,6 +46,7 @@ export default function GoogleOneTapButton() {
             scope: 'openid email profile',
             access_type: 'offline',
             prompt: 'select_account',
+            state: JSON.stringify({ app_role: 'customer' })
         };
 
         const queryString = new URLSearchParams(options).toString();

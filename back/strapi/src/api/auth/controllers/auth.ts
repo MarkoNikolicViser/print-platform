@@ -138,10 +138,23 @@ export default {
   },
 
   async googleCallback(ctx) {
-    const { code, app_role = 'customer' } = ctx.query;
+    const { code, state } = ctx.query;
 
     if (!code) {
       return ctx.badRequest("Missing code");
+    }
+
+    let requestedRole = "customer";
+
+    if (state) {
+      try {
+        const parsedState = JSON.parse(state);
+        if (parsedState?.app_role) {
+          requestedRole = parsedState.app_role;
+        }
+      } catch (e) {
+        console.warn("Invalid state JSON");
+      }
     }
 
     try {
@@ -167,6 +180,7 @@ export default {
         .query("plugin::users-permissions.role")
         .findOne({ where: { type: "authenticated" } });
 
+      // 🔹 Ako user ne postoji — kreiraj ga sa requested role
       if (!user) {
         user = await strapi.plugin("users-permissions").service("user").add({
           username: email,
@@ -174,17 +188,29 @@ export default {
           provider: "google",
           confirmed: true,
           role: role.id,
-          app_role
+          app_role: requestedRole,
         });
       }
+
+      // 🔐 Uvek koristi rolu iz baze
+      const finalRole = user.app_role;
 
       const jwt = strapi
         .plugin("users-permissions")
         .service("jwt")
-        .issue({ id: user.id, role: user.app_role, });
+        .issue({
+          id: user.id,
+          role: finalRole,
+        });
 
       ctx.cookies.set(COOKIE_NAME, jwt, cookieOptions());
-      ctx.redirect(`${FRONTEND_URL}/store`);
+
+      // ✅ Conditional redirect
+      if (finalRole === "shop") {
+        return ctx.redirect(`${FRONTEND_URL}/store`);
+      }
+
+      return ctx.redirect(`${FRONTEND_URL}/`);
     } catch (err) {
       console.error("Google callback error:", err);
       ctx.redirect(`${FRONTEND_URL}/login?error=google`);

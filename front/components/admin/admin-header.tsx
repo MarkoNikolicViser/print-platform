@@ -1,14 +1,12 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { useLogout } from '@/hooks/useLogout';
 import {
   AppBar,
   Toolbar,
   Box,
   Typography,
   IconButton,
-  Button,
   Chip,
   Badge,
   useMediaQuery,
@@ -16,14 +14,19 @@ import {
   Container,
   Stack,
 } from '@mui/material';
-import { Bell, LogOut, User, Printer } from 'lucide-react';
+import { Bell, LogOut, Printer } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { alpha } from '@mui/material/styles';
 import { Menu as MenuIcon, Moon, Sun } from 'lucide-react';
 import { Menu, MenuItem, Divider, ListItemIcon, ListItemText, Switch } from '@mui/material';
 import { useState } from 'react';
+import { CopyShop } from '@/types';
 
-export function AdminHeader({ shopInfo }) {
+interface Props {
+  shopInfo: CopyShop | undefined;
+}
+
+export function AdminHeader({ shopInfo }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -35,14 +38,13 @@ export function AdminHeader({ shopInfo }) {
     setAnchorEl(null);
   };
 
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const theme = useTheme();
-  const { mutate: logout } = useLogout();
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleLogout = () => {
-    logout();
+    logout('/login');
     setTimeout(() => router.push('/'), 500);
   };
 
