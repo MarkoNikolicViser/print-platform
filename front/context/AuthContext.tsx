@@ -63,12 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   /* -------------------- LOGOUT -------------------- */
-  const logout = async () => {
+  const logout = async (route?: string) => {
     setLoading(true);
     try {
       await strapiService.logout();
       setUser(null);
-      router.push('/login');
+      if (route) {
+        router.push(route);
+      }
     } finally {
       setLoading(false);
     }

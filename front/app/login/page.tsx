@@ -14,7 +14,6 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type React from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -40,7 +39,6 @@ function TabPanel({ children, value, index }: TabPanelProps) {
 
 export default function LoginPage() {
   const { login, register, loading } = useAuth();
-  const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 

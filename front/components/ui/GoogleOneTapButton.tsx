@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Box, useTheme } from '@mui/material';
+import { Button, Box } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { API_URL, GOOGLE_CLIENT_ID, GOOGLE_URI, STRAPI_REDIRECT_URI } from '@/helpers/constants';
 import Spinner from './spinner';
@@ -13,7 +13,6 @@ declare global {
 }
 
 export default function GoogleOneTapButton() {
-    const theme = useTheme();
     const [initialized, setInitialized] = useState(false);
     const [loading, setLoading] = useState(false);
 
