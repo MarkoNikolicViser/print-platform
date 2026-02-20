@@ -7,7 +7,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
-import { Grid, Card, CardActionArea, CardContent, Typography, Skeleton, Box } from '@mui/material';
+import { Grid, Card, CardActionArea, CardContent, Typography, Skeleton, Box, useTheme } from '@mui/material';
 import { useEffect, ReactElement } from 'react';
 import { useProductTemplatesByMime } from '../hooks/useProductTemplatesByMime';
 
@@ -29,6 +29,7 @@ const iconMap: Record<IconKey, ReactElement> = {
 type Props = {
   fileUploaded: boolean;
   documentMime?: string;
+  uploading: boolean
 };
 
 type Template = {
@@ -96,17 +97,10 @@ function TemplateSkeleton() {
 
 /* ---------------- COMPONENT ---------------- */
 
-export function PrintTypeSelector({ fileUploaded, documentMime }: Props) {
+export function PrintTypeSelector({ fileUploaded, documentMime, uploading }: Props) {
   const { selectedTemplate, setSelectedTemplate } = usePrintContext();
-
+  const theme = useTheme()
   const { data: templates = [], isLoading } = useProductTemplatesByMime(documentMime, fileUploaded);
-
-  // useEffect(() => {
-  //     if (!fileUploaded) {
-  //         return
-  //     }
-  //     setSelectedTemplate({id:1})
-  // }, [fileUploaded])
 
   const showSkeletons = fileUploaded && isLoading;
   const templatesToRender = !fileUploaded ? dummyTemplates : templates;
@@ -120,7 +114,7 @@ export function PrintTypeSelector({ fileUploaded, documentMime }: Props) {
 
   return (
     <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-      {showSkeletons
+      {showSkeletons || uploading
         ? Array.from({ length: 6 }).map((_, idx) => (
           <Grid size={{ xs: 6, sm: 6, md: 4 }} key={idx}>
             <TemplateSkeleton />
@@ -148,6 +142,7 @@ export function PrintTypeSelector({ fileUploaded, documentMime }: Props) {
                     : 'background.paper',
                   opacity: fileUploaded ? 1 : 0.5,
                   transition: 'all .2s ease',
+                  minHeight: 140
                 }}
               >
                 <CardActionArea
@@ -215,6 +210,23 @@ export function PrintTypeSelector({ fileUploaded, documentMime }: Props) {
             </Grid>
           );
         })}
+      {fileUploaded && !selectedTemplate && !isLoading && !uploading && (
+        <Box
+          sx={{
+            width: '100%',
+            mt: 2,
+            textAlign: 'center',
+          }}
+        >
+          <Typography
+            variant="body2"
+            color={'red'}
+            sx={{ opacity: 0.8, fontWeight: 700 }}
+          >
+            *Izaberite način štampe kako biste nastavili sa podešavanjem opcija.
+          </Typography>
+        </Box>
+      )}
     </Grid>
   );
 

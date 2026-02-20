@@ -18,6 +18,8 @@ import {
   Checkbox,
   Button,
   Box,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
@@ -48,6 +50,8 @@ export function PrintConfigSection({ onNextStep }) {
   const { uploadFile, loading: uploading } = useFileUpload();
   const [open, setOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const updateConfig = (key: string, value: any) => {
     setPrintConfig((prev: any) => ({ ...prev, [key]: value }));
@@ -89,7 +93,7 @@ export function PrintConfigSection({ onNextStep }) {
   }, []);
 
   return (
-    <Card elevation={4} sx={{ boxShadow: 'none' }}>
+    <Card elevation={isMobile ? 4 : 0} sx={{ boxShadow: 'none' }}>
       <CardHeader
         title={
           <Typography
