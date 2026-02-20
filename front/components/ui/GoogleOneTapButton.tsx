@@ -5,6 +5,7 @@ import { Button, Box } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { API_URL, GOOGLE_CLIENT_ID, GOOGLE_URI, STRAPI_REDIRECT_URI } from '@/helpers/constants';
 import Spinner from './spinner';
+import { useAuth } from '@/context/AuthContext';
 
 declare global {
     interface Window {
@@ -13,6 +14,8 @@ declare global {
 }
 
 export default function GoogleOneTapButton() {
+    const { refreshUser } = useAuth();
+
     const [initialized, setInitialized] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -24,12 +27,12 @@ export default function GoogleOneTapButton() {
             const res = await fetch(`${API_URL}/auth/google/one-tap`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token: idToken, role: 'user' }),
+                body: JSON.stringify({ token: idToken, app_role: 'customer' }),
             });
 
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
-
+            await refreshUser();
         } catch (err) {
             console.error('One Tap login failed:', err);
             redirectToClassicGoogleSSO();

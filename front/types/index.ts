@@ -199,6 +199,7 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, app_role: string) => Promise<void>;
   logout: (route?: string) => void;
+  refreshUser: () => void;
 }
 
 export type MarkPaidPayload = {

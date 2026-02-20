@@ -76,6 +76,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const me = await strapiService.getMe();
+      setUser(me);
+    } catch {
+      setUser(null);
+    }
+  };
+
+
   return (
     <AuthContext.Provider
       value={{
@@ -84,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        refreshUser
       }}
     >
       {children}
