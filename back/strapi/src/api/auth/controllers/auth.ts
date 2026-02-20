@@ -145,12 +145,16 @@ export default {
     }
 
     let requestedRole = "customer";
+    let returnTo = "/";
 
     if (state) {
       try {
         const parsedState = JSON.parse(state);
         if (parsedState?.app_role) {
           requestedRole = parsedState.app_role;
+        }
+        if (parsedState?.returnTo) {
+          returnTo = parsedState.returnTo;
         }
       } catch (e) {
         console.warn("Invalid state JSON");
@@ -210,7 +214,7 @@ export default {
         return ctx.redirect(`${FRONTEND_URL}/store`);
       }
 
-      return ctx.redirect(`${FRONTEND_URL}/`);
+      return ctx.redirect(`${FRONTEND_URL}${returnTo}`);
     } catch (err) {
       console.error("Google callback error:", err);
       ctx.redirect(`${FRONTEND_URL}/login?error=google`);

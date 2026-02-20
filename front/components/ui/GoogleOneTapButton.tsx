@@ -33,6 +33,8 @@ export default function GoogleOneTapButton() {
         } catch (err) {
             console.error('One Tap login failed:', err);
             redirectToClassicGoogleSSO();
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -44,7 +46,10 @@ export default function GoogleOneTapButton() {
             scope: 'openid email profile',
             access_type: 'offline',
             prompt: 'select_account',
-            state: JSON.stringify({ app_role: 'customer' })
+            state: JSON.stringify({
+                app_role: 'customer',
+                returnTo: window.location.pathname
+            })
         };
 
         const queryString = new URLSearchParams(options).toString();
@@ -99,7 +104,7 @@ export default function GoogleOneTapButton() {
                 '&.Mui-disabled': {
                     bgcolor: '#fff',
                     color: 'rgba(0,0,0,0.87)',
-                    opacity: 1, // uklanja fade efekat
+                    opacity: 1,
                 }
             }}
         >
