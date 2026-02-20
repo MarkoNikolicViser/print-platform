@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Box } from '@mui/material';
+import { Button, Box, useTheme, useMediaQuery } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import { API_URL, GOOGLE_CLIENT_ID, GOOGLE_URI, STRAPI_REDIRECT_URI } from '@/helpers/constants';
 import Spinner from './spinner';
@@ -15,6 +15,8 @@ declare global {
 
 export default function GoogleOneTapButton() {
     const { refreshUser } = useAuth();
+    const theme = useTheme()
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     const [initialized, setInitialized] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -112,8 +114,8 @@ export default function GoogleOneTapButton() {
             }}
         >
             <Box display="flex" alignItems="center" gap={1}>
-                <GoogleIcon />
-                {loading ? <Spinner size={20} fullScreen={false} /> : 'Login'}
+                {(isMobile && loading) ? null : <GoogleIcon />}
+                {loading ? <Spinner size={20} fullScreen={false} /> : isMobile ? null : 'Login'}
             </Box>
 
         </Button>

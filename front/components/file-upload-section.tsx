@@ -63,16 +63,6 @@ export function FileUploadSection() {
     return null;
   };
 
-  const estimatePages = (file: File) => {
-    const kb = file.size / 1024;
-    const ext = file.name.split('.').pop()?.toLowerCase();
-
-    if (ext === 'pdf') return Math.max(1, Math.round(kb / 100));
-    if (ext === 'doc' || ext === 'docx') return Math.max(1, Math.round(kb / 50));
-    if (ext === 'txt') return Math.max(1, Math.round(kb / 5));
-    return 1;
-  };
-
   const formatSize = (bytes: number) => {
     if (!bytes) return '0 B';
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -97,7 +87,6 @@ export function FileUploadSection() {
         name: file.name,
         size: file.size,
         type: file.type,
-        pages: estimatePages(file),
       });
 
       try {
@@ -107,13 +96,11 @@ export function FileUploadSection() {
           throw new Error(res.error || 'Greška pri otpremanju.');
         }
 
-        const finalPages = res.pageCount ?? estimatePages(file);
-
         setFileInfo((prev) =>
           prev
             ? {
               ...prev,
-              pages: finalPages,
+              pages: res.pageCount,
               url: res.url,
             }
             : prev,
@@ -123,18 +110,6 @@ export function FileUploadSection() {
 
         setDone(true);
 
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(
-            new CustomEvent('fileCalculated', {
-              detail: {
-                file,
-                pages: finalPages,
-                estimatedCost: finalPages * 10,
-                url: res.url,
-              },
-            }),
-          );
-        }
       } catch (e: any) {
         setError(e?.message || 'Greška pri otpremanju.');
         setFile(null);
@@ -156,7 +131,7 @@ export function FileUploadSection() {
   };
 
   return (
-    <Card elevation={4} sx={{ borderRadius: 3, boxShadow: 'none' }}>
+    <Card elevation={isMobile ? 4 : 0} sx={{ borderRadius: 3, boxShadow: 'none' }}>
       <CardHeader title={
         <Typography variant="h6" align="center"
           sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.1rem' }, }} >
@@ -352,6 +327,7 @@ export function FileUploadSection() {
         <Box mt={{ xs: 3, md: 4 }}>
           <PrintTypeSelector
             fileUploaded={done}
+            uploading={uploading}
             documentMime={file?.type}
           />
         </Box>

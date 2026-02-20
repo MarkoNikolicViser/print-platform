@@ -70,8 +70,8 @@ export function ShopSelectionSection() {
   const mapShops = copyShops.map((shop) => ({
     id: shop.id,
     name: shop.name,
-    lat: shop.latitude,   // ovde koristiš shop.latitude
-    lng: shop.longitude,  // ovde koristiš shop.longitude
+    lat: shop.latitude,
+    lng: shop.longitude,
   }));
 
   const selectedShopData: CopyShop | null =
@@ -92,12 +92,19 @@ export function ShopSelectionSection() {
     };
     addToCart(payload);
   };
+  const handleAddToCartAndPay = () => {
+    handleAddToCart();
+    setTimeout(() => {
+      router.push('/home/cart');
+    }, 500)
+
+  }
 
   if (isLoading) return <ShopSelectionSkeleton />;
   if (isError) return <ErrorState queryKey={['copyShops']} message={error.message} />;
 
   return (
-    <Card elevation={4} sx={{ boxShadow: 'none' }}>
+    <Card elevation={isMobile ? 4 : 0} sx={{ boxShadow: 'none' }}>
       <CardHeader
         title={
           <Typography
@@ -349,10 +356,7 @@ export function ShopSelectionSection() {
               variant="contained"
               color="secondary"
               fullWidth
-              onClick={() => {
-                handleAddToCart();
-                router.push('/home/cart');
-              }}
+              onClick={handleAddToCartAndPay}
               disabled={isPending}
             >
               Plati i poruči odmah
