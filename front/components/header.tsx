@@ -51,7 +51,6 @@ export function Header() {
   const handleLogout = () => {
     handleCloseUserMenu();
     logout(); // koristi logout iz context-a
-    router.push('/');
   };
 
   const renderUserMenu = () => (
