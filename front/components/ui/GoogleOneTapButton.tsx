@@ -33,6 +33,8 @@ export default function GoogleOneTapButton() {
         } catch (err) {
             console.error('One Tap login failed:', err);
             redirectToClassicGoogleSSO();
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -99,7 +101,7 @@ export default function GoogleOneTapButton() {
                 '&.Mui-disabled': {
                     bgcolor: '#fff',
                     color: 'rgba(0,0,0,0.87)',
-                    opacity: 1, // uklanja fade efekat
+                    opacity: 1,
                 }
             }}
         >
