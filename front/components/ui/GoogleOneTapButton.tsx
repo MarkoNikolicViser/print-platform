@@ -30,8 +30,6 @@ export default function GoogleOneTapButton() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            localStorage.setItem('jwt', data.jwt);
-            window.location.href = '/store';
         } catch (err) {
             console.error('One Tap login failed:', err);
             redirectToClassicGoogleSSO();
