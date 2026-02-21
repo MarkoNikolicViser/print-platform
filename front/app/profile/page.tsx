@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Order {
   id: string;
@@ -31,6 +32,7 @@ export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -104,13 +106,13 @@ export default function ProfilePage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'Završeno';
+        return t('profile.status.completed');
       case 'ready':
-        return 'Spremno za preuzimanje';
+        return t('profile.status.ready');
       case 'processing':
-        return 'U obradi';
+        return t('profile.status.processing');
       case 'pending':
-        return 'Na čekanju';
+        return t('profile.status.pending');
       default:
         return status;
     }
@@ -122,39 +124,39 @@ export default function ProfilePage() {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1" sx={{ color: '#1e3a8a', fontWeight: 600 }}>
-          Moj Profil
+          {t('profile.title')}
         </Typography>
         <Button
           variant="outlined"
           onClick={handleLogout}
           sx={{ color: '#1e3a8a', borderColor: '#1e3a8a' }}
         >
-          Odjavi se
+          {t('profile.logoutButton')}
         </Button>
       </Box>
 
       <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
         <Typography variant="h6" gutterBottom sx={{ color: '#1e3a8a' }}>
-          Informacije o korisniku
+          {t('profile.userInfoTitle')}
         </Typography>
         <Typography variant="body1" sx={{ mb: 1 }}>
-          <strong>Ime:</strong> {user.name}
+          <strong>{t('profile.nameLabel')}:</strong> {user.name}
         </Typography>
         <Typography variant="body1">
-          <strong>Email:</strong> {user.email}
+          <strong>{t('profile.emailLabel')}:</strong> {user.email}
         </Typography>
       </Paper>
 
       <Paper elevation={2} sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom sx={{ color: '#1e3a8a', mb: 3 }}>
-          Istorija štampanja ({orders.length} porudžbina)
+          {t('profile.orderHistoryTitle', { count: orders.length })}
         </Typography>
 
         {orders.length === 0 ? (
           <Alert severity="info">
-            Nemate još uvek nijednu porudžbinu.{' '}
+            {t('profile.noOrdersMessage')}{' '}
             <Button href="/" sx={{ ml: 1 }}>
-              Počnite štampanje
+              {t('profile.startPrintingButton')}
             </Button>
           </Alert>
         ) : (
@@ -175,7 +177,7 @@ export default function ProfilePage() {
                         {order.fileName}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Porudžbina #{order.id} • {order.orderDate}
+                        {t('profile.orderLabel')} #{order.id} • {order.orderDate}
                       </Typography>
                     </Box>
                     <Chip
@@ -197,28 +199,28 @@ export default function ProfilePage() {
                   >
                     <Box>
                       <Typography variant="body2" color="text.secondary">
-                        Copy Shop
+                        {t('profile.shopLabel')}
                       </Typography>
                       <Typography variant="body1">{order.shopName}</Typography>
                     </Box>
                     <Box>
                       <Typography variant="body2" color="text.secondary">
-                        Broj kopija
+                        {t('profile.copiesLabel')}
                       </Typography>
                       <Typography variant="body1">{order.copies}</Typography>
                     </Box>
                     <Box>
                       <Typography variant="body2" color="text.secondary">
-                        Opcije
+                        {t('profile.optionsLabel')}
                       </Typography>
                       <Typography variant="body1">
-                        {order.color ? 'U boji' : 'Crno-belo'} •{' '}
-                        {order.doubleSided ? 'Duplex' : 'Jednostrano'}
+                        {order.color ? t('profile.color') : t('profile.bw')} •{' '}
+                        {order.doubleSided ? t('profile.duplex') : t('profile.simplex')}
                       </Typography>
                     </Box>
                     <Box>
                       <Typography variant="body2" color="text.secondary">
-                        Ukupna cena
+                        {t('profile.totalPriceLabel')}
                       </Typography>
                       <Typography variant="h6" sx={{ color: '#f97316', fontWeight: 600 }}>
                         {order.totalPrice} RSD
@@ -228,7 +230,7 @@ export default function ProfilePage() {
 
                   {order.status === 'ready' && (
                     <Alert severity="success" sx={{ mt: 2 }}>
-                      Vaša porudžbina je spremna za preuzimanje u {order.shopName}!
+                      {t('profile.readyMessage', { shopName: order.shopName })}
                     </Alert>
                   )}
                 </CardContent>
@@ -244,7 +246,7 @@ export default function ProfilePage() {
           href="/"
           sx={{ bgcolor: '#f97316', '&:hover': { bgcolor: '#ea580c' } }}
         >
-          Nova porudžbina
+          {t('profile.newOrderButton')}
         </Button>
       </Box>
     </Container>

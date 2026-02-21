@@ -7,8 +7,19 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import ImageIcon from '@mui/icons-material/Image';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
-import { Grid, Card, CardActionArea, CardContent, Typography, Skeleton, Box, useTheme } from '@mui/material';
+import {
+  Grid,
+  Card,
+  CardActionArea,
+  CardContent,
+  Typography,
+  Skeleton,
+  Box,
+  useTheme,
+} from '@mui/material';
 import { useEffect, ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { useProductTemplatesByMime } from '../hooks/useProductTemplatesByMime';
 
 /* ---------------- ICON MAP ---------------- */
@@ -29,7 +40,7 @@ const iconMap: Record<IconKey, ReactElement> = {
 type Props = {
   fileUploaded: boolean;
   documentMime?: string;
-  uploading: boolean
+  uploading: boolean;
 };
 
 type Template = {
@@ -98,8 +109,9 @@ function TemplateSkeleton() {
 /* ---------------- COMPONENT ---------------- */
 
 export function PrintTypeSelector({ fileUploaded, documentMime, uploading }: Props) {
+  const { t } = useTranslation();
   const { selectedTemplate, setSelectedTemplate } = usePrintContext();
-  const theme = useTheme()
+  const theme = useTheme();
   const { data: templates = [], isLoading } = useProductTemplatesByMime(documentMime, fileUploaded);
 
   const showSkeletons = fileUploaded && isLoading;
@@ -116,100 +128,85 @@ export function PrintTypeSelector({ fileUploaded, documentMime, uploading }: Pro
     <Grid container spacing={{ xs: 1.5, sm: 2 }}>
       {showSkeletons || uploading
         ? Array.from({ length: 6 }).map((_, idx) => (
-          <Grid size={{ xs: 6, sm: 6, md: 4 }} key={idx}>
-            <TemplateSkeleton />
-          </Grid>
-        ))
+            <Grid size={{ xs: 6, sm: 6, md: 4 }} key={idx}>
+              <TemplateSkeleton />
+            </Grid>
+          ))
         : templatesToRender.map((template) => {
-          const isSelected =
-            selectedTemplate?.id === template.id;
+            const isSelected = selectedTemplate?.id === template.id;
 
-          return (
-            <Grid
-              size={{ xs: 6, sm: 6, md: 4 }}
-              key={template.id}
-            >
-              <Card
-                elevation={0}
-                sx={{
-                  borderRadius: 3,
-                  border: '1px solid',
-                  borderColor: isSelected
-                    ? 'primary.main'
-                    : 'divider',
-                  bgcolor: isSelected
-                    ? 'primary.50'
-                    : 'background.paper',
-                  opacity: fileUploaded ? 1 : 0.5,
-                  transition: 'all .2s ease',
-                  minHeight: 140
-                }}
-              >
-                <CardActionArea
-                  disabled={!fileUploaded}
-                  onClick={() =>
-                    setSelectedTemplate({
-                      id: template.id,
-                      allowedOptions:
-                        template?.allowed_options,
-                    })
-                  }
+            return (
+              <Grid size={{ xs: 6, sm: 6, md: 4 }} key={template.id}>
+                <Card
+                  elevation={0}
                   sx={{
-                    py: { xs: 2, sm: 3 },
+                    borderRadius: 3,
+                    border: '1px solid',
+                    borderColor: isSelected ? 'primary.main' : 'divider',
+                    bgcolor: isSelected ? 'primary.50' : 'background.paper',
+                    opacity: fileUploaded ? 1 : 0.5,
+                    transition: 'all .2s ease',
+                    minHeight: 140,
                   }}
                 >
-                  <CardContent
+                  <CardActionArea
+                    disabled={!fileUploaded}
+                    onClick={() =>
+                      setSelectedTemplate({
+                        id: template.id,
+                        allowedOptions: template?.allowed_options,
+                      })
+                    }
                     sx={{
-                      textAlign: 'center',
-                      p: { xs: 1.5, sm: 2 },
+                      py: { xs: 2, sm: 3 },
                     }}
                   >
-                    <Box
+                    <CardContent
                       sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        mb: 1,
-                        color: isSelected
-                          ? 'primary.main'
-                          : 'text.secondary',
+                        textAlign: 'center',
+                        p: { xs: 1.5, sm: 2 },
                       }}
                     >
-                      {iconMap[
-                        template.icon as IconKey
-                      ] ?? (
-                          <DescriptionIcon fontSize="medium" />
-                        )}
-                    </Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          mb: 1,
+                          color: isSelected ? 'primary.main' : 'text.secondary',
+                        }}
+                      >
+                        {iconMap[template.icon as IconKey] ?? <DescriptionIcon fontSize="medium" />}
+                      </Box>
 
-                    <Typography
-                      fontWeight={700}
-                      fontSize={{
-                        xs: '0.85rem',
-                        sm: '1rem',
-                      }}
-                    >
-                      {template.name}
-                    </Typography>
+                      <Typography
+                        fontWeight={700}
+                        fontSize={{
+                          xs: '0.85rem',
+                          sm: '1rem',
+                        }}
+                      >
+                        {template.name}
+                      </Typography>
 
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        display: {
-                          xs: 'none',
-                          sm: 'block',
-                        },
-                        mt: 0.5,
-                      }}
-                    >
-                      {template.description}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Grid>
-          );
-        })}
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          display: {
+                            xs: 'none',
+                            sm: 'block',
+                          },
+                          mt: 0.5,
+                        }}
+                      >
+                        {template.description}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            );
+          })}
       {fileUploaded && !selectedTemplate && !isLoading && !uploading && (
         <Box
           sx={{
@@ -218,16 +215,11 @@ export function PrintTypeSelector({ fileUploaded, documentMime, uploading }: Pro
             textAlign: 'center',
           }}
         >
-          <Typography
-            variant="body2"
-            color={'red'}
-            sx={{ opacity: 0.8, fontWeight: 700 }}
-          >
-            *Izaberite način štampe kako biste nastavili sa podešavanjem opcija.
+          <Typography variant="body2" color={'red'} sx={{ opacity: 0.8, fontWeight: 700 }}>
+            {t('home.printTypeSelector.selectTypeWarning')}
           </Typography>
         </Box>
       )}
     </Grid>
   );
-
 }

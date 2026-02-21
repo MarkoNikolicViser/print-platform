@@ -1,10 +1,13 @@
 'use client';
 
-import React from 'react';
-import { Card, CardContent, Stack, Typography } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { Card, CardContent, Stack, Typography } from '@mui/material';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function NoOrdersEmptyState() {
+  const { t } = useTranslation();
+
   return (
     <Card
       sx={{
@@ -22,13 +25,12 @@ export function NoOrdersEmptyState() {
           <ShoppingCartIcon sx={{ fontSize: 60, color: 'primary.main' }} />
 
           <Typography variant="h5" fontWeight={600}>
-            Još nema porudžbina
+            {t('admin.noOrders.title')}
           </Typography>
 
           <Typography variant="body1" color="text.secondary">
-            Kada kupci pošalju porudžbinu, pojaviće se ovde.
+            {t('admin.noOrders.description')}
           </Typography>
-
         </Stack>
       </CardContent>
     </Card>

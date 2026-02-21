@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { CopyShop } from '@/types';
 import {
   AppBar,
   Toolbar,
@@ -14,13 +15,15 @@ import {
   Container,
   Stack,
 } from '@mui/material';
-import { Bell, LogOut, Printer } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { alpha } from '@mui/material/styles';
-import { Menu as MenuIcon, Moon, Sun } from 'lucide-react';
 import { Menu, MenuItem, Divider, ListItemIcon, ListItemText, Switch } from '@mui/material';
-import { useState } from 'react';
-import { CopyShop } from '@/types';
+import { alpha, useColorScheme } from '@mui/material/styles';
+import { Bell, LogOut, Printer } from 'lucide-react';
+import { Menu as MenuIcon, Moon, Sun } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 interface Props {
   shopInfo: CopyShop | undefined;
@@ -29,6 +32,7 @@ interface Props {
 export function AdminHeader({ shopInfo }: Props) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const { t } = useTranslation();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -41,6 +45,17 @@ export function AdminHeader({ shopInfo }: Props) {
   const { user, logout } = useAuth();
   const router = useRouter();
   const theme = useTheme();
+  const { mode, systemMode, setMode } = useColorScheme();
+  const resolvedMode = useMemo(() => {
+    if (mode === 'system') return systemMode;
+    return mode;
+  }, [mode, systemMode]);
+  const isDark = (resolvedMode ?? theme.palette.mode) === 'dark';
+
+  const toggleTheme = () => {
+    setMode(isDark ? 'light' : 'dark');
+  };
+
   const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleLogout = () => {
@@ -73,18 +88,18 @@ export function AdminHeader({ shopInfo }: Props) {
 
             <Box>
               <Typography fontWeight={800} color="primary.main">
-                Go2Copy Admin
+                {t('header.admin.brand')}
               </Typography>
               {!isMobileOrTablet && (
                 <Typography variant="caption" color="text.secondary">
-                  {shopInfo?.name || 'Prodavnica nije kreirana'}
+                  {shopInfo?.name || t('header.admin.noShop')}
                 </Typography>
               )}
             </Box>
 
             {shopInfo && (
               <Chip
-                label={shopInfo?.is_active ? 'Aktivno' : 'Neaktivno'}
+                label={shopInfo?.is_active ? t('header.admin.active') : t('header.admin.inactive')}
                 size="small"
                 sx={{
                   ml: 1,
@@ -107,6 +122,8 @@ export function AdminHeader({ shopInfo }: Props) {
                 <Bell size={18} />
               </Badge>
             </IconButton>
+
+            <LanguageSwitcher />
 
             <IconButton onClick={handleMenuOpen} size="small">
               <MenuIcon size={20} />
@@ -136,17 +153,9 @@ export function AdminHeader({ shopInfo }: Props) {
 
             {/* THEME SWITCH */}
             <MenuItem>
-              <ListItemIcon>
-                {theme.palette.mode === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-              </ListItemIcon>
-              <ListItemText>Promeni temu</ListItemText>
-              <Switch
-                checked={theme.palette.mode === 'dark'}
-                onChange={() => {
-                  // 👇 Ovde pozovi svoju toggleTheme funkciju
-                  console.log('toggle theme');
-                }}
-              />
+              <ListItemIcon>{isDark ? <Sun /> : <Moon />}</ListItemIcon>
+              <ListItemText>{t('header.admin.toggleTheme')}</ListItemText>
+              <Switch checked={isDark} onChange={toggleTheme} />
             </MenuItem>
 
             <Divider />
@@ -161,10 +170,9 @@ export function AdminHeader({ shopInfo }: Props) {
               <ListItemIcon>
                 <LogOut size={18} />
               </ListItemIcon>
-              <ListItemText>Odjavi se</ListItemText>
+              <ListItemText>{t('header.userMenu.logout')}</ListItemText>
             </MenuItem>
           </Menu>
-
         </Container>
       </Toolbar>
     </AppBar>

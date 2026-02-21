@@ -2,6 +2,7 @@
 
 import { Box, Typography, Grid, Card, CardContent, CardHeader, Chip, Paper } from '@mui/material';
 import { TrendingUp, TrendingDown, Users, FileText, DollarSign, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const stats = [
   {
@@ -69,35 +70,60 @@ const recentOrders = [
   },
 ];
 
-const getStatusChip = (status: string) => {
+const getStatusChip = (status: string, t: (key: string) => string) => {
   switch (status) {
     case 'completed':
-      return <Chip label="Završeno" color="success" size="small" />;
+      return <Chip label={t('admin.analytics.status.completed')} color="success" size="small" />;
     case 'processing':
-      return <Chip label="U obradi" color="info" size="small" />;
+      return <Chip label={t('admin.analytics.status.processing')} color="info" size="small" />;
     case 'ready':
-      return <Chip label="Spremno" color="warning" size="small" />;
+      return <Chip label={t('admin.analytics.status.ready')} color="warning" size="small" />;
     default:
       return <Chip label={status} variant="outlined" size="small" />;
   }
 };
 
 export function Analytics() {
+  const { t } = useTranslation();
+
+  const translatedStats = [
+    {
+      ...stats[0],
+      title: t('admin.analytics.stats.revenue.title'),
+      period: t('admin.analytics.stats.revenue.period'),
+    },
+    {
+      ...stats[1],
+      title: t('admin.analytics.stats.orders.title'),
+      period: t('admin.analytics.stats.orders.period'),
+    },
+    {
+      ...stats[2],
+      title: t('admin.analytics.stats.newUsers.title'),
+      period: t('admin.analytics.stats.newUsers.period'),
+    },
+    {
+      ...stats[3],
+      title: t('admin.analytics.stats.avgTime.title'),
+      period: t('admin.analytics.stats.avgTime.period'),
+    },
+  ];
+
   return (
     <Box display="flex" flexDirection="column" gap={6}>
       {/* Header */}
       <Box>
         <Typography variant="h5" color="primary" fontWeight="bold" gutterBottom>
-          Pregled poslovanja
+          {t('admin.analytics.title')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Statistike i performanse vaše štamparije
+          {t('admin.analytics.subtitle')}
         </Typography>
       </Box>
 
       {/* Stats Grid */}
       <Grid container spacing={3}>
-        {stats.map((stat) => {
+        {translatedStats.map((stat) => {
           const Icon = stat.icon;
           const isPositive = stat.trend === 'up';
           const TrendIcon = isPositive ? TrendingUp : TrendingDown;
@@ -125,7 +151,7 @@ export function Analytics() {
                       {stat.change}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      od prošlog meseca
+                      {t('admin.analytics.sinceLastMonth')}
                     </Typography>
                   </Box>
                   <Typography variant="caption" color="text.secondary">
@@ -145,7 +171,7 @@ export function Analytics() {
             <CardHeader
               title={
                 <Typography variant="subtitle1" color="primary" fontWeight="bold">
-                  Poslednje narudžbine
+                  {t('admin.analytics.recentOrders')}
                 </Typography>
               }
             />
@@ -171,7 +197,7 @@ export function Analytics() {
                       <Typography variant="body1" color="primary" fontWeight="bold">
                         {order.amount}
                       </Typography>
-                      {getStatusChip(order.status)}
+                      {getStatusChip(order.status, t)}
                     </Box>
                   </Paper>
                 ))}
@@ -185,7 +211,7 @@ export function Analytics() {
             <CardHeader
               title={
                 <Typography variant="subtitle1" color="primary" fontWeight="bold">
-                  Brze akcije
+                  {t('admin.analytics.quickActions')}
                 </Typography>
               }
             />
@@ -193,35 +219,35 @@ export function Analytics() {
               <Box display="flex" flexDirection="column" gap={2}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle2" color="primary" fontWeight="medium">
-                    Narudžbine na čekanju
+                    {t('admin.analytics.pendingOrders')}
                   </Typography>
                   <Typography variant="h6" color="primary">
                     8
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Potrebna je vaša pažnja
+                    {t('admin.analytics.needsAttention')}
                   </Typography>
                 </Paper>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle2" color="primary" fontWeight="medium">
-                    Spremne za preuzimanje
+                    {t('admin.analytics.readyForPickup')}
                   </Typography>
                   <Typography variant="h6" color="primary">
                     3
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Obavestiti korisnike
+                    {t('admin.analytics.notifyUsers')}
                   </Typography>
                 </Paper>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle2" color="primary" fontWeight="medium">
-                    Prosečna ocena
+                    {t('admin.analytics.averageRating')}
                   </Typography>
                   <Typography variant="h6" color="primary">
                     4.8 ⭐
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Na osnovu 124 recenzije
+                    {t('admin.analytics.basedOnReviews')}
                   </Typography>
                 </Paper>
               </Box>

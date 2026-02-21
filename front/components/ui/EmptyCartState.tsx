@@ -1,53 +1,47 @@
 'use client';
 
-import { Box, Typography, Button, Stack } from '@mui/material';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import { Box, Typography, Button, Stack } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 
 interface EmptyCartStateProps {
-    title?: string;
-    description?: string;
-    ctaLabel?: string;
-    ctaHref?: string;
+  title?: string;
+  description?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 }
 
 export default function EmptyCartState({
-    title = 'Korpa je prazna',
-    description = 'Izgleda da još niste dodali nijedan proizvod u korpu.',
-    ctaLabel = 'Nazad na ponudu',
-    ctaHref = '/',
+  title,
+  description,
+  ctaLabel,
+  ctaHref = '/',
 }: EmptyCartStateProps) {
-    const router = useRouter();
+  const { t } = useTranslation();
+  const router = useRouter();
 
-    return (
-        <Box
-            maxWidth="sm"
-            mx="auto"
-            mt={8}
-            px={2}
-            textAlign="center"
-        >
-            <Stack spacing={3} alignItems="center">
-                <ShoppingCartOutlinedIcon
-                    sx={{ fontSize: 64, color: 'text.secondary' }}
-                />
+  const resolvedTitle = title ?? t('cart.emptyTitle');
+  const resolvedDescription = description ?? t('cart.emptyDescription');
+  const resolvedCtaLabel = ctaLabel ?? t('cart.emptyCta');
 
-                <Typography variant="h5" fontWeight={600}>
-                    {title}
-                </Typography>
+  return (
+    <Box maxWidth="sm" mx="auto" mt={8} px={2} textAlign="center">
+      <Stack spacing={3} alignItems="center">
+        <ShoppingCartOutlinedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
 
-                <Typography variant="body1" color="text.secondary">
-                    {description}
-                </Typography>
+        <Typography variant="h5" fontWeight={600}>
+          {resolvedTitle}
+        </Typography>
 
-                <Button
-                    variant="contained"
-                    size="large"
-                    onClick={() => router.push(ctaHref)}
-                >
-                    {ctaLabel}
-                </Button>
-            </Stack>
-        </Box>
-    );
+        <Typography variant="body1" color="text.secondary">
+          {resolvedDescription}
+        </Typography>
+
+        <Button variant="contained" size="large" onClick={() => router.push(ctaHref)}>
+          {resolvedCtaLabel}
+        </Button>
+      </Stack>
+    </Box>
+  );
 }

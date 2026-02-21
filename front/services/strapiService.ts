@@ -5,8 +5,8 @@ import type {
   AddToCartPayload,
   SyncCartPayload,
   Order,
+  OrderItemsResponse,
   PrintOptions,
-  ProductTemplate,
   MarkPaidPayload,
 } from '../types';
 import { API_URL } from '../helpers/constants';
@@ -120,7 +120,7 @@ class StrapiService {
     }
   }
 
-  async getOrderItems(orderId: string) {
+  async getOrderItems(orderId: string): Promise<OrderItemsResponse> {
     const res = await this.api.get(`/order/${orderId}/items`);
     return res.data;
   }

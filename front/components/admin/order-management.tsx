@@ -1,5 +1,6 @@
 'use client';
 
+import { useMyShopOrders } from '@/hooks/useMyShopOrders';
 import {
   Box,
   Typography,
@@ -20,7 +21,8 @@ import {
 } from '@mui/material';
 import { Search, Eye, Download, CheckCircle, XCircle } from 'lucide-react';
 import { useState } from 'react';
-import { useMyShopOrders } from '@/hooks/useMyShopOrders';
+import { useTranslation } from 'react-i18next';
+
 import { NoOrdersEmptyState } from '../ui/NoOrdersEmptyState';
 
 interface SelectedOptionWithLabel {
@@ -56,13 +58,13 @@ interface Order {
   items: OrderItem[];
 }
 
-const getStatusBadge = (status: string) => {
+const getStatusBadge = (status: string, t: (key: string) => string) => {
   const map: Record<string, { label: string; color: string }> = {
-    paid: { label: 'Plaćeno', color: '#2e7d32' },
-    printing: { label: 'Štampa', color: '#f9a825' },
-    ready: { label: 'Spremno', color: '#ef6c00' },
-    picked_up: { label: 'Preuzeto', color: '#2e7d32' },
-    cancelled: { label: 'Otkazano', color: '#c62828' },
+    paid: { label: t('admin.orders.status.paid'), color: '#2e7d32' },
+    printing: { label: t('admin.orders.status.printing'), color: '#f9a825' },
+    ready: { label: t('admin.orders.status.ready'), color: '#ef6c00' },
+    picked_up: { label: t('admin.orders.status.pickedUp'), color: '#2e7d32' },
+    cancelled: { label: t('admin.orders.status.cancelled'), color: '#c62828' },
   };
 
   const cfg = map[status];
@@ -79,6 +81,7 @@ const getStatusBadge = (status: string) => {
 };
 
 export function OrderManagement() {
+  const { t } = useTranslation();
   const { data: orders = [], isLoading } = useMyShopOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -124,7 +127,7 @@ export function OrderManagement() {
   return (
     <Box display="flex" flexDirection="column" gap={4}>
       <Typography variant="h5" fontWeight="bold">
-        Upravljanje porudžbinama
+        {t('admin.orders.title')}
       </Typography>
 
       {/* Filters */}
@@ -133,7 +136,7 @@ export function OrderManagement() {
           <CardContent sx={{ display: 'flex', gap: 2 }}>
             <TextField
               fullWidth
-              placeholder="Pretraga..."
+              placeholder={t('admin.orders.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -145,12 +148,12 @@ export function OrderManagement() {
               onChange={(e) => setStatusFilter(e.target.value)}
               sx={{ minWidth: 180 }}
             >
-              <MenuItem value="all">Svi statusi</MenuItem>
-              <MenuItem value="paid">Plaćeno</MenuItem>
-              <MenuItem value="printing">Štampa</MenuItem>
-              <MenuItem value="ready">Spremno</MenuItem>
-              <MenuItem value="picked_up">Preuzeto</MenuItem>
-              <MenuItem value="cancelled">Otkazano</MenuItem>
+              <MenuItem value="all">{t('admin.orders.allStatuses')}</MenuItem>
+              <MenuItem value="paid">{t('admin.orders.status.paid')}</MenuItem>
+              <MenuItem value="printing">{t('admin.orders.status.printing')}</MenuItem>
+              <MenuItem value="ready">{t('admin.orders.status.ready')}</MenuItem>
+              <MenuItem value="picked_up">{t('admin.orders.status.pickedUp')}</MenuItem>
+              <MenuItem value="cancelled">{t('admin.orders.status.cancelled')}</MenuItem>
             </Select>
           </CardContent>
         </Card>
@@ -166,14 +169,14 @@ export function OrderManagement() {
                   <Box>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <Typography fontWeight="bold">
-                        {order.customer_email ?? 'Nepoznat korisnik'}
+                        {order.customer_email ?? t('admin.orders.unknownUser')}
                       </Typography>
-                      {getStatusBadge(order.status_code)}
+                      {getStatusBadge(order.status_code, t)}
                       <Chip label={order.order_code} size="small" variant="outlined" />
                     </Stack>
 
                     <Typography variant="body2" mt={1}>
-                      Ukupno: <strong>{order.total_price} RSD</strong>
+                      {t('admin.orders.total')}: <strong>{order.total_price} RSD</strong>
                     </Typography>
                   </Box>
 
@@ -186,7 +189,7 @@ export function OrderManagement() {
                         startIcon={<CheckCircle size={16} />}
                         onClick={() => markAsReady(order.id)}
                       >
-                        Gotovo
+                        {t('admin.orders.done')}
                       </Button>
                     )}
 
@@ -198,7 +201,7 @@ export function OrderManagement() {
                         startIcon={<XCircle size={16} />}
                         onClick={() => cancelOrder(order.id)}
                       >
-                        Odbij
+                        {t('admin.orders.reject')}
                       </Button>
                     )}
 
@@ -208,7 +211,7 @@ export function OrderManagement() {
                       startIcon={<Eye size={16} />}
                       onClick={() => setSelectedOrder(order)}
                     >
-                      Detalji
+                      {t('admin.orders.details')}
                     </Button>
                   </Stack>
                 </Box>
@@ -218,27 +221,29 @@ export function OrderManagement() {
         ))}
       </Grid>
 
-      {isNoResults && (
-        <NoOrdersEmptyState />
-      )}
+      {isNoResults && <NoOrdersEmptyState />}
 
       {/* DETAILS MODAL */}
       {selectedOrder && (
         <Dialog open onClose={() => setSelectedOrder(null)} fullWidth maxWidth="md">
-          <DialogTitle>Porudžbina {selectedOrder.order_code}</DialogTitle>
+          <DialogTitle>
+            {t('admin.orders.order')} {selectedOrder.order_code}
+          </DialogTitle>
           <DialogContent dividers>
             {(selectedOrder.items ?? []).map((item) => (
               <Box key={item.id} mb={3}>
                 <Typography fontWeight="bold">{item.product_template?.name}</Typography>
 
-                <Typography variant="body2">Fajl: {item.document_name}</Typography>
+                <Typography variant="body2">
+                  {t('admin.orders.file')}: {item.document_name}
+                </Typography>
 
                 <Button
                   size="small"
                   startIcon={<Download size={16} />}
                   onClick={() => handleDownload(item.document_url, item.document_name)}
                 >
-                  Preuzmi fajl
+                  {t('admin.orders.downloadFile')}
                 </Button>
 
                 <Stack spacing={0.5}>

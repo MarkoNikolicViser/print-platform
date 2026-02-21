@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { strapiService } from '../services/strapiService';
-import { ApiError, Order } from '@/types';
+import { OrderItemsResponse } from '@/types';
 
 export function useOrderItems(orderId?: string, enabled: boolean = true) {
   return useQuery({
     queryKey: ['order-items'],
-    queryFn: (): Promise<Order[] | ApiError> => {
+    queryFn: (): Promise<OrderItemsResponse> => {
       if (!orderId) throw new Error('orderId is required');
       return strapiService.getOrderItems(orderId);
     },

@@ -1,24 +1,15 @@
 'use client';
 
+import { useUpdateMyPrintShop } from '@/hooks/useUpdateMyPrintShop';
+import { Box, Typography, TextField, Button, Stack, Paper, Chip, Skeleton } from '@mui/material';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Stack,
-  Paper,
-  Chip,
-  Skeleton,
-} from '@mui/material';
-import { useUpdateMyPrintShop } from '@/hooks/useUpdateMyPrintShop';
-const AddressPicker = dynamic(
-  () => import('../address-picker'),
-  { ssr: false }
-);
+import { useTranslation } from 'react-i18next';
+const AddressPicker = dynamic(() => import('../address-picker'), { ssr: false });
 import { GEOAPIFY_KEY } from '@/helpers/constants';
+
 import NoPrintShopCard from '../ui/NoPrintShopCard';
+
 import { useCreateMyPrintShop } from '@/hooks/useCreateMyPrintShop';
 
 /* =========================
@@ -35,9 +26,7 @@ const daysMap = {
   sun: 'sunday',
 } as const;
 
-const reverseDaysMap = Object.fromEntries(
-  Object.entries(daysMap).map(([k, v]) => [v, k])
-);
+const reverseDaysMap = Object.fromEntries(Object.entries(daysMap).map(([k, v]) => [v, k]));
 
 function apiToUIWorkingHours(apiHours: any) {
   const result: any = {};
@@ -59,9 +48,7 @@ function uiToApiWorkingHours(uiHours: any) {
 
   Object.entries(reverseDaysMap).forEach(([uiKey, apiKey]) => {
     const day = uiHours[uiKey];
-    result[apiKey] = day.closed
-      ? { open: false }
-      : { open: true, from: day.open, to: day.close };
+    result[apiKey] = day.closed ? { open: false } : { open: true, from: day.open, to: day.close };
   });
 
   return result;
@@ -72,6 +59,7 @@ function uiToApiWorkingHours(uiHours: any) {
 ========================= */
 
 export function ShopSettings({ shop, isLoading }) {
+  const { t } = useTranslation();
   const updateShop = useUpdateMyPrintShop();
   const createShop = useCreateMyPrintShop();
 
@@ -95,7 +83,6 @@ export function ShopSettings({ shop, isLoading }) {
         longitude: shop.longitude,
         workingHours: apiToUIWorkingHours(shop.working_hours),
       });
-
     }
   }, [shop]);
 
@@ -104,11 +91,7 @@ export function ShopSettings({ shop, isLoading }) {
     setHasChanges(true);
   };
 
-  const updateWorkingHour = (
-    day: string,
-    field: 'open' | 'close' | 'closed',
-    value: any
-  ) => {
+  const updateWorkingHour = (day: string, field: 'open' | 'close' | 'closed', value: any) => {
     setConfig((prev: any) => ({
       ...prev,
       workingHours: {
@@ -135,7 +118,6 @@ export function ShopSettings({ shop, isLoading }) {
         email: config.email,
         bank_account: config.bank_account,
       });
-
     } else {
       updateShop.mutate({
         name: config.name,
@@ -188,7 +170,6 @@ export function ShopSettings({ shop, isLoading }) {
             longitude: null,
             workingHours: apiToUIWorkingHours({}),
           });
-
         }}
       />
     );
@@ -199,105 +180,98 @@ export function ShopSettings({ shop, isLoading }) {
   return (
     <Box maxWidth={900}>
       <Typography variant="h5" mb={3}>
-        {createMode ? 'Kreiraj kopirnicu' : 'Podešavanja štamparije'}
+        {createMode ? t('admin.shopSettings.createShop') : t('admin.shopSettings.title')}
       </Typography>
 
       <Stack spacing={3}>
-
         {/* OSNOVNI PODACI */}
         {/* OSNOVNI PODACI */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" mb={2}>
-            🏢 Informacije o firmi
+            {t('admin.shopSettings.companyInfo')}
           </Typography>
 
           {!editingCompany ? (
             <Stack spacing={2}>
               <TextField
-                label="Naziv"
+                label={t('admin.shopSettings.name')}
                 value={config.name}
                 disabled
                 fullWidth
               />
 
               <TextField
-                label="Telefon"
+                label={t('admin.shopSettings.phone')}
                 value={config.phone}
                 disabled
                 fullWidth
               />
 
               <TextField
-                label="Email"
+                label={t('admin.shopSettings.email')}
                 value={config.email}
                 disabled
                 fullWidth
               />
 
               <TextField
-                label="Broj računa"
+                label={t('admin.shopSettings.bankAccount')}
                 value={config.bank_account}
                 disabled
                 fullWidth
               />
 
               <Chip
-                label={config.isActive ? 'Aktivna' : 'Neaktivna'}
+                label={
+                  config.isActive
+                    ? t('admin.shopSettings.active')
+                    : t('admin.shopSettings.inactive')
+                }
                 color={config.isActive ? 'success' : 'default'}
                 sx={{ width: 'fit-content' }}
               />
 
-              <Button
-                variant="outlined"
-                onClick={() => setEditingCompany(true)}
-              >
-                Promeni podatke
+              <Button variant="outlined" onClick={() => setEditingCompany(true)}>
+                {t('admin.shopSettings.changeData')}
               </Button>
             </Stack>
           ) : (
             <Stack spacing={2}>
               <TextField
-                label="Naziv"
+                label={t('admin.shopSettings.name')}
                 value={config.name}
                 onChange={(e) => updateField('name', e.target.value)}
                 fullWidth
               />
 
               <TextField
-                label="Telefon"
+                label={t('admin.shopSettings.phone')}
                 value={config.phone}
                 onChange={(e) => updateField('phone', e.target.value)}
                 fullWidth
               />
 
               <TextField
-                label="Email"
+                label={t('admin.shopSettings.email')}
                 value={config.email}
                 onChange={(e) => updateField('email', e.target.value)}
                 fullWidth
               />
 
               <TextField
-                label="Broj računa"
+                label={t('admin.shopSettings.bankAccount')}
                 value={config.bank_account}
                 onChange={(e) => updateField('bank_account', e.target.value)}
                 fullWidth
               />
 
               <Stack direction="row" spacing={2}>
-                <Button
-                  variant="contained"
-                  onClick={() => setEditingCompany(false)}
-                >
-                  Potvrdi
+                <Button variant="contained" onClick={() => setEditingCompany(false)}>
+                  {t('common.confirm')}
                 </Button>
 
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => setEditingCompany(false)}
-                >
-                  Otkaži
+                <Button variant="outlined" color="error" onClick={() => setEditingCompany(false)}>
+                  {t('common.cancel')}
                 </Button>
               </Stack>
             </Stack>
@@ -307,30 +281,27 @@ export function ShopSettings({ shop, isLoading }) {
         {/* LOKACIJA */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" mb={2}>
-            📍 Lokacija
+            {t('admin.shopSettings.location')}
           </Typography>
 
           {!editingLocation ? (
             <Stack spacing={2}>
               <TextField
-                label="Adresa"
+                label={t('admin.shopSettings.address')}
                 value={config.address}
                 disabled
                 fullWidth
               />
 
               <TextField
-                label="Grad"
+                label={t('admin.shopSettings.city')}
                 value={config.city}
                 disabled
                 fullWidth
               />
 
-              <Button
-                variant="outlined"
-                onClick={() => setEditingLocation(true)}
-              >
-                Promeni lokaciju
+              <Button variant="outlined" onClick={() => setEditingLocation(true)}>
+                {t('admin.shopSettings.changeLocation')}
               </Button>
             </Stack>
           ) : (
@@ -357,19 +328,12 @@ export function ShopSettings({ shop, isLoading }) {
               />
 
               <Stack direction="row" spacing={2}>
-                <Button
-                  variant="contained"
-                  onClick={() => setEditingLocation(false)}
-                >
-                  Potvrdi lokaciju
+                <Button variant="contained" onClick={() => setEditingLocation(false)}>
+                  {t('admin.shopSettings.confirmLocation')}
                 </Button>
 
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={() => setEditingLocation(false)}
-                >
-                  Otkaži
+                <Button variant="outlined" color="error" onClick={() => setEditingLocation(false)}>
+                  {t('common.cancel')}
                 </Button>
               </Stack>
             </Stack>
@@ -379,52 +343,37 @@ export function ShopSettings({ shop, isLoading }) {
         {/* RADNO VREME */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" mb={2}>
-            Radno vreme
+            {t('admin.shopSettings.workingHours')}
           </Typography>
 
           <Stack spacing={2}>
-            {Object.entries(config.workingHours).map(
-              ([day, value]: any) => (
-                <Stack
-                  key={day}
-                  direction="row"
-                  spacing={2}
-                  alignItems="center"
+            {Object.entries(config.workingHours).map(([day, value]: any) => (
+              <Stack key={day} direction="row" spacing={2} alignItems="center">
+                <Typography sx={{ width: 90 }}>{day.toUpperCase()}</Typography>
+
+                <TextField
+                  type="time"
+                  disabled={value.closed}
+                  value={value.open}
+                  onChange={(e) => updateWorkingHour(day, 'open', e.target.value)}
+                />
+
+                <TextField
+                  type="time"
+                  disabled={value.closed}
+                  value={value.close}
+                  onChange={(e) => updateWorkingHour(day, 'close', e.target.value)}
+                />
+
+                <Button
+                  size="small"
+                  variant={value.closed ? 'contained' : 'outlined'}
+                  onClick={() => updateWorkingHour(day, 'closed', !value.closed)}
                 >
-                  <Typography sx={{ width: 90 }}>
-                    {day.toUpperCase()}
-                  </Typography>
-
-                  <TextField
-                    type="time"
-                    disabled={value.closed}
-                    value={value.open}
-                    onChange={(e) =>
-                      updateWorkingHour(day, 'open', e.target.value)
-                    }
-                  />
-
-                  <TextField
-                    type="time"
-                    disabled={value.closed}
-                    value={value.close}
-                    onChange={(e) =>
-                      updateWorkingHour(day, 'close', e.target.value)
-                    }
-                  />
-
-                  <Button
-                    size="small"
-                    variant={value.closed ? 'contained' : 'outlined'}
-                    onClick={() =>
-                      updateWorkingHour(day, 'closed', !value.closed)
-                    }
-                  >
-                    {value.closed ? 'Zatvoreno' : 'Otvoreno'}
-                  </Button>
-                </Stack>
-              )
-            )}
+                  {value.closed ? t('admin.shopSettings.closed') : t('admin.shopSettings.open')}
+                </Button>
+              </Stack>
+            ))}
           </Stack>
         </Paper>
 
@@ -435,7 +384,7 @@ export function ShopSettings({ shop, isLoading }) {
             disabled={!hasChanges || updateShop.isPending}
             onClick={saveConfig}
           >
-            Sačuvaj izmene
+            {t('admin.shopSettings.saveChanges')}
           </Button>
         </Box>
       </Stack>

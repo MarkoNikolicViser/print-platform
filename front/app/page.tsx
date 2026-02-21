@@ -1,18 +1,16 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
-import Box from '@mui/material/Box';
 import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
+import Container from '@mui/material/Container';
+import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
+import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 import {
   Upload,
   Settings,
@@ -25,34 +23,35 @@ import {
   Linkedin,
   CreditCard,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useTranslation } from 'react-i18next';
 import '../styles/globals.css';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { alpha } from '@mui/material/styles';
 
 export default function LandingPage() {
   const theme = useTheme();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleHomeRedirect = () => router.push('/home');
   const handleStoreRedirect = () => router.push('/store');
 
   const navItems = [
-    { label: 'Kako radi', id: 'kako-radi' },
-    { label: 'Pogodnosti', id: 'pogodnosti' },
-    { label: 'Kontakt', id: 'kontakt' },
+    { label: t('landing.header.nav.howItWorks'), id: 'kako-radi' },
+    { label: t('landing.header.nav.benefits'), id: 'pogodnosti' },
+    { label: t('landing.header.nav.contact'), id: 'kontakt' },
   ];
 
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        background: `
-      linear-gradient(
-        180deg,
-        #F8FAFC 0%,
-        #F1F5F9 100%
-      )
-    `,
-        color: '#020617',
+        background: (theme) =>
+          `linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+        color: 'text.primary',
       }}
     >
       {/* AppBar */}
@@ -60,11 +59,10 @@ export default function LandingPage() {
         position="sticky"
         elevation={0}
         sx={{
-          bgcolor: 'background.paper',
+          bgcolor: (theme) => alpha(theme.palette.background.paper, 0.95),
           borderBottom: '1px solid',
           borderColor: 'divider',
           backdropFilter: 'blur(8px)',
-          opacity: 0.95,
         }}
       >
         <Toolbar sx={{ height: 72 }}>
@@ -105,18 +103,21 @@ export default function LandingPage() {
               ))}
             </Stack>
 
-            <Button
-              onClick={handleStoreRedirect}
-              variant="contained"
-              sx={{
-                borderRadius: '8px',
-                px: 3,
-                textTransform: 'none',
-                fontWeight: 600,
-              }}
-            >
-              Započni
-            </Button>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <LanguageSwitcher />
+              <Button
+                onClick={handleStoreRedirect}
+                variant="contained"
+                sx={{
+                  borderRadius: '8px',
+                  px: 3,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                }}
+              >
+                {t('landing.header.startButton')}
+              </Button>
+            </Stack>
           </Container>
         </Toolbar>
       </AppBar>
@@ -126,13 +127,10 @@ export default function LandingPage() {
         component="section"
         sx={{
           pt: { xs: 4, md: 8 },
-          background: `
-      radial-gradient(
-        circle at 20% 0%,
-        rgba(37,99,235,0.08),
-        transparent 40%
-      )
-    `,
+          background: (theme) =>
+            theme.palette.mode === 'light'
+              ? `radial-gradient(circle at 20% 0%, rgba(37,99,235,0.08), transparent 40%)`
+              : `radial-gradient(circle at 20% 0%, rgba(59,130,246,0.18), transparent 50%)`,
         }}
       >
         <Container maxWidth="lg" sx={{ py: { xs: 10, md: 16 } }}>
@@ -148,9 +146,9 @@ export default function LandingPage() {
                   letterSpacing: '-0.04em',
                 }}
               >
-                Štampanje{' '}
+                {t('landing.hero.title1')}{' '}
                 <Box component="span" sx={{ color: 'primary.main' }}>
-                  bez čekanja u redu
+                  {t('landing.hero.title2')}
                 </Box>
               </Typography>
 
@@ -164,8 +162,7 @@ export default function LandingPage() {
                   fontWeight: 400,
                 }}
               >
-                Okačite dokument online, izaberite tip štampe i preuzmite kada je gotovo.
-                Jednostavno, brzo i sigurno.
+                {t('landing.hero.description')}
               </Typography>
 
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 5 }}>
@@ -183,7 +180,7 @@ export default function LandingPage() {
                     boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.main}33`,
                   }}
                 >
-                  Započni štampanje
+                  {t('landing.hero.startPrintButton')}
                 </Button>
                 <Button
                   variant="outlined"
@@ -199,7 +196,7 @@ export default function LandingPage() {
                     borderColor: 'divider',
                   }}
                 >
-                  Saznaj više
+                  {t('landing.hero.learnMoreButton')}
                 </Button>
               </Stack>
             </Grid>
@@ -226,9 +223,9 @@ export default function LandingPage() {
         <Container maxWidth="lg" sx={{ py: 6 }}>
           <Grid container spacing={4} textAlign="center">
             {[
-              ['50+', 'Kopirnica u mreži'],
-              ['< 2min', 'Vreme za porudžbinu'],
-              ['24/7', 'Podrška i dostupnost'],
+              [t('landing.stats.value1'), t('landing.stats.label1')],
+              [t('landing.stats.value2'), t('landing.stats.label2')],
+              [t('landing.stats.value3'), t('landing.stats.label3')],
             ].map(([value, label]) => (
               <Grid key={label} size={{ xs: 12, md: 4 }}>
                 <Typography variant="h3" sx={{ fontWeight: 900, color: 'primary.main', mb: 0.5 }}>
@@ -255,7 +252,8 @@ export default function LandingPage() {
         component="section"
         id="kako-radi"
         sx={{
-          background: 'linear-gradient(180deg, #EFF6FF 0%, #F8FAFC 100%)',
+          background: (theme) =>
+            `linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
           scrollMarginTop: '72px',
           py: 14,
         }}
@@ -270,7 +268,7 @@ export default function LandingPage() {
                 letterSpacing: '-0.03em',
               }}
             >
-              Kako radi?
+              {t('landing.howItWorks.title')}
             </Typography>
             <Typography
               variant="h6"
@@ -282,7 +280,7 @@ export default function LandingPage() {
                 lineHeight: 1.6,
               }}
             >
-              Ceo proces je potpuno automatizovan. Pratite ova 4 koraka i zaboravite na čekanje.
+              {t('landing.howItWorks.subtitle')}
             </Typography>
           </Stack>
 
@@ -290,23 +288,23 @@ export default function LandingPage() {
             {[
               {
                 icon: Upload,
-                title: '1. Otpremite dokument',
-                desc: 'Otpremite PDF, Word ili slike direktno sa svog telefona ili računara.',
+                title: t('landing.howItWorks.step1Title'),
+                desc: t('landing.howItWorks.step1Desc'),
               },
               {
                 icon: Settings,
-                title: '2. Izaberite opcije',
-                desc: 'Podesite broj kopija, boju i format. Cena se automatski obračunava.',
+                title: t('landing.howItWorks.step2Title'),
+                desc: t('landing.howItWorks.step2Desc'),
               },
               {
                 icon: CreditCard,
-                title: '3. Platite online',
-                desc: 'Sigurno plaćanje karticom omogućava trenutnu obradu vaše porudžbine.',
+                title: t('landing.howItWorks.step3Title'),
+                desc: t('landing.howItWorks.step3Desc'),
               },
               {
                 icon: Package,
-                title: '4. Preuzmite štampu',
-                desc: 'Kada dobijete obaveštenje da je spremno, samo svratite po gotov materijal.',
+                title: t('landing.howItWorks.step4Title'),
+                desc: t('landing.howItWorks.step4Desc'),
               },
             ].map((step) => {
               const Icon = step.icon;
@@ -361,7 +359,7 @@ export default function LandingPage() {
         component="section"
         id="pogodnosti"
         sx={{
-          bgcolor: 'common.white',
+          bgcolor: 'background.default',
           scrollMarginTop: '72px',
           py: 14,
         }}
@@ -378,25 +376,25 @@ export default function LandingPage() {
                   mb: 3,
                 }}
               >
-                Zašto Go2Copy?
+                {t('landing.benefits.title')}
               </Typography>
               <Typography variant="h6" sx={{ color: 'text.secondary', mb: 6, fontWeight: 400 }}>
-                Uštedite vreme, izbegnite redove i imajte potpunu kontrolu nad svojom štampom.
+                {t('landing.benefits.subtitle')}
               </Typography>
 
               <Stack spacing={4}>
                 {[
                   {
-                    title: 'Bez čekanja u redu',
-                    desc: 'Dolazite samo kada je dokument spreman. Vaše vreme je dragoceno.',
+                    title: t('landing.benefits.point1Title'),
+                    desc: t('landing.benefits.point1Desc'),
                   },
                   {
-                    title: 'Transparentne cene',
-                    desc: 'Tačno znate koliko plaćate pre potvrde. Bez skrivenih troškova.',
+                    title: t('landing.benefits.point2Title'),
+                    desc: t('landing.benefits.point2Desc'),
                   },
                   {
-                    title: 'Sigurnost na prvom mestu',
-                    desc: 'Vaši dokumenti su kriptovani i brišu se odmah nakon preuzimanja.',
+                    title: t('landing.benefits.point3Title'),
+                    desc: t('landing.benefits.point3Desc'),
                   },
                 ].map((item) => (
                   <Stack key={item.title} direction="row" spacing={3}>
@@ -424,7 +422,10 @@ export default function LandingPage() {
                   p: 2,
                   border: '1px solid',
                   borderColor: 'divider',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
+                  boxShadow: (theme) =>
+                    theme.palette.mode === 'light'
+                      ? '0 20px 40px rgba(0,0,0,0.05)'
+                      : '0 20px 40px rgba(0,0,0,0.6)',
                 }}
               >
                 <Box
@@ -447,7 +448,8 @@ export default function LandingPage() {
         component="section"
         id="kontakt"
         sx={{
-          background: 'linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%)',
+          background: (theme) =>
+            `linear-gradient(180deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
           borderTop: '1px solid',
           borderColor: 'divider',
           scrollMarginTop: '72px',
@@ -464,13 +466,13 @@ export default function LandingPage() {
                 letterSpacing: '-0.03em',
               }}
             >
-              Kontaktirajte nas
+              {t('landing.contact.title')}
             </Typography>
             <Typography
               variant="h6"
               sx={{ color: 'text.secondary', fontWeight: 400, fontSize: '1.125rem' }}
             >
-              Imate pitanje ili želite saradnju? Naš tim je tu za vas.
+              {t('landing.contact.subtitle')}
             </Typography>
           </Stack>
 
@@ -489,7 +491,7 @@ export default function LandingPage() {
                 <Stack spacing={4}>
                   <Box>
                     <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800 }}>
-                      E-adresa
+                      {t('landing.contact.emailLabel')}
                     </Typography>
                     <Typography variant="h6" fontWeight={700}>
                       support@go2copy.rs
@@ -497,7 +499,7 @@ export default function LandingPage() {
                   </Box>
                   <Box>
                     <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800 }}>
-                      Telefon
+                      {t('landing.contact.phoneLabel')}
                     </Typography>
                     <Typography variant="h6" fontWeight={700}>
                       +381 60 123 4567
@@ -505,10 +507,10 @@ export default function LandingPage() {
                   </Box>
                   <Box>
                     <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800 }}>
-                      Radno vreme
+                      {t('landing.contact.hoursLabel')}
                     </Typography>
                     <Typography variant="h6" fontWeight={700}>
-                      Pon – Sub | 08:00 – 20:00
+                      {t('landing.contact.hoursValue')}
                     </Typography>
                   </Box>
                 </Stack>
@@ -527,20 +529,20 @@ export default function LandingPage() {
                 }}
               >
                 <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
-                  Brzi upit
+                  {t('landing.contact.quickInquiryTitle')}
                 </Typography>
                 <Stack spacing={2}>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Za sve poslovne ponude i tehničku podršku možete nas kontaktirati direktno.
-                    Odgovaramo u roku od 24 časa.
+                    {t('landing.contact.quickInquiryDesc')}
                   </Typography>
                   <Button
+                    onClick={() => router.push('/quick-inquiry')}
                     variant="contained"
                     size="large"
                     fullWidth
                     sx={{ mt: 2, borderRadius: 2 }}
                   >
-                    Pošalji poruku
+                    {t('landing.contact.quickInquiryButton')}
                   </Button>
                 </Stack>
               </Card>
@@ -561,22 +563,34 @@ export default function LandingPage() {
                 </Typography>
               </Stack>
               <Typography sx={{ color: 'grey.500', lineHeight: 1.8, maxWidth: 300 }}>
-                Prva onlajn platforma za štampanje u Srbiji koja štedi vaše vreme i novac.
+                {t('footer.description')}
               </Typography>
             </Grid>
 
             {[
               {
-                title: 'Proizvod',
-                links: ['Funkcionalnosti', 'Cene', 'FAQ'],
+                title: t('footer.product.title'),
+                links: [
+                  t('footer.product.features'),
+                  t('footer.product.pricing'),
+                  t('footer.product.faq'),
+                ],
               },
               {
-                title: 'Kompanija',
-                links: ['O nama', 'Blog', 'Karijera'],
+                title: t('footer.company.title'),
+                links: [
+                  t('footer.company.about'),
+                  t('footer.company.blog'),
+                  t('footer.company.careers'),
+                ],
               },
               {
-                title: 'Podrška',
-                links: ['Kontakt', 'Status', 'Privatnost'],
+                title: t('footer.support.title'),
+                links: [
+                  t('footer.support.contact'),
+                  t('footer.support.status'),
+                  t('footer.support.privacy'),
+                ],
               },
             ].map((section) => (
               <Grid key={section.title} size={{ xs: 6, md: 2 }}>
@@ -624,7 +638,7 @@ export default function LandingPage() {
             }}
           >
             <Typography sx={{ fontSize: 14, color: 'grey.600' }}>
-              © 2026 Go2Copy. Sva prava zadržana.
+              {t('footer.copyright')}
             </Typography>
 
             <Stack direction="row" spacing={3}>

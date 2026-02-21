@@ -1,5 +1,8 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
+import { GOOGLE_CLIENT_ID, GOOGLE_URI, STRAPI_REDIRECT_URI } from '@/helpers/constants';
+import GoogleIcon from '@mui/icons-material/Google';
 import {
   Box,
   Container,
@@ -14,17 +17,11 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useState } from 'react';
 import type React from 'react';
-import { useAuth } from '@/context/AuthContext';
-import GoogleIcon from '@mui/icons-material/Google';
-import {
-  GOOGLE_CLIENT_ID,
-  GOOGLE_URI,
-  STRAPI_REDIRECT_URI,
-} from '@/helpers/constants';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import { useTheme } from '@mui/material/styles';
+import { useTranslation } from 'react-i18next';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -57,6 +54,8 @@ export default function LoginPage() {
     confirmPassword: '',
   });
 
+  const { t } = useTranslation();
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -64,7 +63,7 @@ export default function LoginPage() {
     try {
       await login(loginData.email, loginData.password);
     } catch (err: any) {
-      setError(err.message || 'Greška pri prijavi');
+      setError(err.message || t('login.errorLogin'));
     }
   };
 
@@ -76,7 +75,7 @@ export default function LoginPage() {
       scope: 'openid email profile',
       access_type: 'offline',
       prompt: 'select_account',
-      state: JSON.stringify({ app_role: 'shop' })
+      state: JSON.stringify({ app_role: 'shop' }),
     };
 
     const queryString = new URLSearchParams(options).toString();
@@ -88,19 +87,14 @@ export default function LoginPage() {
     setError('');
 
     if (registerData.password !== registerData.confirmPassword) {
-      setError('Lozinke se ne poklapaju');
+      setError(t('login.errorPasswordMismatch'));
       return;
     }
 
     try {
-      await register(
-        registerData.email,
-        registerData.password,
-        registerData.name,
-        'shop'
-      );
+      await register(registerData.email, registerData.password, registerData.name, 'shop');
     } catch (err: any) {
-      setError(err.message || 'Greška pri registraciji');
+      setError(err.message || t('login.errorRegister'));
     }
   };
 
@@ -124,9 +118,7 @@ export default function LoginPage() {
             borderRadius: 4,
             backdropFilter: 'blur(10px)',
             background:
-              theme.palette.mode === 'dark'
-                ? 'rgba(17,24,39,0.7)'
-                : 'rgba(255,255,255,0.7)',
+              theme.palette.mode === 'dark' ? 'rgba(17,24,39,0.7)' : 'rgba(255,255,255,0.7)',
             boxShadow:
               theme.palette.mode === 'dark'
                 ? '0 10px 40px rgba(0,0,0,0.6)'
@@ -135,10 +127,8 @@ export default function LoginPage() {
           }}
         >
           <CircularProgress size={40} sx={{ color: '#f97316' }} />
-          <Typography
-            sx={{ mt: 2, fontSize: '0.9rem', color: 'text.secondary' }}
-          >
-            Učitavanje...
+          <Typography sx={{ mt: 2, fontSize: '0.9rem', color: 'text.secondary' }}>
+            {t('login.loading')}
           </Typography>
         </Box>
       </Box>
@@ -166,9 +156,7 @@ export default function LoginPage() {
             borderRadius: 4,
             backdropFilter: 'blur(14px)',
             background:
-              theme.palette.mode === 'dark'
-                ? 'rgba(17,24,39,0.85)'
-                : 'rgba(255,255,255,0.75)',
+              theme.palette.mode === 'dark' ? 'rgba(17,24,39,0.85)' : 'rgba(255,255,255,0.75)',
             border:
               theme.palette.mode === 'dark'
                 ? '1px solid rgba(255,255,255,0.06)'
@@ -203,7 +191,7 @@ export default function LoginPage() {
                 fontSize: { xs: '0.85rem', md: '0.95rem' },
               }}
             >
-              Profesionalno online štampanje bez čekanja
+              {t('login.subtitle')}
             </Typography>
           </Box>
 
@@ -225,10 +213,7 @@ export default function LoginPage() {
               '& .MuiTab-root': {
                 fontWeight: 600,
                 textTransform: 'none',
-                color:
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.6)'
-                    : 'inherit',
+                color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : 'inherit',
                 fontSize: { xs: '0.85rem', md: '0.95rem' },
                 '&.Mui-selected': {
                   color: theme.palette.mode === 'dark' ? '#fff' : 'inherit',
@@ -236,11 +221,16 @@ export default function LoginPage() {
               },
             }}
           >
-            <Tab label="Prijava" />
-            <Tab label="Registracija" />
+            <Tab label={t('login.tabLogin')} />
+            <Tab label={t('login.tabRegister')} />
           </Tabs>
 
-          <Divider sx={{ mb: 2, borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined }} />
+          <Divider
+            sx={{
+              mb: 2,
+              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
+            }}
+          />
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -260,51 +250,44 @@ export default function LoginPage() {
                 fontWeight: 600,
                 borderRadius: 2,
                 textTransform: 'none',
-                backgroundColor:
-                  theme.palette.mode === 'dark' ? '#1f2937' : '#fff',
-                borderColor:
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.1)'
-                    : '#e5e7eb',
-                color:
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.9)'
-                    : 'inherit',
+                backgroundColor: theme.palette.mode === 'dark' ? '#1f2937' : '#fff',
+                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e5e7eb',
+                color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.9)' : 'inherit',
                 '&:hover': {
-                  backgroundColor:
-                    theme.palette.mode === 'dark' ? '#273549' : '#f9fafb',
+                  backgroundColor: theme.palette.mode === 'dark' ? '#273549' : '#f9fafb',
                 },
               }}
             >
-              {isMobile ? 'Google' : 'Nastavi sa Google nalogom'}
+              {isMobile ? 'Google' : t('login.googleButton')}
             </Button>
 
-            <Divider sx={{ my: 3, borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined }}>ili</Divider>
+            <Divider
+              sx={{
+                my: 3,
+                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
+              }}
+            >
+              {t('login.or')}
+            </Divider>
 
             <Box component="form" onSubmit={handleLogin}>
               <TextField
                 fullWidth
-                label="Email"
+                label={t('login.emailLabel')}
                 type="email"
                 margin="normal"
                 size="small"
                 required
                 value={loginData.email}
-                onChange={(e) =>
-                  setLoginData({ ...loginData, email: e.target.value })
-                }
+                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.03)'
-                        : 'transparent',
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.12)'
-                        : undefined,
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
                   },
                 }}
               />
@@ -317,21 +300,15 @@ export default function LoginPage() {
                 size="small"
                 required
                 value={loginData.password}
-                onChange={(e) =>
-                  setLoginData({ ...loginData, password: e.target.value })
-                }
+                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.03)'
-                        : 'transparent',
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.12)'
-                        : undefined,
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
                   },
                 }}
               />
@@ -349,19 +326,17 @@ export default function LoginPage() {
                   fontWeight: 700,
                   textTransform: 'none',
                   fontSize: '0.95rem',
-                  background:
-                    'linear-gradient(135deg, #f97316, #ea580c)',
+                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
                   boxShadow: '0 8px 20px rgba(249,115,22,0.3)',
                   '&:hover': {
-                    background:
-                      'linear-gradient(135deg, #ea580c, #c2410c)',
+                    background: 'linear-gradient(135deg, #ea580c, #c2410c)',
                   },
                 }}
               >
                 {loading ? (
                   <CircularProgress size={22} sx={{ color: '#fff' }} />
                 ) : (
-                  'Prijavite se'
+                  t('login.loginButton')
                 )}
               </Button>
             </Box>
@@ -372,7 +347,7 @@ export default function LoginPage() {
             <Box component="form" onSubmit={handleRegister}>
               <TextField
                 fullWidth
-                label="Ime i prezime"
+                label={t('login.nameLabel')}
                 margin="normal"
                 required
                 size="small"
@@ -386,22 +361,18 @@ export default function LoginPage() {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.03)'
-                        : 'transparent',
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.12)'
-                        : undefined,
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
                   },
                 }}
               />
 
               <TextField
                 fullWidth
-                label="Email"
+                label={t('login.emailLabel')}
                 type="email"
                 margin="normal"
                 size="small"
@@ -416,22 +387,18 @@ export default function LoginPage() {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.03)'
-                        : 'transparent',
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.12)'
-                        : undefined,
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
                   },
                 }}
               />
 
               <TextField
                 fullWidth
-                label="Lozinka"
+                label={t('login.passwordLabel')}
                 type="password"
                 margin="normal"
                 size="small"
@@ -446,22 +413,18 @@ export default function LoginPage() {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.03)'
-                        : 'transparent',
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.12)'
-                        : undefined,
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
                   },
                 }}
               />
 
               <TextField
                 fullWidth
-                label="Potvrdite lozinku"
+                label={t('login.confirmPasswordLabel')}
                 type="password"
                 margin="normal"
                 size="small"
@@ -476,15 +439,11 @@ export default function LoginPage() {
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     backgroundColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.03)'
-                        : 'transparent',
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.12)'
-                        : undefined,
+                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
                   },
                 }}
               />
@@ -502,19 +461,17 @@ export default function LoginPage() {
                   fontWeight: 700,
                   textTransform: 'none',
                   fontSize: '0.95rem',
-                  background:
-                    'linear-gradient(135deg, #f97316, #ea580c)',
+                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
                   boxShadow: '0 8px 20px rgba(249,115,22,0.3)',
                   '&:hover': {
-                    background:
-                      'linear-gradient(135deg, #ea580c, #c2410c)',
+                    background: 'linear-gradient(135deg, #ea580c, #c2410c)',
                   },
                 }}
               >
                 {loading ? (
                   <CircularProgress size={22} sx={{ color: '#fff' }} />
                 ) : (
-                  'Napravite nalog'
+                  t('login.registerButton')
                 )}
               </Button>
             </Box>
@@ -529,7 +486,7 @@ export default function LoginPage() {
                 color: 'text.secondary',
               }}
             >
-              ← Nazad na početnu
+              {t('login.backToHome')}
             </Link>
           </Box>
         </Paper>

@@ -4,6 +4,7 @@ import { Container, Paper, Typography, Box, Button, Alert } from '@mui/material'
 import { CheckCircle, Printer as Print, User } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function SuccessPage() {
   const [orderDetails, setOrderDetails] = useState<any>(null);
@@ -11,6 +12,7 @@ export default function SuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Check if user is logged in
@@ -44,48 +46,48 @@ export default function SuccessPage() {
           gutterBottom
           sx={{ color: '#1e3a8a', fontWeight: 600 }}
         >
-          Porudžbina uspešno poslata!
+          {t('success.title')}
         </Typography>
 
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Vaša porudžbina je primljena i obrađuje se. Uskoro ćete dobiti email potvrdu.
+          {t('success.description')}
         </Typography>
 
         {orderDetails && (
           <Box sx={{ mb: 4, p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>
             <Typography variant="h6" gutterBottom sx={{ color: '#1e3a8a' }}>
-              Detalji porudžbine
+              {t('success.detailsTitle')}
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              <strong>ID porudžbine:</strong> {orderDetails.id}
+              <strong>{t('success.orderId')}:</strong> {orderDetails.id}
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              <strong>Copy Shop:</strong> {orderDetails.shopName}
+              <strong>{t('success.shop')}:</strong> {orderDetails.shopName}
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              <strong>Adresa:</strong> {orderDetails.shopAddress}
+              <strong>{t('success.address')}:</strong> {orderDetails.shopAddress}
             </Typography>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              <strong>Procenjeno vreme:</strong> {orderDetails.estimatedTime}
+              <strong>{t('success.estimatedTime')}:</strong> {orderDetails.estimatedTime}
             </Typography>
             <Typography variant="body2">
-              <strong>Kontakt:</strong> {orderDetails.contactPhone}
+              <strong>{t('success.contact')}:</strong> {orderDetails.contactPhone}
             </Typography>
           </Box>
         )}
 
         <Alert severity="info" sx={{ mb: 4, textAlign: 'left' }}>
           <Typography variant="body2">
-            <strong>Sledeći koraci:</strong>
+            <strong>{t('success.nextStepsTitle')}:</strong>
           </Typography>
           <Typography variant="body2" component="div" sx={{ mt: 1 }}>
-            1. Dobićete email potvrdu sa detaljima porudžbine
+            1. {t('success.nextStepsWaitEmail')}
             <br />
-            2. Copy shop će početi sa štampanjem
+            2. {t('success.nextStepsPrinting')}
             <br />
-            3. Kada bude gotovo, dobićete obaveštenje
+            3. {t('success.nextStepsNotification')}
             <br />
-            4. Pokupite gotove kopije u copy shopu
+            4. {t('success.nextStepsPickup')}
           </Typography>
         </Alert>
 
@@ -96,7 +98,7 @@ export default function SuccessPage() {
             onClick={() => router.push('/home')}
             sx={{ bgcolor: '#f97316', '&:hover': { bgcolor: '#ea580c' } }}
           >
-            Nova porudžbina
+            {t('success.newOrder')}
           </Button>
 
           {user && (
@@ -106,7 +108,7 @@ export default function SuccessPage() {
               onClick={() => router.push('/profile')}
               sx={{ color: '#1e3a8a', borderColor: '#1e3a8a' }}
             >
-              Moj profil
+              {t('success.myProfile')}
             </Button>
           )}
 
@@ -117,7 +119,7 @@ export default function SuccessPage() {
               onClick={() => router.push('/login')}
               sx={{ color: '#1e3a8a', borderColor: '#1e3a8a' }}
             >
-              Prijavite se
+              {t('success.login')}
             </Button>
           )}
         </Box>

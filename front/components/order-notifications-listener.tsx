@@ -1,8 +1,8 @@
 'use client';
 
 import { useOrderNotifications } from '@/hooks/useOrderNotifications';
-import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 export function OrderNotificationsListener() {
   const queryClient = useQueryClient();

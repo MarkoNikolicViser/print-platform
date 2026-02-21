@@ -1,5 +1,10 @@
 'use client';
 
+import { FileUploadSection } from '@/components/file-upload-section';
+import { Header } from '@/components/header';
+import { PrintConfigSection } from '@/components/print-config-section';
+import { ShopSelectionSection } from '@/components/shop-selection-section';
+import { usePrintContext } from '@/context/PrintContext';
 import {
   Box,
   Container,
@@ -12,21 +17,17 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
-
-import { FileUploadSection } from '@/components/file-upload-section';
-import { Header } from '@/components/header';
-import { PrintConfigSection } from '@/components/print-config-section';
-import { ShopSelectionSection } from '@/components/shop-selection-section';
-import { usePrintContext } from '@/context/PrintContext';
-
-const steps = [
-  'Otpremanje fajla',
-  'Podešavanje štampe',
-  'Izbor lokacije',
-];
+import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function HomePage() {
+  const { t } = useTranslation();
+
+  const steps = useMemo(
+    () => [t('home.steps.upload'), t('home.steps.config'), t('home.steps.location')],
+    [t],
+  );
+
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<{ [k: number]: boolean }>({});
   const { selectedTemplate, selectedShop } = usePrintContext();
@@ -80,13 +81,13 @@ export default function HomePage() {
             sx={{
               fontSize: {
                 xs: '1.5rem', // mobile
-                sm: '2rem',   // small tablets
+                sm: '2rem', // small tablets
                 md: '2.5rem', // desktop
               },
               lineHeight: 1.2,
             }}
           >
-            Štampanje bez čekanja
+            {t('home.heroTitle')}
           </Typography>
 
           <Typography
@@ -101,10 +102,9 @@ export default function HomePage() {
               lineHeight: 1.5,
             }}
           >
-            Otpremite fajlove, platite online i pokupite kopije
+            {t('home.heroSubtitle')}
           </Typography>
         </Box>
-
 
         <Card
           elevation={4}
@@ -153,10 +153,8 @@ export default function HomePage() {
                               : isDisabled
                                 ? 'text.disabled'
                                 : 'text.primary',
-                            borderBottom:
-                              activeStep === index ? '2px solid' : 'none',
-                            borderColor:
-                              activeStep === index ? 'primary.main' : 'transparent',
+                            borderBottom: activeStep === index ? '2px solid' : 'none',
+                            borderColor: activeStep === index ? 'primary.main' : 'transparent',
                           },
                         }}
                       >
@@ -173,10 +171,7 @@ export default function HomePage() {
               sx={{
                 transition: 'opacity 0.4s ease, transform 0.4s ease',
                 opacity: activeStep === 0 ? 1 : 0,
-                transform:
-                  activeStep === 0
-                    ? 'translateY(0)'
-                    : 'translateY(10px)',
+                transform: activeStep === 0 ? 'translateY(0)' : 'translateY(10px)',
                 mb: 2,
               }}
             >
@@ -187,10 +182,7 @@ export default function HomePage() {
               sx={{
                 transition: 'opacity 0.4s ease, transform 0.4s ease',
                 opacity: activeStep === 1 ? 1 : 0,
-                transform:
-                  activeStep === 1
-                    ? 'translateY(0)'
-                    : 'translateY(10px)',
+                transform: activeStep === 1 ? 'translateY(0)' : 'translateY(10px)',
                 mb: 2,
               }}
             >
@@ -210,10 +202,7 @@ export default function HomePage() {
               sx={{
                 transition: 'opacity 0.4s ease, transform 0.4s ease',
                 opacity: activeStep === 2 ? 1 : 0,
-                transform:
-                  activeStep === 2
-                    ? 'translateY(0)'
-                    : 'translateY(10px)',
+                transform: activeStep === 2 ? 'translateY(0)' : 'translateY(10px)',
               }}
             >
               {activeStep === 2 && <ShopSelectionSection />}

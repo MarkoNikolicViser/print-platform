@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import {
   Box,
   TextField,
@@ -12,18 +12,17 @@ import {
   Stack,
   CircularProgress,
 } from '@mui/material';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // Fix za Next.js i Leaflet marker ikone
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl:
-    'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
 type Suggestion = {
@@ -46,6 +45,7 @@ export default function AddressPicker({
   visible = true,
   initial,
 }: AddressPickerProps) {
+  const { t } = useTranslation();
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -67,10 +67,9 @@ export default function AddressPicker({
       attributionControl: true,
     });
 
-    L.tileLayer(
-      `https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`,
-      { attribution: '© OpenStreetMap contributors, © Geoapify' }
-    ).addTo(map);
+    L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`, {
+      attribution: '© OpenStreetMap contributors, © Geoapify',
+    }).addTo(map);
 
     mapRef.current = map;
     setTimeout(() => map.invalidateSize(), 150);
@@ -85,11 +84,7 @@ export default function AddressPicker({
   }, []);
 
   useEffect(() => {
-    if (
-      initial &&
-      typeof initial.lat === 'number' &&
-      typeof initial.lng === 'number'
-    ) {
+    if (initial && typeof initial.lat === 'number' && typeof initial.lng === 'number') {
       setMarker(initial.lat, initial.lng);
       setSelected(true);
     }
@@ -166,13 +161,13 @@ export default function AddressPicker({
   const handleCurrentLocation = async () => {
     try {
       const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject)
+        navigator.geolocation.getCurrentPosition(resolve, reject),
       );
       const { latitude, longitude } = pos.coords;
       setMarker(latitude, longitude);
 
       const res = await fetch(
-        `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`,
       );
       const data = await res.json();
       const address = data.features?.[0]?.properties?.formatted || '';
@@ -183,7 +178,7 @@ export default function AddressPicker({
       onSelect({ address, lat: latitude, lng: longitude, city });
     } catch (err: any) {
       console.error(err);
-      alert('Ne možemo dobiti lokaciju.');
+      alert(t('addressPicker.locationError'));
     }
   };
 
@@ -192,24 +187,22 @@ export default function AddressPicker({
       <Stack direction="row" spacing={2} mb={1}>
         <TextField
           fullWidth
-          label="Adresa kopirnice"
+          label={t('addressPicker.label')}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
             setSelected(false); // reset autocomplete kada korisnik kuca novo
           }}
-          placeholder="Unesite najmanje 3 slova…"
+          placeholder={t('addressPicker.placeholder')}
         />
-        <Button
-          variant="outlined"
-          startIcon={<MyLocationIcon />}
-          onClick={handleCurrentLocation}
-        >
-          Moja lokacija
+        <Button variant="outlined" startIcon={<MyLocationIcon />} onClick={handleCurrentLocation}>
+          {t('addressPicker.myLocation')}
         </Button>
       </Stack>
 
-      {loadingAuto && <CircularProgress size={20} sx={{ position: 'absolute', top: 45, right: 10 }} />}
+      {loadingAuto && (
+        <CircularProgress size={20} sx={{ position: 'absolute', top: 45, right: 10 }} />
+      )}
 
       {suggestions.length > 0 && (
         <Paper

@@ -1,6 +1,8 @@
 'use client';
 
 import { usePrintContext } from '@/context/PrintContext';
+import { isItImage } from '@/helpers/formatters';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   Card,
   CardHeader,
@@ -22,10 +24,10 @@ import {
   useTheme,
 } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
-import { useFileUpload } from '@/hooks/useFileUpload';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import { isItImage } from '@/helpers/formatters';
+
+import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
 
 interface OptionField {
   type: 'number' | 'select' | 'radio' | 'checkbox';
@@ -37,6 +39,8 @@ interface OptionField {
 }
 
 export function PrintConfigSection({ onNextStep }) {
+  const { t } = useTranslation();
+
   const {
     file,
     selectedTemplate,
@@ -50,7 +54,7 @@ export function PrintConfigSection({ onNextStep }) {
   const { uploadFile, loading: uploading } = useFileUpload();
   const [open, setOpen] = useState(false);
   const [image, setImage] = useState<string | null>(null);
-  const theme = useTheme()
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const updateConfig = (key: string, value: any) => {
@@ -71,26 +75,29 @@ export function PrintConfigSection({ onNextStep }) {
   }, [selectedTemplate]);
   const disabled = !file || !selectedTemplate; // 👈 disable if file is empty
 
-  const handleUploadCropped = useCallback(async (editedFile: File) => {
-    try {
-      const res = await uploadFile(editedFile);
-      if (!res.success) {
-        toast(`Greska pri editu`, {
+  const handleUploadCropped = useCallback(
+    async (editedFile: File) => {
+      try {
+        const res = await uploadFile(editedFile);
+        if (!res.success) {
+          toast(t('home.printConfig.editError'), {
+            type: 'error',
+          });
+          return;
+        }
+        const url = res.url ?? '';
+        setFileInfo((prev) => (prev ? { ...prev, url } : prev));
+        toast(t('home.printConfig.editSuccess'), {
+          type: 'success',
+        });
+      } catch (err) {
+        toast(t('home.printConfig.editError'), {
           type: 'error',
         });
-        return;
       }
-      const url = res.url ?? '';
-      setFileInfo((prev) => (prev ? { ...prev, url } : prev));
-      toast(`Uspesno editovanje slike`, {
-        type: 'success',
-      });
-    } catch (err) {
-      toast(`Greska pri editu`, {
-        type: 'error',
-      });
-    }
-  }, []);
+    },
+    [setFileInfo, t, uploadFile],
+  );
 
   return (
     <Card elevation={isMobile ? 4 : 0} sx={{ boxShadow: 'none' }}>
@@ -99,10 +106,10 @@ export function PrintConfigSection({ onNextStep }) {
           <Typography
             variant="h6"
             color="primary"
-            align='center'
+            align="center"
             sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
           >
-            Popunite opcije da vidite procenu
+            {t('home.printConfig.title')}
           </Typography>
         }
       />
@@ -119,11 +126,11 @@ export function PrintConfigSection({ onNextStep }) {
           <Grid size={{ xs: 12, md: 6 }}>
             {printConfig && (
               <FormControl fullWidth disabled={disabled}>
-                <InputLabel>Broj primeraka</InputLabel>
+                <InputLabel>{t('home.printConfig.copies')}</InputLabel>
                 <Select
                   value={quantity} // safety
                   onChange={(e) => setQuantity(Number(e.target.value))}
-                  label={'Broj Primeraka'}
+                  label={t('home.printConfig.copies')}
                 >
                   {' '}
                   {[...Array(10)].map((_, i) => (
@@ -201,7 +208,7 @@ export function PrintConfigSection({ onNextStep }) {
                 setOpen(true);
               }}
             >
-              Crop Image
+              {t('home.printConfig.cropImage')}
             </Button>
           ) : null}
 
@@ -216,12 +223,8 @@ export function PrintConfigSection({ onNextStep }) {
           )}
         </>
         <Box mt={4} textAlign="center">
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => onNextStep?.()}
-          >
-            Sledeći korak
+          <Button variant="contained" color="primary" onClick={() => onNextStep?.()}>
+            {t('home.printConfig.nextStep')}
           </Button>
         </Box>
       </CardContent>

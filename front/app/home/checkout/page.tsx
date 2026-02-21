@@ -1,14 +1,15 @@
 'use client';
 
 import { Header } from '@/components/header';
+import { useMarkOrderPaid } from '@/hooks/useMarkOrderPaid';
+import { useOrderItems } from '@/hooks/useOrderItems';
+import { Box, Typography, Paper, Stack, Button, Container, Divider } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { Box, Typography, Paper, Stack, Button, Container, Divider } from '@mui/material';
-
-import { useOrderItems } from '@/hooks/useOrderItems';
-import { useMarkOrderPaid } from '@/hooks/useMarkOrderPaid';
+import { useTranslation } from 'react-i18next';
 
 export default function CheckoutPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [orderCode, setOrderCode] = useState<string | null>(null);
 
@@ -16,10 +17,13 @@ export default function CheckoutPage() {
 
   const handlePayment = () => {
     const orderCode = localStorage.getItem('order_code');
+    if (!orderCode) {
+      return;
+    }
     const payload = {
       order_code: orderCode,
       customer_email: 'kupac@test.com',
-      provider: 'PayPal',
+      provider: 'PayPal' as const,
       provider_payment_id: 'PAYID-MOCK-9ABCD12345',
       amount: 1499.0,
       fee: 59.0,
@@ -43,7 +47,7 @@ export default function CheckoutPage() {
       <Box minHeight="100vh" bgcolor="background.default">
         <Header />
         <Container maxWidth="sm" sx={{ py: 4 }}>
-          <Typography align="center">Učitava se checkout…</Typography>
+          <Typography align="center">{t('checkout.loading')}</Typography>
         </Container>
       </Box>
     );
@@ -55,7 +59,7 @@ export default function CheckoutPage() {
         <Header />
         <Container maxWidth="sm" sx={{ py: 4 }}>
           <Typography align="center" color="error">
-            Greška pri učitavanju narudžbine.
+            {t('checkout.loadError')}
           </Typography>
         </Container>
       </Box>
@@ -77,7 +81,9 @@ export default function CheckoutPage() {
     if (!acc[key]) {
       acc[key] = {
         name:
-          item.product_template?.description ?? item.product_template?.name ?? 'Nepoznata usluga',
+          item.product_template?.description ??
+          item.product_template?.name ??
+          t('checkout.unknownService'),
         quantity: 0,
       };
     }
@@ -104,7 +110,7 @@ export default function CheckoutPage() {
 
       <Container maxWidth="sm" sx={{ py: 4 }}>
         <Typography variant="h5" fontWeight={600} gutterBottom>
-          Plaćanje
+          {t('checkout.title')}
         </Typography>
 
         {/* ORDER SUMMARY */}
@@ -112,12 +118,14 @@ export default function CheckoutPage() {
           <Stack spacing={2}>
             {/* USLUGA / USLUGE */}
             <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-              <Typography color="text.secondary">Usluga</Typography>
+              <Typography color="text.secondary">{t('checkout.service')}</Typography>
 
               <Stack alignItems="flex-end" spacing={0.5}>
                 {hasMultipleServices ? (
                   <>
-                    <Typography fontWeight={500}>Više usluga ({services.length})</Typography>
+                    <Typography fontWeight={500}>
+                      {t('checkout.multipleServices', { count: services.length })}
+                    </Typography>
 
                     {services.map((s: any, idx: number) => (
                       <Typography key={idx} variant="caption" color="text.secondary">
@@ -133,7 +141,7 @@ export default function CheckoutPage() {
 
             {/* KOLIČINA */}
             <Stack direction="row" justifyContent="space-between">
-              <Typography color="text.secondary">Ukupna količina</Typography>
+              <Typography color="text.secondary">{t('checkout.totalQuantity')}</Typography>
               <Typography fontWeight={500}>{totalQuantity}</Typography>
             </Stack>
 
@@ -141,7 +149,7 @@ export default function CheckoutPage() {
 
             {/* TOTAL */}
             <Stack direction="row" justifyContent="space-between">
-              <Typography fontWeight={600}>Ukupno za plaćanje</Typography>
+              <Typography fontWeight={600}>{t('checkout.totalToPay')}</Typography>
               <Typography variant="h6">{currencyFmt.format(Number(data.total))}</Typography>
             </Stack>
           </Stack>
@@ -150,11 +158,11 @@ export default function CheckoutPage() {
         {/* PAYPAL */}
         <Paper variant="outlined" sx={{ p: 3, mt: 3 }}>
           <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-            Plaćanje karticom
+            {t('checkout.cardPayment')}
           </Typography>
 
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            Sigurno plaćanje putem PayPal sistema. PayPal nalog nije potreban.
+            {t('checkout.cardPaymentDescription')}
           </Typography>
 
           {/* ovde ide PayPalButtons */}
@@ -169,18 +177,18 @@ export default function CheckoutPage() {
             }}
           >
             <Typography variant="caption" color="text.secondary">
-              PayPal Card Payment UI
+              {t('checkout.paypalPlaceholder')}
             </Typography>
           </Box>
 
           <Button fullWidth size="large" variant="contained" onClick={handlePayment}>
-            Plati {currencyFmt.format(Number(data.total))}
+            {t('checkout.pay')} {currencyFmt.format(Number(data.total))}
           </Button>
         </Paper>
 
         <Stack direction="row" justifyContent="flex-end" mt={2}>
           <Button variant="text" onClick={() => router.push('/home/cart')}>
-            Nazad na korpu
+            {t('checkout.backToCart')}
           </Button>
         </Stack>
       </Container>

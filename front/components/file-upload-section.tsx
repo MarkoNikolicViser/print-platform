@@ -1,6 +1,10 @@
 'use client';
 
 import { usePrintContext } from '@/context/PrintContext';
+import { isItImage } from '@/helpers/formatters';
+import { allowedFileTypes } from '@/hooks/useFileUpload';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import {
   Box,
   Typography,
@@ -19,14 +23,14 @@ import {
 } from '@mui/material';
 import { Upload, FileText, AlertCircle, X, ShieldCheck } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { PrintTypeSelector } from './print-type-selector';
-import { allowedFileTypes } from '@/hooks/useFileUpload';
-import { useFileUpload } from '@/hooks/useFileUpload';
+import { useTranslation } from 'react-i18next';
+
 import { PreviewModal } from './PreviewRenderer';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { isItImage } from '@/helpers/formatters';
+import { PrintTypeSelector } from './print-type-selector';
 
 export function FileUploadSection() {
+  const { t } = useTranslation();
+
   const {
     file,
     setFile,
@@ -53,11 +57,11 @@ export function FileUploadSection() {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
 
     if (!allowedFileTypes.includes(ext)) {
-      return `Dozvoljeni formati: ${allowedFileTypes.join(', ')}`;
+      return t('home.fileUpload.allowedFormats', { formats: allowedFileTypes.join(', ') });
     }
 
     if (file.size > maxFileSize) {
-      return 'Maksimalna veličina fajla je 50MB.';
+      return t('home.fileUpload.maxSizeError');
     }
 
     return null;
@@ -93,25 +97,24 @@ export function FileUploadSection() {
         const res = await uploadFile(file);
 
         if (!res.success) {
-          throw new Error(res.error || 'Greška pri otpremanju.');
+          throw new Error(res.error || t('home.fileUpload.uploadError'));
         }
 
         setFileInfo((prev) =>
           prev
             ? {
-              ...prev,
-              pages: res.pageCount,
-              url: res.url,
-            }
+                ...prev,
+                pages: res.pageCount,
+                url: res.url,
+              }
             : prev,
         );
 
         if (res.url) setUploadedUrl(res.url);
 
         setDone(true);
-
       } catch (e: any) {
-        setError(e?.message || 'Greška pri otpremanju.');
+        setError(e?.message || t('home.fileUpload.uploadError'));
         setFile(null);
         setFileInfo(null);
         setDone(false);
@@ -132,17 +135,22 @@ export function FileUploadSection() {
 
   return (
     <Card elevation={isMobile ? 4 : 0} sx={{ borderRadius: 3, boxShadow: 'none' }}>
-      <CardHeader title={
-        <Typography variant="h6" align="center"
-          sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.1rem' }, }} >
-          Bezbedan upload dokumenta
-        </Typography>} />
+      <CardHeader
+        title={
+          <Typography
+            variant="h6"
+            align="center"
+            sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.1rem' } }}
+          >
+            {t('home.fileUpload.title')}
+          </Typography>
+        }
+      />
 
       <CardContent>
-
         {error && (
           <Alert severity="error" icon={<AlertCircle size={18} />} sx={{ mb: 3 }}>
-            <AlertTitle>Greška</AlertTitle>
+            <AlertTitle>{t('home.fileUpload.errorTitle')}</AlertTitle>
             {error}
           </Alert>
         )}
@@ -154,9 +162,7 @@ export function FileUploadSection() {
               type="file"
               accept={allowedFileTypes.join(',')}
               disabled={uploading}
-              onChange={(e) =>
-                e.target.files && selectFile(e.target.files[0])
-              }
+              onChange={(e) => e.target.files && selectFile(e.target.files[0])}
             />
 
             <Paper
@@ -185,14 +191,14 @@ export function FileUploadSection() {
                 <>
                   <CircularProgress size={26} />
                   <Typography mt={2} fontWeight={600}>
-                    Otpremanje...
+                    {t('home.fileUpload.uploading')}
                   </Typography>
                 </>
               ) : (
                 <>
                   <Upload size={isMobile ? 28 : 40} />
                   <Typography mt={2} fontWeight={700}>
-                    Kliknite ili prevucite fajl
+                    {t('home.fileUpload.clickOrDrag')}
                   </Typography>
                   <Typography
                     variant="caption"
@@ -239,46 +245,30 @@ export function FileUploadSection() {
                     color="text.secondary"
                     sx={{ display: 'block', mt: 0.5 }}
                   >
-                    {fileInfo?.size
-                      ? formatSize(fileInfo.size)
-                      : null}
-                    {fileInfo?.pages &&
-                      !isItImage(fileInfo?.type)
-                      ? ` • ${fileInfo.pages} stranica`
+                    {fileInfo?.size ? formatSize(fileInfo.size) : null}
+                    {fileInfo?.pages && !isItImage(fileInfo?.type)
+                      ? ` • ${t('home.fileUpload.pages', { count: fileInfo.pages })}`
                       : null}
                   </Typography>
 
-                  <Box
-                    mt={2}
-                    display="flex"
-                    gap={1}
-                    flexWrap="wrap"
-                  >
+                  <Box mt={2} display="flex" gap={1} flexWrap="wrap">
                     {uploading && (
-                      <Chip
-                        size="small"
-                        color="info"
-                        label="Otpremanje..."
-                      />
+                      <Chip size="small" color="info" label={t('home.fileUpload.uploading')} />
                     )}
                     {uploadedUrl && (
-                      <Chip
-                        size="small"
-                        color="primary"
-                        label="Otpremljeno"
-                      />
+                      <Chip size="small" color="primary" label={t('home.fileUpload.uploaded')} />
                     )}
                     <Chip
                       size="small"
                       color={done ? 'success' : 'warning'}
                       label={
-                        done ? 'Obrađeno' : 'Nije obrađeno'
+                        done ? t('home.fileUpload.processed') : t('home.fileUpload.notProcessed')
                       }
                     />
                     <Chip
                       size="small"
                       icon={<VisibilityIcon />}
-                      label="Pregled"
+                      label={t('home.fileUpload.preview')}
                       disabled={!done}
                       onClick={() => setPreviewOpen(true)}
                     />
@@ -312,24 +302,16 @@ export function FileUploadSection() {
         >
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <ShieldCheck size={18} />
-            <Typography fontWeight={700}>
-              Vaš dokument je zaštićen
-            </Typography>
+            <Typography fontWeight={700}>{t('home.fileUpload.securityTitle')}</Typography>
           </Box>
 
           <Divider sx={{ my: 1 }} />
 
-          <Typography variant="body2">
-            Dokument je vidljiv samo izabranoj kopirnici i briše se nakon završetka štampe.
-          </Typography>
+          <Typography variant="body2">{t('home.fileUpload.securityDescription')}</Typography>
         </Paper>
 
         <Box mt={{ xs: 3, md: 4 }}>
-          <PrintTypeSelector
-            fileUploaded={done}
-            uploading={uploading}
-            documentMime={file?.type}
-          />
+          <PrintTypeSelector fileUploaded={done} uploading={uploading} documentMime={file?.type} />
         </Box>
 
         <PreviewModal

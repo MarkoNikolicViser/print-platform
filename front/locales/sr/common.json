@@ -1,0 +1,438 @@
+{
+  "landing": {
+    "hero": {
+      "title1": "Štampanje",
+      "title2": "bez čekanja u redu",
+      "description": "Okačite dokument online, izaberite tip štampe i preuzmite kada je gotovo. Jednostavno, brzo i sigurno.",
+      "startPrintButton": "Započni štampanje",
+      "learnMoreButton": "Saznaj više"
+    },
+    "stats": {
+      "value1": "50+",
+      "label1": "Kopirnica u mreži",
+      "value2": "< 2min",
+      "label2": "Vreme za porudžbinu",
+      "value3": "24/7",
+      "label3": "Podrška i dostupnost"
+    },
+    "howItWorks": {
+      "title": "Kako radi?",
+      "subtitle": "Ceo proces je potpuno automatizovan. Pratite ova 4 koraka i zaboravite na čekanje.",
+      "step1Title": "1. Otpremite dokument",
+      "step1Desc": "Otpremite PDF, Word ili slike direktno sa svog telefona ili računara.",
+      "step2Title": "2. Izaberite opcije",
+      "step2Desc": "Podesite broj kopija, boju i format. Cena se automatski obračunava.",
+      "step3Title": "3. Platite online",
+      "step3Desc": "Sigurno plaćanje karticom omogućava trenutnu obradu vaše porudžbine.",
+      "step4Title": "4. Preuzmite štampu",
+      "step4Desc": "Kada dobijete obaveštenje da je spremno, samo svratite po gotov materijal."
+    },
+    "benefits": {
+      "title": "Zašto Go2Copy?",
+      "subtitle": "Uštedite vreme, izbegnite redove i imajte potpunu kontrolu nad svojom štampom.",
+      "point1Title": "Bez čekanja u redu",
+      "point1Desc": "Dolazite samo kada je dokument spreman. Vaše vreme je dragoceno.",
+      "point2Title": "Transparentne cene",
+      "point2Desc": "Tačno znate koliko plaćate pre potvrde. Bez skrivenih troškova.",
+      "point3Title": "Sigurnost na prvom mestu",
+      "point3Desc": "Vaši dokumenti su kriptovani i brišu se odmah nakon preuzimanja."
+    },
+    "contact": {
+      "title": "Kontaktirajte nas",
+      "subtitle": "Imate pitanje ili želite saradnju? Naš tim je tu za vas.",
+      "emailLabel": "E-adresa",
+      "phoneLabel": "Telefon",
+      "hoursLabel": "Radno vreme",
+      "hoursValue": "Pon – Sub | 08:00 – 20:00",
+      "quickInquiryTitle": "Brzi upit",
+      "quickInquiryDesc": "Za sve poslovne ponude i tehničku podršku možete nas kontaktirati direktno. Odgovaramo u roku od 24 časa.",
+      "quickInquiryButton": "Pošalji poruku"
+    },
+    "header": {
+      "nav": {
+        "howItWorks": "Kako radi",
+        "benefits": "Pogodnosti",
+        "contact": "Kontakt"
+      },
+      "startButton": "Započni"
+    }
+  },
+  "login": {
+    "subtitle": "Profesionalno online štampanje bez čekanja",
+    "tabLogin": "Prijava",
+    "tabRegister": "Registracija",
+    "googleButton": "Nastavi sa Google nalogom",
+    "or": "ili",
+    "emailLabel": "Email",
+    "passwordLabel": "Lozinka",
+    "loginButton": "Prijavite se",
+    "nameLabel": "Ime i prezime",
+    "confirmPasswordLabel": "Potvrdite lozinku",
+    "registerButton": "Napravite nalog",
+    "backToHome": "← Nazad na početnu",
+    "errorLogin": "Greška pri prijavi",
+    "errorRegister": "Greška pri registraciji",
+    "errorPasswordMismatch": "Lozinke se ne poklapaju",
+    "loading": "Učitavanje..."
+  },
+  "store": {
+    "tabs": {
+      "orders": "Narudžbine",
+      "pricing": "Cene",
+      "settings": "Podešavanja"
+    },
+    "loading": "Učitavanje..."
+  },
+  "profile": {
+    "title": "Moj Profil",
+    "logoutButton": "Odjavi se",
+    "userInfoTitle": "Informacije o korisniku",
+    "nameLabel": "Ime",
+    "emailLabel": "Email",
+    "orderHistoryTitle": "Istorija štampanja ({{count}} porudžbina)",
+    "noOrdersMessage": "Nemate još uvek nijednu porudžbinu.",
+    "startPrintingButton": "Počnite štampanje",
+    "orderLabel": "Porudžbina",
+    "shopLabel": "Copy Shop",
+    "copiesLabel": "Broj kopija",
+    "optionsLabel": "Opcije",
+    "color": "U boji",
+    "bw": "Crno-belo",
+    "duplex": "Duplex",
+    "simplex": "Jednostrano",
+    "totalPriceLabel": "Ukupna cena",
+    "readyMessage": "Vaša porudžbina je spremna za preuzimanje u {{shopName}}!",
+    "newOrderButton": "Nova porudžbina",
+    "status": {
+      "completed": "Završeno",
+      "ready": "Spremno za preuzimanje",
+      "processing": "U obradi",
+      "pending": "Na čekanju"
+    }
+  },
+  "home": {
+    "heroTitle": "Štampanje bez čekanja",
+    "heroSubtitle": "Otpremite fajlove, platite online i pokupite kopije",
+    "steps": {
+      "upload": "Otpremanje fajla",
+      "config": "Podešavanje štampe",
+      "location": "Izbor lokacije"
+    },
+    "fileUpload": {
+      "title": "Bezbedan upload dokumenta",
+      "errorTitle": "Greška",
+      "allowedFormats": "Dozvoljeni formati: {{formats}}",
+      "maxSizeError": "Maksimalna veličina fajla je 50MB.",
+      "uploadError": "Greška pri otpremanju.",
+      "uploading": "Otpremanje...",
+      "clickOrDrag": "Kliknite ili prevucite fajl",
+      "pages": "{{count}} stranica",
+      "uploaded": "Otpremljeno",
+      "processed": "Obrađeno",
+      "notProcessed": "Nije obrađeno",
+      "preview": "Pregled",
+      "securityTitle": "Vaš dokument je zaštićen",
+      "securityDescription": "Dokument je vidljiv samo izabranoj kopirnici i briše se nakon završetka štampe."
+    },
+    "printConfig": {
+      "title": "Popunite opcije da vidite procenu",
+      "copies": "Broj primeraka",
+      "cropImage": "Iseci sliku",
+      "nextStep": "Sledeći korak",
+      "editError": "Greška pri obradi slike",
+      "editSuccess": "Slika je uspešno izmenjena"
+    },
+    "shopSelection": {
+      "title": "Pronađite najbližu ili najjeftiniju štampariju",
+      "searchPlaceholder": "Pretražite štamparije...",
+      "cityLabel": "Grad",
+      "allCities": "Svi gradovi",
+      "nearest": "Najbliže",
+      "cheapest": "Najjeftinije",
+      "bestRated": "Najbolje ocenjene",
+      "list": "Lista",
+      "map": "Mapa",
+      "interactiveMap": "Interaktivna mapa",
+      "noShops": "Nema štamparija koje odgovaraju vašim kriterijumima",
+      "workingHours": "Radno vreme",
+      "dayOff": "Neradan dan",
+      "addToCart": "Dodaj u korpu i nastavi kupovinu",
+      "payNow": "Plati i poruči odmah"
+    },
+    "printTypeSelector": {
+      "selectTypeWarning": "*Izaberite način štampe kako biste nastavili sa podešavanjem opcija."
+    }
+  },
+  "checkout": {
+    "loading": "Učitava se checkout…",
+    "loadError": "Greška pri učitavanju narudžbine.",
+    "unknownService": "Nepoznata usluga",
+    "title": "Plaćanje",
+    "service": "Usluga",
+    "multipleServices": "Više usluga ({{count}})",
+    "totalQuantity": "Ukupna količina",
+    "totalToPay": "Ukupno za plaćanje",
+    "cardPayment": "Plaćanje karticom",
+    "cardPaymentDescription": "Sigurno plaćanje putem PayPal sistema. PayPal nalog nije potreban.",
+    "paypalPlaceholder": "PayPal Card Payment UI",
+    "pay": "Plati",
+    "backToCart": "Nazad na korpu"
+  },
+  "cart": {
+    "notificationsLoggedIn": "Ulogovani ste – obaveštenja stižu na vaš nalog.",
+    "or": "ILI",
+    "notificationEmail": "Email za obaveštenja",
+    "invalidEmail": "Unesite ispravan email",
+    "emailHint": "Na ovaj email stiže potvrda i status narudžbine",
+    "orderItems": "Stavke narudžbine",
+    "resetChanges": "Poništi izmene",
+    "saveChanges": "Sačuvaj izmene",
+    "changed": "Izmenjeno",
+    "preview": "Pregled",
+    "service": "Usluga",
+    "unitPrice": "Jedinična cena",
+    "itemTotal": "Ukupno za ovu stavku",
+    "quantity": "Količina",
+    "remove": "Ukloni",
+    "totalAmount": "Ukupan iznos",
+    "notificationInfo": "Podaci za obaveštenja",
+    "saveOrResetBeforePayment": "Sačuvajte ili poništite izmene pre plaćanja.",
+    "emailOrLoginRequired": "Unesite email ili se ulogujte da biste nastavili.",
+    "payment": "Plaćanje",
+    "reset": "Poništi",
+    "save": "Sačuvaj",
+    "emptyTitle": "Korpa je prazna",
+    "emptyDescription": "Izgleda da još niste dodali nijedan proizvod u korpu.",
+    "emptyCta": "Nazad na ponudu"
+  },
+  "payment": {
+    "title": "Plaćanje",
+    "selectMethod": "Izaberite način plaćanja",
+    "orderSummary": "Rezime narudžbine",
+    "shop": "Štamparija",
+    "file": "Fajl",
+    "pages": "Stranice",
+    "copies": "Primerci",
+    "color": "Boja",
+    "doubleSided": "Obostrano",
+    "binding": "Povezivanje",
+    "total": "Ukupno",
+    "cardDetails": "Detalji kartice",
+    "cardName": "Ime na kartici",
+    "cardNumber": "Broj kartice",
+    "cardExpiry": "MM/GG",
+    "cardCvv": "CVV",
+    "transferNotice": "Štampanje počinje nakon prijema uplate (1–24h)",
+    "cancel": "Otkaži",
+    "pay": "Plati",
+    "sslNotice": "Podaci su zaštićeni SSL enkripcijom",
+    "successTitle": "Plaćanje uspešno!",
+    "successDescription": "Vaša narudžbina je primljena.",
+    "methods": {
+      "card": {
+        "name": "Platna kartica",
+        "description": "Visa, MasterCard, Dina"
+      },
+      "mbanking": {
+        "name": "m-Banking",
+        "description": "Komercijalna, Intesa, Raiffeisen"
+      },
+      "bank_transfer": {
+        "name": "Bankovna doznaka",
+        "description": "Prenos na račun štamparije"
+      }
+    }
+  },
+  "quickInquiry": {
+    "heroTitle": "Postanite partner Go2Copy platforme",
+    "heroDescription": "Pridružite se brzo rastućoj platformi za štampu koja povezuje vašu kopirnicu sa korisnicima kojima su potrebne brze, pouzdane i lokalne usluge štampe.",
+    "productTitle": "Opis proizvoda",
+    "productDescription": "Go2Copy je platforma za online poručivanje gde korisnici otpremaju fajlove, biraju opcije štampe, porede obližnje štamparije i poručuju u nekoliko klikova.",
+    "benefitsTitle": "Prednosti za vašu kopirnicu",
+    "benefitsDescription": "Povećajte broj dnevnih porudžbina, smanjite ručnu komunikaciju i upravljajte zahtevima kroz jedinstven digitalni tok rada za kopirnice.",
+    "whyJoinTitle": "Zašto je dobro da se priključite",
+    "whyJoinDescription": "Prisustvo na Go2Copy platformi daje vašoj kopirnici veću vidljivost baš kada su korisnici spremni da poruče, što pomaže u sticanju lojalnih kupaca i poverenja.",
+    "whyUsersTitle": "Zašto korisnici biraju ovu platformu",
+    "whyUsersDescription": "Korisnici biraju Go2Copy jer je brz, transparentan i praktičan: mogu da uporede opcije, prate narudžbine i izbegnu čekanje u redu.",
+    "formTitle": "Registraciona forma",
+    "form": {
+      "fullName": "Ime i prezime",
+      "email": "Email",
+      "shopName": "Naziv kopirnice",
+      "city": "Grad",
+      "phone": "Broj telefona",
+      "message": "Recite nam više o vašoj kopirnici",
+      "submit": "Pošalji registraciju"
+    }
+  },
+  "addressPicker": {
+    "locationError": "Ne možemo dobiti lokaciju.",
+    "label": "Adresa kopirnice",
+    "placeholder": "Unesite najmanje 3 slova…",
+    "myLocation": "Moja lokacija"
+  },
+  "admin": {
+    "noOrders": {
+      "title": "Još nema porudžbina",
+      "description": "Kada kupci pošalju porudžbinu, pojaviće se ovde."
+    },
+    "noPrintShop": {
+      "title": "Nemaš kreiranu kopirnicu",
+      "description": "Da bi mogao da primaš porudžbine, potrebno je da prvo kreiraš svoju kopirnicu.",
+      "createButton": "Kreiraj kopirnicu"
+    },
+    "analytics": {
+      "title": "Pregled poslovanja",
+      "subtitle": "Statistike i performanse vaše štamparije",
+      "sinceLastMonth": "od prošlog meseca",
+      "recentOrders": "Poslednje narudžbine",
+      "quickActions": "Brze akcije",
+      "pendingOrders": "Narudžbine na čekanju",
+      "needsAttention": "Potrebna je vaša pažnja",
+      "readyForPickup": "Spremne za preuzimanje",
+      "notifyUsers": "Obavestiti korisnike",
+      "averageRating": "Prosečna ocena",
+      "basedOnReviews": "Na osnovu 124 recenzije",
+      "status": {
+        "completed": "Završeno",
+        "processing": "U obradi",
+        "ready": "Spremno"
+      },
+      "stats": {
+        "revenue": {
+          "title": "Ukupni prihod",
+          "period": "ovaj mesec"
+        },
+        "orders": {
+          "title": "Narudžbine",
+          "period": "ovaj mesec"
+        },
+        "newUsers": {
+          "title": "Novi korisnici",
+          "period": "ove nedelje"
+        },
+        "avgTime": {
+          "title": "Prosečno vreme",
+          "period": "po narudžbini"
+        }
+      }
+    },
+    "orders": {
+      "title": "Upravljanje porudžbinama",
+      "searchPlaceholder": "Pretraga...",
+      "allStatuses": "Svi statusi",
+      "unknownUser": "Nepoznat korisnik",
+      "total": "Ukupno",
+      "done": "Gotovo",
+      "reject": "Odbij",
+      "details": "Detalji",
+      "order": "Porudžbina",
+      "file": "Fajl",
+      "downloadFile": "Preuzmi fajl",
+      "status": {
+        "paid": "Plaćeno",
+        "printing": "Štampa",
+        "ready": "Spremno",
+        "pickedUp": "Preuzeto",
+        "cancelled": "Otkazano"
+      }
+    },
+    "pricing": {
+      "title": "Cenovnik proizvoda",
+      "subtitle": "Kreiranje i uređivanje cena po templejtima",
+      "basePriceTitle": "Osnovna cena",
+      "active": "Aktivan",
+      "inactive": "Neaktivan",
+      "basePriceLabel": "Osnovna cena (RSD)",
+      "saveChanges": "Sačuvaj izmene",
+      "createPricing": "Kreiraj cenovnik"
+    },
+    "shopSettings": {
+      "title": "Podešavanja štamparije",
+      "createShop": "Kreiraj kopirnicu",
+      "companyInfo": "🏢 Informacije o firmi",
+      "name": "Naziv",
+      "phone": "Telefon",
+      "email": "Email",
+      "bankAccount": "Broj računa",
+      "active": "Aktivna",
+      "inactive": "Neaktivna",
+      "changeData": "Promeni podatke",
+      "location": "📍 Lokacija",
+      "address": "Adresa",
+      "city": "Grad",
+      "changeLocation": "Promeni lokaciju",
+      "confirmLocation": "Potvrdi lokaciju",
+      "workingHours": "Radno vreme",
+      "closed": "Zatvoreno",
+      "open": "Otvoreno",
+      "saveChanges": "Sačuvaj izmene"
+    }
+  },
+  "common": {
+    "errorLoadingData": "Greška u vraćanju podataka",
+    "tryAgain": "Pokušaj ponovo",
+    "previewNotAvailable": "Pregled nije dostupan za ovaj tip štampe",
+    "cropImage": "Iseci sliku",
+    "zoom": "Zum",
+    "rotation": "Rotacija",
+    "cancel": "Otkaži",
+    "save": "Sačuvaj",
+    "confirm": "Potvrdi"
+  },
+  "success": {
+    "title": "Porudžbina uspešno poslata!",
+    "description": "Vaša porudžbina je primljena i obrađuje se. Uskoro ćete dobiti email potvrdu.",
+    "detailsTitle": "Detalji porudžbine",
+    "orderId": "ID porudžbine",
+    "shop": "Copy Shop",
+    "address": "Adresa",
+    "estimatedTime": "Procenjeno vreme",
+    "contact": "Kontakt",
+    "nextStepsTitle": "Sledeći koraci",
+    "nextStepsWaitEmail": "Dobićete email potvrdu sa detaljima porudžbine",
+    "nextStepsPrinting": "Copy shop će početi sa štampanjem",
+    "nextStepsNotification": "Kada bude gotovo, dobićete obaveštenje",
+    "nextStepsPickup": "Pokupite gotove kopije u copy shopu",
+    "newOrder": "Nova porudžbina",
+    "myProfile": "Moj profil",
+    "login": "Prijavite se"
+  },
+  "header": {
+    "userMenu": {
+      "defaultName": "Korisnik",
+      "lightTheme": "Svetla tema",
+      "darkTheme": "Tamna tema",
+      "logout": "Odjavi se"
+    },
+    "admin": {
+      "noShop": "Prodavnica nije kreirana",
+      "active": "Aktivno",
+      "inactive": "Neaktivno",
+      "toggleTheme": "Promeni temu",
+      "brand": "Go2Copy Admin"
+    }
+  },
+  "footer": {
+    "description": "Prva onlajn platforma za štampanje u Srbiji koja štedi vaše vreme i novac.",
+    "product": {
+      "title": "Proizvod",
+      "features": "Funkcionalnosti",
+      "pricing": "Cene",
+      "faq": "FAQ"
+    },
+    "company": {
+      "title": "Kompanija",
+      "about": "O nama",
+      "blog": "Blog",
+      "careers": "Karijera"
+    },
+    "support": {
+      "title": "Podrška",
+      "contact": "Kontakt",
+      "status": "Status",
+      "privacy": "Privatnost"
+    },
+    "copyright": "© 2026 Go2Copy. Sva prava zadržana."
+  }
+}

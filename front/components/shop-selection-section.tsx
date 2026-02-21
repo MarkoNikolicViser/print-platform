@@ -1,7 +1,7 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { usePrintContext } from '@/context/PrintContext';
+import { GEOAPIFY_KEY } from '@/helpers/constants';
 import { useCopyShops } from '@/hooks/useCopyShops';
 import { AddToCartPayload, CopyShop } from '@/types';
 import {
@@ -21,30 +21,24 @@ import {
   useTheme,
 } from '@mui/material';
 import { MapPin, Clock, Star, Navigation, Filter, Search, EuroIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import ErrorState from '../components/ui/error-state';
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
 import { useAddToCart } from '../hooks/useAddToCart';
-import { GEOAPIFY_KEY } from '@/helpers/constants';
 
-const CopyshopsMap = dynamic(
-  () => import('./shops-map'),
-  { ssr: false }
-);
+const CopyshopsMap = dynamic(() => import('./shops-map'), { ssr: false });
 
 type SortBy = 'distance' | 'price' | 'rating';
 
 export function ShopSelectionSection() {
-  const {
-    file,
-    selectedTemplate,
-    printConfig,
-    quantity,
-    fileInfo,
-    selectedShop,
-    setSelectedShop,
-  } = usePrintContext();
+  const { t } = useTranslation();
+
+  const { file, selectedTemplate, printConfig, quantity, fileInfo, selectedShop, setSelectedShop } =
+    usePrintContext();
   const disabled = !file || !selectedTemplate;
 
   const [sortBy, setSortBy] = useState<SortBy>('distance');
@@ -59,7 +53,12 @@ export function ShopSelectionSection() {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const memoizedConfig = useMemo(() => JSON.stringify(printConfig), [printConfig]);
 
-  const { data: copyShops = [], isLoading, error, isError } = useCopyShops({
+  const {
+    data: copyShops = [],
+    isLoading,
+    error,
+    isError,
+  } = useCopyShops({
     selectedTemplate: selectedTemplate?.id,
     quantity,
     memoizedConfig,
@@ -75,7 +74,7 @@ export function ShopSelectionSection() {
   }));
 
   const selectedShopData: CopyShop | null =
-    selectedShop && copyShops ? copyShops.find((s) => s.id === selectedShop) ?? null : null;
+    selectedShop && copyShops ? (copyShops.find((s) => s.id === selectedShop) ?? null) : null;
 
   const handleAddToCart = () => {
     const orderCode = localStorage.getItem('order_code');
@@ -96,9 +95,8 @@ export function ShopSelectionSection() {
     handleAddToCart();
     setTimeout(() => {
       router.push('/home/cart');
-    }, 500)
-
-  }
+    }, 500);
+  };
 
   if (isLoading) return <ShopSelectionSkeleton />;
   if (isError) return <ErrorState queryKey={['copyShops']} message={error.message} />;
@@ -113,7 +111,7 @@ export function ShopSelectionSection() {
             align="center"
             sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
           >
-            Pronađite najbližu ili najjeftiniju štampariju
+            {t('home.shopSelection.title')}
           </Typography>
         }
       />
@@ -128,12 +126,7 @@ export function ShopSelectionSection() {
         }}
       >
         {/* Filters and Search */}
-        <Box
-          display="flex"
-          flexDirection={isMobile ? 'column' : 'row'}
-          flexWrap="wrap"
-          gap={2}
-        >
+        <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} flexWrap="wrap" gap={2}>
           <Box flex={1} minWidth={200} position="relative">
             <Search
               size={16}
@@ -146,7 +139,7 @@ export function ShopSelectionSection() {
               }}
             />
             <TextField
-              placeholder="Pretražite štamparije..."
+              placeholder={t('home.shopSelection.searchPlaceholder')}
               size="small"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -156,32 +149,27 @@ export function ShopSelectionSection() {
           </Box>
 
           <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>Grad</InputLabel>
+            <InputLabel>{t('home.shopSelection.cityLabel')}</InputLabel>
             <Select
               size="small"
               value={filterCity}
               onChange={(e) => setFilterCity(e.target.value)}
-              label="Grad"
+              label={t('home.shopSelection.cityLabel')}
             >
-              <MenuItem value="all">Svi gradovi</MenuItem>
+              <MenuItem value="all">{t('home.shopSelection.allCities')}</MenuItem>
             </Select>
           </FormControl>
         </Box>
 
         {/* Sort Buttons */}
-        <Box
-          display="flex"
-          flexDirection={isMobile ? 'column' : 'row'}
-          flexWrap="wrap"
-          gap={1}
-        >
+        <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} flexWrap="wrap" gap={1}>
           <Button
             variant={sortBy === 'distance' ? 'contained' : 'outlined'}
             onClick={() => setSortBy('distance')}
             size="small"
             startIcon={<MapPin size={16} />}
           >
-            {!isMobile && 'Najbliže'}
+            {!isMobile && t('home.shopSelection.nearest')}
           </Button>
           <Button
             variant={sortBy === 'price' ? 'contained' : 'outlined'}
@@ -189,7 +177,7 @@ export function ShopSelectionSection() {
             size="small"
             startIcon={<EuroIcon size={16} />}
           >
-            {!isMobile && 'Najjeftinije'}
+            {!isMobile && t('home.shopSelection.cheapest')}
           </Button>
           <Button
             variant={sortBy === 'rating' ? 'contained' : 'outlined'}
@@ -198,7 +186,7 @@ export function ShopSelectionSection() {
             startIcon={<Star size={16} />}
             disabled
           >
-            {!isMobile && 'Najbolje ocenjene'}
+            {!isMobile && t('home.shopSelection.bestRated')}
           </Button>
           <Button
             variant="outlined"
@@ -206,7 +194,7 @@ export function ShopSelectionSection() {
             size="small"
             startIcon={<Navigation size={16} />}
           >
-            {showMap ? 'Lista' : 'Mapa'}
+            {showMap ? t('home.shopSelection.list') : t('home.shopSelection.map')}
           </Button>
         </Box>
 
@@ -225,7 +213,7 @@ export function ShopSelectionSection() {
               <Box display="flex" alignItems="center" gap={1} mb={2}>
                 <Navigation size={24} color="var(--mui-palette-primary-main)" />
                 <Typography variant="h6" color="primary">
-                  Interaktivna mapa
+                  {t('home.shopSelection.interactiveMap')}
                 </Typography>
               </Box>
               <CopyshopsMap apiKey={GEOAPIFY_KEY} shops={mapShops} />
@@ -240,7 +228,7 @@ export function ShopSelectionSection() {
               <Card sx={{ p: 4, textAlign: 'center' }}>
                 <Filter size={32} color="#888" style={{ marginBottom: 8 }} />
                 <Typography variant="body2" color="text.secondary">
-                  Nema štamparija koje odgovaraju vašim kriterijumima
+                  {t('home.shopSelection.noShops')}
                 </Typography>
               </Card>
             ) : (
@@ -250,10 +238,8 @@ export function ShopSelectionSection() {
                   variant="outlined"
                   sx={{
                     cursor: 'pointer',
-                    borderColor:
-                      selectedShop === shop.id ? 'primary.main' : 'grey.300',
-                    backgroundColor:
-                      selectedShop === shop.id ? 'action.hover' : 'inherit',
+                    borderColor: selectedShop === shop.id ? 'primary.main' : 'grey.300',
+                    backgroundColor: selectedShop === shop.id ? 'action.hover' : 'inherit',
                   }}
                   onClick={() => setSelectedShop(shop.id)}
                 >
@@ -290,27 +276,21 @@ export function ShopSelectionSection() {
                         </Box>
                         <Box display="flex" flexWrap="wrap" gap={1} mt={1}>
                           {shop?.templates.map((service: string) => (
-                            <Chip
-                              key={service}
-                              label={service}
-                              size="small"
-                              variant="outlined"
-                            />
+                            <Chip key={service} label={service} size="small" variant="outlined" />
                           ))}
                         </Box>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          mt={1}
-                          display="block"
-                        >
-                          Radno vreme:{' '}
+                        <Typography variant="caption" color="text.secondary" mt={1} display="block">
+                          {t('home.shopSelection.workingHours')}:{' '}
                           {shop.is_open_today
                             ? shop.working_time_today
-                            : 'Neradan dan'}
+                            : t('home.shopSelection.dayOff')}
                         </Typography>
                       </Box>
-                      <Box textAlign={isMobile ? 'left' : 'right'} ml={isMobile ? 0 : 2} mt={isMobile ? 1 : 0}>
+                      <Box
+                        textAlign={isMobile ? 'left' : 'right'}
+                        ml={isMobile ? 0 : 2}
+                        mt={isMobile ? 1 : 0}
+                      >
                         {shop?.total_price ? (
                           <Typography variant="h6" color="primary">
                             {shop?.total_price} RSD
@@ -350,7 +330,7 @@ export function ShopSelectionSection() {
               onClick={handleAddToCart}
               disabled={isPending}
             >
-              Dodaj u korpu i nastavi kupovinu
+              {t('home.shopSelection.addToCart')}
             </Button>
             <Button
               variant="contained"
@@ -359,7 +339,7 @@ export function ShopSelectionSection() {
               onClick={handleAddToCartAndPay}
               disabled={isPending}
             >
-              Plati i poruči odmah
+              {t('home.shopSelection.payNow')}
             </Button>
           </Card>
         </Box>

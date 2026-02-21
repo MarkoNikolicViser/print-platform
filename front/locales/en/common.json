@@ -1,0 +1,438 @@
+{
+  "landing": {
+    "hero": {
+      "title1": "Printing",
+      "title2": "without waiting in line",
+      "description": "Upload a document online, select the print type, and pick it up when it's done. Simple, fast, and secure.",
+      "startPrintButton": "Start Printing",
+      "learnMoreButton": "Learn More"
+    },
+    "stats": {
+      "value1": "50+",
+      "label1": "Print Shops in Network",
+      "value2": "< 2min",
+      "label2": "Order Time",
+      "value3": "24/7",
+      "label3": "Support and Availability"
+    },
+    "howItWorks": {
+      "title": "How it works?",
+      "subtitle": "The entire process is fully automated. Follow these 4 steps and forget about waiting.",
+      "step1Title": "1. Upload the document",
+      "step1Desc": "Upload PDF, Word, or images directly from your phone or computer.",
+      "step2Title": "2. Choose options",
+      "step2Desc": "Adjust the number of copies, color, and format. The price is automatically calculated.",
+      "step3Title": "3. Pay online",
+      "step3Desc": "Secure card payment allows for immediate processing of your order.",
+      "step4Title": "4. Pick up the print",
+      "step4Desc": "When you receive a notification that it's ready, just drop by for the finished material."
+    },
+    "benefits": {
+      "title": "Why Go2Copy?",
+      "subtitle": "Save time, avoid lines, and have full control over your printing.",
+      "point1Title": "No waiting in line",
+      "point1Desc": "Arrive only when the document is ready. Your time is valuable.",
+      "point2Title": "Transparent pricing",
+      "point2Desc": "You know exactly how much you pay before confirming. No hidden costs.",
+      "point3Title": "Security comes first",
+      "point3Desc": "Your documents are encrypted and deleted immediately after pickup."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "subtitle": "Have a question or want to collaborate? Our team is here for you.",
+      "emailLabel": "Email address",
+      "phoneLabel": "Phone",
+      "hoursLabel": "Working hours",
+      "hoursValue": "Mon – Sat | 08:00 – 20:00",
+      "quickInquiryTitle": "Quick Inquiry",
+      "quickInquiryDesc": "For all business offers and technical support, you can contact us directly. We reply within 24 hours.",
+      "quickInquiryButton": "Send a message"
+    },
+    "header": {
+      "nav": {
+        "howItWorks": "How it works",
+        "benefits": "Benefits",
+        "contact": "Contact"
+      },
+      "startButton": "Get Started"
+    }
+  },
+  "login": {
+    "subtitle": "Professional online printing without waiting",
+    "tabLogin": "Login",
+    "tabRegister": "Register",
+    "googleButton": "Continue with Google",
+    "or": "or",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "loginButton": "Sign In",
+    "nameLabel": "Full Name",
+    "confirmPasswordLabel": "Confirm Password",
+    "registerButton": "Create Account",
+    "backToHome": "← Back to home",
+    "errorLogin": "Error during login",
+    "errorRegister": "Error during registration",
+    "errorPasswordMismatch": "Passwords do not match",
+    "loading": "Loading..."
+  },
+  "store": {
+    "tabs": {
+      "orders": "Orders",
+      "pricing": "Pricing",
+      "settings": "Settings"
+    },
+    "loading": "Loading..."
+  },
+  "profile": {
+    "title": "My Profile",
+    "logoutButton": "Log Out",
+    "userInfoTitle": "User Information",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "orderHistoryTitle": "Printing History ({{count}} orders)",
+    "noOrdersMessage": "You don't have any orders yet.",
+    "startPrintingButton": "Start Printing",
+    "orderLabel": "Order",
+    "shopLabel": "Copy Shop",
+    "copiesLabel": "Copies",
+    "optionsLabel": "Options",
+    "color": "Color",
+    "bw": "B&W",
+    "duplex": "Double-sided",
+    "simplex": "Single-sided",
+    "totalPriceLabel": "Total Price",
+    "readyMessage": "Your order is ready for pickup at {{shopName}}!",
+    "newOrderButton": "New Order",
+    "status": {
+      "completed": "Completed",
+      "ready": "Ready for pickup",
+      "processing": "Processing",
+      "pending": "Pending"
+    }
+  },
+  "home": {
+    "heroTitle": "Printing without waiting",
+    "heroSubtitle": "Upload files, pay online, and pick up your copies",
+    "steps": {
+      "upload": "File Upload",
+      "config": "Print Configuration",
+      "location": "Select Location"
+    },
+    "fileUpload": {
+      "title": "Secure document upload",
+      "errorTitle": "Error",
+      "allowedFormats": "Allowed formats: {{formats}}",
+      "maxSizeError": "Maximum file size is 50MB.",
+      "uploadError": "Upload failed.",
+      "uploading": "Uploading...",
+      "clickOrDrag": "Click or drag a file",
+      "pages": "{{count}} pages",
+      "uploaded": "Uploaded",
+      "processed": "Processed",
+      "notProcessed": "Not processed",
+      "preview": "Preview",
+      "securityTitle": "Your document is protected",
+      "securityDescription": "The document is visible only to the selected print shop and is deleted after printing is completed."
+    },
+    "printConfig": {
+      "title": "Fill in the options to see an estimate",
+      "copies": "Number of copies",
+      "cropImage": "Crop image",
+      "nextStep": "Next step",
+      "editError": "Image processing failed",
+      "editSuccess": "Image edited successfully"
+    },
+    "shopSelection": {
+      "title": "Find the nearest or cheapest print shop",
+      "searchPlaceholder": "Search print shops...",
+      "cityLabel": "City",
+      "allCities": "All cities",
+      "nearest": "Nearest",
+      "cheapest": "Cheapest",
+      "bestRated": "Best rated",
+      "list": "List",
+      "map": "Map",
+      "interactiveMap": "Interactive map",
+      "noShops": "No print shops match your criteria",
+      "workingHours": "Working hours",
+      "dayOff": "Day off",
+      "addToCart": "Add to cart and continue shopping",
+      "payNow": "Pay and order now"
+    },
+    "printTypeSelector": {
+      "selectTypeWarning": "*Choose a print type to continue with option setup."
+    }
+  },
+  "checkout": {
+    "loading": "Loading checkout…",
+    "loadError": "Error loading order.",
+    "unknownService": "Unknown service",
+    "title": "Payment",
+    "service": "Service",
+    "multipleServices": "Multiple services ({{count}})",
+    "totalQuantity": "Total quantity",
+    "totalToPay": "Total to pay",
+    "cardPayment": "Card payment",
+    "cardPaymentDescription": "Secure payment via PayPal. A PayPal account is not required.",
+    "paypalPlaceholder": "PayPal Card Payment UI",
+    "pay": "Pay",
+    "backToCart": "Back to cart"
+  },
+  "cart": {
+    "notificationsLoggedIn": "You are logged in — notifications will be sent to your account.",
+    "or": "OR",
+    "notificationEmail": "Notification email",
+    "invalidEmail": "Enter a valid email",
+    "emailHint": "Order confirmation and status will be sent to this email",
+    "orderItems": "Order items",
+    "resetChanges": "Reset changes",
+    "saveChanges": "Save changes",
+    "changed": "Changed",
+    "preview": "Preview",
+    "service": "Service",
+    "unitPrice": "Unit price",
+    "itemTotal": "Item total",
+    "quantity": "Quantity",
+    "remove": "Remove",
+    "totalAmount": "Total amount",
+    "notificationInfo": "Notification info",
+    "saveOrResetBeforePayment": "Save or reset changes before payment.",
+    "emailOrLoginRequired": "Enter email or log in to continue.",
+    "payment": "Payment",
+    "reset": "Reset",
+    "save": "Save",
+    "emptyTitle": "Cart is empty",
+    "emptyDescription": "Looks like you haven't added any products to cart yet.",
+    "emptyCta": "Back to offer"
+  },
+  "payment": {
+    "title": "Payment",
+    "selectMethod": "Select payment method",
+    "orderSummary": "Order summary",
+    "shop": "Print shop",
+    "file": "File",
+    "pages": "Pages",
+    "copies": "Copies",
+    "color": "Color",
+    "doubleSided": "Double-sided",
+    "binding": "Binding",
+    "total": "Total",
+    "cardDetails": "Card details",
+    "cardName": "Name on card",
+    "cardNumber": "Card number",
+    "cardExpiry": "MM/YY",
+    "cardCvv": "CVV",
+    "transferNotice": "Printing starts after payment is received (1–24h)",
+    "cancel": "Cancel",
+    "pay": "Pay",
+    "sslNotice": "Data is protected with SSL encryption",
+    "successTitle": "Payment successful!",
+    "successDescription": "Your order has been received.",
+    "methods": {
+      "card": {
+        "name": "Card",
+        "description": "Visa, MasterCard, Dina"
+      },
+      "mbanking": {
+        "name": "m-Banking",
+        "description": "Komercijalna, Intesa, Raiffeisen"
+      },
+      "bank_transfer": {
+        "name": "Bank transfer",
+        "description": "Transfer to print shop account"
+      }
+    }
+  },
+  "quickInquiry": {
+    "heroTitle": "Partner With Go2Copy",
+    "heroDescription": "Join a fast-growing print platform that connects your shop with customers who need quick, reliable and local printing services.",
+    "productTitle": "Product Description",
+    "productDescription": "Go2Copy is an online ordering platform where users upload files, choose print options, compare nearby print shops, and place orders in a few clicks.",
+    "benefitsTitle": "Benefits for Your Shop",
+    "benefitsDescription": "Increase daily order volume, reduce manual communication, and manage requests through one digital workflow built for copy shops.",
+    "whyJoinTitle": "Why It Is Good to Join",
+    "whyJoinDescription": "Being present on Go2Copy gives your shop visibility exactly when users are ready to order, helping you win repeat business and build trust with verified online demand.",
+    "whyUsersTitle": "Why Users Choose This Platform",
+    "whyUsersDescription": "Customers use Go2Copy because it is fast, transparent and convenient: they can compare options, track orders and avoid waiting in line.",
+    "formTitle": "Registration Form",
+    "form": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "shopName": "Shop Name",
+      "city": "City",
+      "phone": "Phone Number",
+      "message": "Tell us about your shop",
+      "submit": "Submit Registration"
+    }
+  },
+  "addressPicker": {
+    "locationError": "Unable to get location.",
+    "label": "Print shop address",
+    "placeholder": "Enter at least 3 letters…",
+    "myLocation": "My location"
+  },
+  "admin": {
+    "noOrders": {
+      "title": "No orders yet",
+      "description": "When customers submit an order, it will appear here."
+    },
+    "noPrintShop": {
+      "title": "You don’t have a print shop yet",
+      "description": "To receive orders, you need to create your print shop first.",
+      "createButton": "Create print shop"
+    },
+    "analytics": {
+      "title": "Business overview",
+      "subtitle": "Statistics and performance of your print shop",
+      "sinceLastMonth": "since last month",
+      "recentOrders": "Recent orders",
+      "quickActions": "Quick actions",
+      "pendingOrders": "Pending orders",
+      "needsAttention": "Needs your attention",
+      "readyForPickup": "Ready for pickup",
+      "notifyUsers": "Notify users",
+      "averageRating": "Average rating",
+      "basedOnReviews": "Based on 124 reviews",
+      "status": {
+        "completed": "Completed",
+        "processing": "Processing",
+        "ready": "Ready"
+      },
+      "stats": {
+        "revenue": {
+          "title": "Total revenue",
+          "period": "this month"
+        },
+        "orders": {
+          "title": "Orders",
+          "period": "this month"
+        },
+        "newUsers": {
+          "title": "New users",
+          "period": "this week"
+        },
+        "avgTime": {
+          "title": "Average time",
+          "period": "per order"
+        }
+      }
+    },
+    "orders": {
+      "title": "Order management",
+      "searchPlaceholder": "Search...",
+      "allStatuses": "All statuses",
+      "unknownUser": "Unknown user",
+      "total": "Total",
+      "done": "Done",
+      "reject": "Reject",
+      "details": "Details",
+      "order": "Order",
+      "file": "File",
+      "downloadFile": "Download file",
+      "status": {
+        "paid": "Paid",
+        "printing": "Printing",
+        "ready": "Ready",
+        "pickedUp": "Picked up",
+        "cancelled": "Cancelled"
+      }
+    },
+    "pricing": {
+      "title": "Product pricing",
+      "subtitle": "Create and edit prices per template",
+      "basePriceTitle": "Base price",
+      "active": "Active",
+      "inactive": "Inactive",
+      "basePriceLabel": "Base price (RSD)",
+      "saveChanges": "Save changes",
+      "createPricing": "Create pricing"
+    },
+    "shopSettings": {
+      "title": "Print shop settings",
+      "createShop": "Create print shop",
+      "companyInfo": "🏢 Company info",
+      "name": "Name",
+      "phone": "Phone",
+      "email": "Email",
+      "bankAccount": "Bank account",
+      "active": "Active",
+      "inactive": "Inactive",
+      "changeData": "Change data",
+      "location": "📍 Location",
+      "address": "Address",
+      "city": "City",
+      "changeLocation": "Change location",
+      "confirmLocation": "Confirm location",
+      "workingHours": "Working hours",
+      "closed": "Closed",
+      "open": "Open",
+      "saveChanges": "Save changes"
+    }
+  },
+  "common": {
+    "errorLoadingData": "Error loading data",
+    "tryAgain": "Try again",
+    "previewNotAvailable": "Preview is not available for this print type",
+    "cropImage": "Crop image",
+    "zoom": "Zoom",
+    "rotation": "Rotation",
+    "cancel": "Cancel",
+    "save": "Save",
+    "confirm": "Confirm"
+  },
+  "success": {
+    "title": "Order Sent Successfully!",
+    "description": "Your order has been received and is processing. You will receive an email confirmation shortly.",
+    "detailsTitle": "Order Details",
+    "orderId": "Order ID",
+    "shop": "Copy Shop",
+    "address": "Address",
+    "estimatedTime": "Estimated Time",
+    "contact": "Contact",
+    "nextStepsTitle": "Next Steps",
+    "nextStepsWaitEmail": "You'll receive an email confirmation with order details",
+    "nextStepsPrinting": "The copy shop will begin printing",
+    "nextStepsNotification": "When it's ready, you'll receive a notification",
+    "nextStepsPickup": "Pick up the finished copies at the copy shop",
+    "newOrder": "New Order",
+    "myProfile": "My Profile",
+    "login": "Log In"
+  },
+  "header": {
+    "userMenu": {
+      "defaultName": "User",
+      "lightTheme": "Light mode",
+      "darkTheme": "Dark mode",
+      "logout": "Log out"
+    },
+    "admin": {
+      "noShop": "Shop not created",
+      "active": "Active",
+      "inactive": "Inactive",
+      "toggleTheme": "Change theme",
+      "brand": "Go2Copy Admin"
+    }
+  },
+  "footer": {
+    "description": "The first online printing platform in Serbia that saves you time and money.",
+    "product": {
+      "title": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "faq": "FAQ"
+    },
+    "company": {
+      "title": "Company",
+      "about": "About Us",
+      "blog": "Blog",
+      "careers": "Careers"
+    },
+    "support": {
+      "title": "Support",
+      "contact": "Contact",
+      "status": "Status",
+      "privacy": "Privacy"
+    },
+    "copyright": "© 2026 Go2Copy. All rights reserved."
+  }
+}

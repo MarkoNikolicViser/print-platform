@@ -2,16 +2,15 @@
 
 import { Box, Typography, Button } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 interface ErrorStateProps {
   queryKey: string[];
   message?: string;
 }
 
-const ErrorState: React.FC<ErrorStateProps> = ({
-  queryKey,
-  message = 'Greška u vraćanju podataka',
-}) => {
+const ErrorState: React.FC<ErrorStateProps> = ({ queryKey, message }) => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   return (
@@ -24,14 +23,14 @@ const ErrorState: React.FC<ErrorStateProps> = ({
       p={3}
     >
       <Typography variant="body1" color="error">
-        {message}
+        {message ?? t('common.errorLoadingData')}
       </Typography>
       <Button
         variant="contained"
         color="primary"
         onClick={() => queryClient.invalidateQueries({ queryKey })}
       >
-        Pokušaj ponovo
+        {t('common.tryAgain')}
       </Button>
     </Box>
   );

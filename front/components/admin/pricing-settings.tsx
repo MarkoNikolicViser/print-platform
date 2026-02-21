@@ -1,5 +1,7 @@
 'use client';
 
+import { useProductTemplates } from '@/hooks/useProductTemplates';
+import { useUpsertProductPricing } from '@/hooks/useUpsertProductPricing';
 import {
   Box,
   Typography,
@@ -14,9 +16,8 @@ import {
 } from '@mui/material';
 import { Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { useProductTemplates } from '@/hooks/useProductTemplates';
-import { useUpsertProductPricing } from '@/hooks/useUpsertProductPricing';
 import { PricingTemplateSelector } from '../ui/PricingTemplateSelector';
 import { RangePricingEditor } from '../ui/RangePricingEditor';
 
@@ -32,34 +33,32 @@ function buildInitialPricing(template: TemplateWithPricing): PricingValues {
   const result: PricingValues = {};
   const existing = template.pricing?.option_price_modifiers || {};
 
-  Object.entries(template.allowed_options).forEach(
-    ([optionKey, option]: any) => {
-      if (option.pricing_type === 'range') {
-        result[optionKey] = existing[optionKey] ?? {};
+  Object.entries(template.allowed_options).forEach(([optionKey, option]: any) => {
+    if (option.pricing_type === 'range') {
+      result[optionKey] = existing[optionKey] ?? {};
 
-        option.options.forEach((opt: any) => {
-          const valKey = String(opt.value);
+      option.options.forEach((opt: any) => {
+        const valKey = String(opt.value);
 
-          if (!result[optionKey][valKey]) {
-            result[optionKey][valKey] = { ranges: [] };
-          }
-        });
-      } else {
-        result[optionKey] = {
-          values: {
-            ...(existing[optionKey]?.values ?? {}),
-          },
-        };
+        if (!result[optionKey][valKey]) {
+          result[optionKey][valKey] = { ranges: [] };
+        }
+      });
+    } else {
+      result[optionKey] = {
+        values: {
+          ...(existing[optionKey]?.values ?? {}),
+        },
+      };
 
-        option.options.forEach((opt: any) => {
-          const valKey = String(opt.value);
-          if (result[optionKey].values[valKey] === undefined) {
-            result[optionKey].values[valKey] = 0;
-          }
-        });
-      }
-    },
-  );
+      option.options.forEach((opt: any) => {
+        const valKey = String(opt.value);
+        if (result[optionKey].values[valKey] === undefined) {
+          result[optionKey].values[valKey] = 0;
+        }
+      });
+    }
+  });
 
   return result;
 }
@@ -67,11 +66,10 @@ function buildInitialPricing(template: TemplateWithPricing): PricingValues {
 /* ---------------- COMPONENT ---------------- */
 
 export function PricingSettings({ templates, isLoading }) {
-  const { mutate: savePricing, isLoading: isSaving } =
-    useUpsertProductPricing();
+  const { t } = useTranslation();
+  const { mutate: savePricing, isLoading: isSaving } = useUpsertProductPricing();
 
-  const [selectedTemplate, setSelectedTemplate] =
-    useState<TemplateWithPricing | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateWithPricing | null>(null);
 
   const [pricing, setPricing] = useState<PricingValues>({});
   const [basePrice, setBasePrice] = useState<number>(0);
@@ -94,11 +92,7 @@ export function PricingSettings({ templates, isLoading }) {
 
   /* ---------------- UPDATE HANDLERS ---------------- */
 
-  const updatePrice = (
-    optionKey: string,
-    valueKey: string,
-    value: number,
-  ) => {
+  const updatePrice = (optionKey: string, valueKey: string, value: number) => {
     setPricing((prev) => ({
       ...prev,
       [optionKey]: {
@@ -111,10 +105,7 @@ export function PricingSettings({ templates, isLoading }) {
     setHasChanges(true);
   };
 
-  const updateRangePricing = (
-    optionKey: string,
-    nextValue: any,
-  ) => {
+  const updateRangePricing = (optionKey: string, nextValue: any) => {
     setPricing((prev) => ({
       ...prev,
       [optionKey]: nextValue,
@@ -142,10 +133,10 @@ export function PricingSettings({ templates, isLoading }) {
       {/* HEADER */}
       <Box>
         <Typography variant="h5" fontWeight="bold">
-          Cenovnik proizvoda
+          {t('admin.pricing.title')}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Kreiranje i uređivanje cena po templejtima
+          {t('admin.pricing.subtitle')}
         </Typography>
       </Box>
 
@@ -161,7 +152,7 @@ export function PricingSettings({ templates, isLoading }) {
       {selectedTemplate && (
         <Card>
           <CardHeader
-            title="Osnovna cena"
+            title={t('admin.pricing.basePriceTitle')}
             action={
               <FormControlLabel
                 control={
@@ -174,13 +165,13 @@ export function PricingSettings({ templates, isLoading }) {
                     color="success"
                   />
                 }
-                label={isActive ? 'Aktivan' : 'Neaktivan'}
+                label={isActive ? t('admin.pricing.active') : t('admin.pricing.inactive')}
               />
             }
           />
           <CardContent>
             <TextField
-              label="Base price (RSD)"
+              label={t('admin.pricing.basePriceLabel')}
               type="number"
               value={basePrice}
               onChange={(e) => {
@@ -197,57 +188,45 @@ export function PricingSettings({ templates, isLoading }) {
 
       {/* OPTION PRICING */}
       {selectedTemplate &&
-        Object.entries(selectedTemplate.allowed_options).map(
-          ([optionKey, option]: any) => {
-            if (option.pricing_type === 'range') {
-              return (
-                <RangePricingEditor
-                  key={optionKey}
-                  optionKey={optionKey}
-                  label={option.label}
-                  options={option.options}
-                  value={pricing[optionKey]}
-                  onChange={(next) =>
-                    updateRangePricing(optionKey, next)
-                  }
-                />
-              );
-            }
-
+        Object.entries(selectedTemplate.allowed_options).map(([optionKey, option]: any) => {
+          if (option.pricing_type === 'range') {
             return (
-              <Card key={optionKey}>
-                <CardHeader title={option.label} />
-                <CardContent>
-                  <Grid container spacing={2}>
-                    {option.options.map((opt: any) => (
-                      <Grid item xs={12} md={6} key={String(opt.value)}>
-                        <TextField
-                          label={`${opt.label} (RSD)`}
-                          type="number"
-                          value={
-                            pricing?.[optionKey]?.values?.[
-                            String(opt.value)
-                            ] ?? 0
-                          }
-                          onChange={(e) =>
-                            updatePrice(
-                              optionKey,
-                              String(opt.value),
-                              Number(e.target.value),
-                            )
-                          }
-                          fullWidth
-                          inputProps={{ min: 0 }}
-                          disabled={!isActive}
-                        />
-                      </Grid>
-                    ))}
-                  </Grid>
-                </CardContent>
-              </Card>
+              <RangePricingEditor
+                key={optionKey}
+                optionKey={optionKey}
+                label={option.label}
+                options={option.options}
+                value={pricing[optionKey]}
+                onChange={(next) => updateRangePricing(optionKey, next)}
+              />
             );
-          },
-        )}
+          }
+
+          return (
+            <Card key={optionKey}>
+              <CardHeader title={option.label} />
+              <CardContent>
+                <Grid container spacing={2}>
+                  {option.options.map((opt: any) => (
+                    <Grid item xs={12} md={6} key={String(opt.value)}>
+                      <TextField
+                        label={`${opt.label} (RSD)`}
+                        type="number"
+                        value={pricing?.[optionKey]?.values?.[String(opt.value)] ?? 0}
+                        onChange={(e) =>
+                          updatePrice(optionKey, String(opt.value), Number(e.target.value))
+                        }
+                        fullWidth
+                        inputProps={{ min: 0 }}
+                        disabled={!isActive}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              </CardContent>
+            </Card>
+          );
+        })}
 
       {/* SAVE */}
       {selectedTemplate && (
@@ -259,8 +238,8 @@ export function PricingSettings({ templates, isLoading }) {
             onClick={handleSave}
           >
             {selectedTemplate.has_pricing
-              ? 'Sačuvaj izmene'
-              : 'Kreiraj cenovnik'}
+              ? t('admin.pricing.saveChanges')
+              : t('admin.pricing.createPricing')}
           </Button>
         </Box>
       )}

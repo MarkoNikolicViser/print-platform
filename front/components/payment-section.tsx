@@ -24,6 +24,28 @@ import {
   CircularProgress,
 } from '@mui/material';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+interface PaymentSectionOrderSummary {
+  shopName: string;
+  totalCost: number;
+  fileInfo: {
+    name: string;
+    pages: number;
+  };
+  printConfig: {
+    quantity: number;
+    isColor: boolean;
+    isDoubleSided: boolean;
+    binding: string;
+  };
+}
+
+interface PaymentSectionProps {
+  orderSummary: PaymentSectionOrderSummary;
+  onPaymentComplete: (paymentId: string) => void;
+  onCancel: () => void;
+}
 
 const paymentMethods = [
   {
@@ -52,7 +74,8 @@ const paymentMethods = [
   },
 ];
 
-export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
+export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }: PaymentSectionProps) {
+  const { t } = useTranslation();
   const [selectedMethod, setSelectedMethod] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
@@ -88,16 +111,20 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
         <CardContent sx={{ textAlign: 'center', p: 4 }}>
           <CheckCircleIcon color="success" sx={{ fontSize: 64, mb: 2 }} />
           <Typography variant="h5" fontWeight="bold">
-            Plaćanje uspešno!
+            {t('payment.successTitle')}
           </Typography>
           <Typography color="text.secondary" sx={{ mb: 2 }}>
-            Vaša narudžbina je primljena.
+            {t('payment.successDescription')}
           </Typography>
 
           <Box sx={{ p: 2, bgcolor: 'grey.100', borderRadius: 2 }}>
             <Typography>ID: PS{Date.now()}</Typography>
-            <Typography>Štamparija: {orderSummary.shopName}</Typography>
-            <Typography>Ukupno: {totalWithFees} RSD</Typography>
+            <Typography>
+              {t('payment.shop')}: {orderSummary.shopName}
+            </Typography>
+            <Typography>
+              {t('payment.total')}: {totalWithFees} RSD
+            </Typography>
           </Box>
         </CardContent>
       </Card>
@@ -110,10 +137,10 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
         title={
           <Stack direction="row" spacing={1} alignItems="center">
             <LockIcon />
-            <Typography variant="h6">Plaćanje</Typography>
+            <Typography variant="h6">{t('payment.title')}</Typography>
           </Stack>
         }
-        subheader="Izaberite način plaćanja"
+        subheader={t('payment.selectMethod')}
       />
 
       <CardContent>
@@ -122,26 +149,38 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
           sx={{ p: 2, border: '1px solid', borderColor: 'primary.main', borderRadius: 2, mb: 3 }}
         >
           <Typography fontWeight="bold" color="primary" mb={1}>
-            Rezime narudžbine
+            {t('payment.orderSummary')}
           </Typography>
 
           <Stack spacing={1}>
-            <Typography>Štamparija: {orderSummary.shopName}</Typography>
-            <Typography>Fajl: {orderSummary.fileInfo.name}</Typography>
-            <Typography>Stranice: {orderSummary.fileInfo.pages}</Typography>
-            <Typography>Primerci: {orderSummary.printConfig.quantity}</Typography>
+            <Typography>
+              {t('payment.shop')}: {orderSummary.shopName}
+            </Typography>
+            <Typography>
+              {t('payment.file')}: {orderSummary.fileInfo.name}
+            </Typography>
+            <Typography>
+              {t('payment.pages')}: {orderSummary.fileInfo.pages}
+            </Typography>
+            <Typography>
+              {t('payment.copies')}: {orderSummary.printConfig.quantity}
+            </Typography>
 
             <Stack direction="row" spacing={1}>
-              {orderSummary.printConfig.isColor && <Chip label="Boja" size="small" />}
-              {orderSummary.printConfig.isDoubleSided && <Chip label="Obostrano" size="small" />}
+              {orderSummary.printConfig.isColor && <Chip label={t('payment.color')} size="small" />}
+              {orderSummary.printConfig.isDoubleSided && (
+                <Chip label={t('payment.doubleSided')} size="small" />
+              )}
               {orderSummary.printConfig.binding !== 'none' && (
-                <Chip label="Povezivanje" size="small" />
+                <Chip label={t('payment.binding')} size="small" />
               )}
             </Stack>
 
             <Divider />
 
-            <Typography fontWeight="bold">Ukupno: {totalWithFees} RSD</Typography>
+            <Typography fontWeight="bold">
+              {t('payment.total')}: {totalWithFees} RSD
+            </Typography>
           </Stack>
         </Box>
 
@@ -156,9 +195,11 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
                 <Stack direction="row" spacing={2} alignItems="center">
                   {method.icon}
                   <Box>
-                    <Typography fontWeight="medium">{method.name}</Typography>
+                    <Typography fontWeight="medium">
+                      {t(`payment.methods.${method.id}.name`)}
+                    </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      {method.description}
+                      {t(`payment.methods.${method.id}.description`)}
                     </Typography>
                   </Box>
                 </Stack>
@@ -171,30 +212,30 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
         {selectedMethod === 'card' && (
           <Box sx={{ mt: 3 }}>
             <Typography fontWeight="bold" mb={2}>
-              Detalji kartice
+              {t('payment.cardDetails')}
             </Typography>
 
             <Stack spacing={2}>
               <TextField
-                label="Ime na kartici"
+                label={t('payment.cardName')}
                 fullWidth
                 value={cardDetails.name}
                 onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
               />
               <TextField
-                label="Broj kartice"
+                label={t('payment.cardNumber')}
                 fullWidth
                 value={cardDetails.number}
                 onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
               />
               <Stack direction="row" spacing={2}>
                 <TextField
-                  label="MM/GG"
+                  label={t('payment.cardExpiry')}
                   value={cardDetails.expiry}
                   onChange={(e) => setCardDetails({ ...cardDetails, expiry: e.target.value })}
                 />
                 <TextField
-                  label="CVV"
+                  label={t('payment.cardCvv')}
                   type="password"
                   value={cardDetails.cvv}
                   onChange={(e) => setCardDetails({ ...cardDetails, cvv: e.target.value })}
@@ -208,14 +249,14 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
         {selectedMethod === 'bank_transfer' && (
           <Alert severity="warning" sx={{ mt: 3 }}>
             <WarningAmberIcon sx={{ mr: 1 }} />
-            Štampanje počinje nakon prijema uplate (1–24h)
+            {t('payment.transferNotice')}
           </Alert>
         )}
 
         {/* ACTIONS */}
         <Stack direction="row" spacing={2} sx={{ mt: 4 }}>
           <Button variant="outlined" fullWidth onClick={onCancel}>
-            Otkaži
+            {t('payment.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -223,7 +264,11 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
             disabled={!selectedMethod || isProcessing}
             onClick={handlePayment}
           >
-            {isProcessing ? <CircularProgress size={24} /> : `Plati ${totalWithFees} RSD`}
+            {isProcessing ? (
+              <CircularProgress size={24} />
+            ) : (
+              `${t('payment.pay')} ${totalWithFees} RSD`
+            )}
           </Button>
         </Stack>
 
@@ -236,7 +281,7 @@ export function PaymentSection({ orderSummary, onPaymentComplete, onCancel }) {
           color="text.secondary"
         >
           <LockIcon sx={{ fontSize: 14, mr: 0.5 }} />
-          Podaci su zaštićeni SSL enkripcijom
+          {t('payment.sslNotice')}
         </Typography>
       </CardContent>
     </Card>

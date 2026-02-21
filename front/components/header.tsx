@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
 import {
   AppBar,
   Toolbar,
@@ -7,7 +8,6 @@ import {
   Typography,
   IconButton,
   Avatar,
-  useMediaQuery,
   useTheme,
   Container,
   Stack,
@@ -17,31 +17,39 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
+import { alpha, useColorScheme } from '@mui/material/styles';
 import { LogOut, Sun, Moon, Printer } from 'lucide-react';
-import { alpha } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useCartItemCount } from '../hooks/useCartItemCount';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import CartButton from './ui/CartButton';
 import GoogleOneTapButton from './ui/GoogleOneTapButton';
-import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
 
 export function Header() {
   const router = useRouter();
   const theme = useTheme();
-  const isMobileOrTablet = useMediaQuery(theme.breakpoints.down('md'), { noSsr: true });
-
-  const { user, logout } = useAuth(); // <-- koristi context
+  const { t } = useTranslation();
+  const { user, logout } = useAuth();
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const userMenuOpen = Boolean(userMenuAnchor);
 
-  const handleOpenUserMenu = (e: React.MouseEvent<HTMLElement>) => setUserMenuAnchor(e.currentTarget);
+  const handleOpenUserMenu = (e: React.MouseEvent<HTMLElement>) =>
+    setUserMenuAnchor(e.currentTarget);
   const handleCloseUserMenu = () => setUserMenuAnchor(null);
 
-  const isDark = theme.palette.mode === 'dark';
-  const toggleTheme = () => console.log('toggle theme'); // Hook your real theme toggler
+  const { mode, systemMode, setMode } = useColorScheme();
+  const resolvedMode = useMemo(() => {
+    if (mode === 'system') return systemMode;
+    return mode;
+  }, [mode, systemMode]);
+  const isDark = (resolvedMode ?? theme.palette.mode) === 'dark';
+
+  const toggleTheme = () => {
+    setMode(isDark ? 'light' : 'dark');
+  };
 
   // Cart logic
   const orderId = undefined; // Ako ti treba orderId, možeš ga uzeti iz context ili props
@@ -61,7 +69,9 @@ export function Header() {
       PaperProps={{ sx: { minWidth: 220, mt: 1, borderRadius: 2 } }}
     >
       <Box px={2} py={1.5}>
-        <Typography fontWeight={700}>{user?.username ?? 'Korisnik'}</Typography>
+        <Typography fontWeight={700}>
+          {user?.username ?? t('header.userMenu.defaultName')}
+        </Typography>
         <Typography variant="caption" color="text.secondary">
           {user?.email}
         </Typography>
@@ -70,8 +80,10 @@ export function Header() {
       <Divider />
 
       <MenuItem onClick={toggleTheme}>
-        <ListItemIcon>{isDark ? <Sun size={18} /> : <Moon size={18} />}</ListItemIcon>
-        <ListItemText>{isDark ? 'Svetla tema' : 'Tamna tema'}</ListItemText>
+        <ListItemIcon>{isDark ? <Sun /> : <Moon />}</ListItemIcon>
+        <ListItemText>
+          {isDark ? t('header.userMenu.lightTheme') : t('header.userMenu.darkTheme')}
+        </ListItemText>
       </MenuItem>
 
       <Divider />
@@ -80,7 +92,7 @@ export function Header() {
         <ListItemIcon>
           <LogOut size={18} />
         </ListItemIcon>
-        <ListItemText>Odjavi se</ListItemText>
+        <ListItemText>{t('header.userMenu.logout')}</ListItemText>
       </MenuItem>
     </Menu>
   );
@@ -92,6 +104,8 @@ export function Header() {
       <IconButton size="small" onClick={toggleTheme} sx={{ ml: 0.5 }}>
         {isDark ? <Sun size={18} /> : <Moon size={18} />}
       </IconButton>
+
+      <LanguageSwitcher />
 
       {user ? (
         <>
@@ -135,7 +149,7 @@ export function Header() {
           {/* Brand */}
           <Stack
             sx={{ ':hover': { cursor: 'pointer' } }}
-            onClick={() => router.push('/home')}
+            onClick={() => router.push('/')}
             direction="row"
             spacing={1}
             alignItems="center"
