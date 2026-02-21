@@ -10,14 +10,10 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import Link from '@mui/material/Link';
 import { useTheme } from '@mui/material/styles';
 import {
-  MapPin,
-  CreditCard,
-  Bell,
   Upload,
   Settings,
   Package,
@@ -27,8 +23,10 @@ import {
   Twitter,
   Instagram,
   Linkedin,
+  CreditCard,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import '../styles/globals.css';
 
 export default function LandingPage() {
   const theme = useTheme();
@@ -37,72 +35,86 @@ export default function LandingPage() {
   const handleHomeRedirect = () => router.push('/home');
   const handleStoreRedirect = () => router.push('/store');
 
-  const features = [
-    {
-      icon: MapPin,
-      title: 'Pronađi kopirnice',
-      description: 'Locirajte najbliže kopirnice pomoću naše napredne geolokacije.',
-    },
-    {
-      icon: CreditCard,
-      title: 'Plati onlajn',
-      description: 'Sigurna i trenutna plaćanja. Bez keša, samo klikni i plati.',
-    },
-    {
-      icon: Bell,
-      title: 'Obaveštenja uživo',
-      description: 'Dobijajte obaveštenja u realnom vremenu kada je vaša štampa spremna.',
-    },
-    {
-      icon: Upload,
-      title: 'Brzo otpremanje',
-      description: 'Otpremite dokumente sigurno i brzo sa našom platformom.',
-    },
-  ];
-
-  const steps = [
-    { icon: Upload, title: 'Okačite dokument', description: 'Otpremite dokumente online' },
-    { icon: Settings, title: 'Izaberite opcije', description: 'Podesite parametre štampe' },
-    { icon: CreditCard, title: 'Platite karticom', description: 'Brzo i sigurno plaćanje' },
-    { icon: Package, title: 'Preuzmite štampu', description: 'Gotovo bez čekanja' },
+  const navItems = [
+    { label: 'Kako radi', id: 'kako-radi' },
+    { label: 'Pogodnosti', id: 'pogodnosti' },
+    { label: 'Kontakt', id: 'kontakt' },
   ];
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f9fafb', color: '#020617' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: `
+      linear-gradient(
+        180deg,
+        #F8FAFC 0%,
+        #F1F5F9 100%
+      )
+    `,
+        color: '#020617',
+      }}
+    >
       {/* AppBar */}
       <AppBar
         position="sticky"
         elevation={0}
         sx={{
-          bgcolor: 'rgba(255,255,255,0.85)',
-          borderBottom: '1px solid #e5e7eb',
+          bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
           backdropFilter: 'blur(8px)',
+          opacity: 0.95,
         }}
       >
-        <Toolbar sx={{ height: 64 }}>
+        <Toolbar sx={{ height: 72 }}>
           <Container
             maxWidth="lg"
             sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
           >
             <Stack direction="row" spacing={1} alignItems="center">
-              <Printer size={20} color={theme.palette.primary.main} />
-              <Typography sx={{ fontWeight: 800 }} color={theme.palette.primary.main}>Go2Copy</Typography>
+              <Printer size={24} color={theme.palette.primary.main} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  color: 'text.primary',
+                }}
+              >
+                Go2Copy
+              </Typography>
             </Stack>
 
             <Stack direction="row" spacing={4} sx={{ display: { xs: 'none', md: 'flex' } }}>
-              {['Kako radi', 'Pogodnosti', 'Kontakt'].map((item) => (
+              {navItems.map((item) => (
                 <Link
-                  key={item}
-                  href="#"
+                  key={item.id}
+                  href={`#${item.id}`}
                   underline="none"
-                  sx={{ color: '#475569', '&:hover': { color: '#020617' } }}
+                  sx={{
+                    color: 'text.secondary',
+                    fontWeight: 600,
+                    fontSize: '0.925rem',
+                    transition: 'color 0.2s',
+                    '&:hover': { color: 'primary.main' },
+                  }}
                 >
-                  {item}
+                  {item.label}
                 </Link>
               ))}
             </Stack>
 
-            <Button onClick={handleStoreRedirect} variant="contained">
+            <Button
+              onClick={handleStoreRedirect}
+              variant="contained"
+              sx={{
+                borderRadius: '8px',
+                px: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
               Započni
             </Button>
           </Container>
@@ -110,38 +122,86 @@ export default function LandingPage() {
       </AppBar>
 
       {/* Hero */}
-      <Box component="section" sx={{ bgcolor: '#ffffff' }}>
+      <Box
+        component="section"
+        sx={{
+          pt: { xs: 4, md: 8 },
+          background: `
+      radial-gradient(
+        circle at 20% 0%,
+        rgba(37,99,235,0.08),
+        transparent 40%
+      )
+    `,
+        }}
+      >
         <Container maxWidth="lg" sx={{ py: { xs: 10, md: 16 } }}>
           <Grid container spacing={6} alignItems="center">
             <Grid size={{ xs: 12, lg: 6 }}>
               <Typography
                 component="h1"
+                variant="h1"
                 sx={{
-                  fontWeight: 800,
-                  lineHeight: 1.05,
-                  fontSize: { xs: '2.5rem', md: '3.5rem', lg: '4.5rem' },
+                  fontWeight: 900,
+                  lineHeight: 1.1,
+                  fontSize: { xs: '2.75rem', md: '4rem', lg: '4.5rem' },
+                  letterSpacing: '-0.04em',
                 }}
               >
                 Štampanje{' '}
-                <Box component="span" sx={{ color: theme.palette.primary.main }}>
+                <Box component="span" sx={{ color: 'primary.main' }}>
                   bez čekanja u redu
                 </Box>
               </Typography>
 
-              <Typography sx={{ color: '#475569', mt: 3, maxWidth: 520 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'text.secondary',
+                  mt: 3,
+                  maxWidth: 520,
+                  lineHeight: 1.6,
+                  fontWeight: 400,
+                }}
+              >
                 Okačite dokument online, izaberite tip štampe i preuzmite kada je gotovo.
+                Jednostavno, brzo i sigurno.
               </Typography>
 
-              <Button
-                variant="contained"
-                endIcon={<ArrowRight size={16} />}
-                sx={{ mt: 4 }}
-                size="large"
-                component={Link}
-                onClick={handleHomeRedirect}
-              >
-                Započni štampanje
-              </Button>
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 5 }}>
+                <Button
+                  variant="contained"
+                  endIcon={<ArrowRight size={18} />}
+                  size="large"
+                  onClick={handleHomeRedirect}
+                  sx={{
+                    py: 1.5,
+                    px: 4,
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    borderRadius: '12px',
+                    boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.main}33`,
+                  }}
+                >
+                  Započni štampanje
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  href="#kako-radi"
+                  sx={{
+                    py: 1.5,
+                    px: 4,
+                    fontSize: '1.1rem',
+                    fontWeight: 600,
+                    borderRadius: '12px',
+                    color: 'text.primary',
+                    borderColor: 'divider',
+                  }}
+                >
+                  Saznaj više
+                </Button>
+              </Stack>
             </Grid>
 
             <Grid size={{ xs: 12, lg: 6 }}>
@@ -162,49 +222,133 @@ export default function LandingPage() {
       </Box>
 
       {/* Statistics */}
-      <Box sx={{ bgcolor: '#f8fafc' }}>
-        <Container maxWidth="lg" sx={{ py: 8 }}>
+      <Box sx={{ bgcolor: 'background.paper', borderY: '1px solid', borderColor: 'divider' }}>
+        <Container maxWidth="lg" sx={{ py: 6 }}>
           <Grid container spacing={4} textAlign="center">
             {[
-              ['50+', 'Kopirnica'],
-              ['2min', 'Prosečno vreme'],
-              ['24/7', 'Dostupnost'],
+              ['50+', 'Kopirnica u mreži'],
+              ['< 2min', 'Vreme za porudžbinu'],
+              ['24/7', 'Podrška i dostupnost'],
             ].map(([value, label]) => (
               <Grid key={label} size={{ xs: 12, md: 4 }}>
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                <Typography variant="h3" sx={{ fontWeight: 900, color: 'primary.main', mb: 0.5 }}>
                   {value}
                 </Typography>
-                <Typography sx={{ color: '#64748b' }}>{label}</Typography>
+                <Typography
+                  sx={{
+                    color: 'text.secondary',
+                    fontWeight: 500,
+                    fontSize: '0.95rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {label}
+                </Typography>
               </Grid>
             ))}
           </Grid>
         </Container>
       </Box>
 
-      {/* Features */}
-      <Box sx={{ bgcolor: '#ffffff' }}>
-        <Container maxWidth="lg" sx={{ py: 10 }}>
-          <Typography variant="h4" align="center" sx={{ fontWeight: 800, mb: 6 }}>
-            Funkcionalnosti platforme
-          </Typography>
+      <Box
+        component="section"
+        id="kako-radi"
+        sx={{
+          background: 'linear-gradient(180deg, #EFF6FF 0%, #F8FAFC 100%)',
+          scrollMarginTop: '72px',
+          py: 14,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Stack spacing={2} sx={{ mb: 10, textAlign: 'center' }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 900,
+                fontSize: { xs: '2.25rem', md: '3rem' },
+                letterSpacing: '-0.03em',
+              }}
+            >
+              Kako radi?
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'text.secondary',
+                maxWidth: 600,
+                mx: 'auto',
+                fontWeight: 400,
+                lineHeight: 1.6,
+              }}
+            >
+              Ceo proces je potpuno automatizovan. Pratite ova 4 koraka i zaboravite na čekanje.
+            </Typography>
+          </Stack>
 
           <Grid container spacing={4}>
-            {features.map((f, i) => {
-              const Icon = f.icon;
+            {[
+              {
+                icon: Upload,
+                title: '1. Otpremite dokument',
+                desc: 'Otpremite PDF, Word ili slike direktno sa svog telefona ili računara.',
+              },
+              {
+                icon: Settings,
+                title: '2. Izaberite opcije',
+                desc: 'Podesite broj kopija, boju i format. Cena se automatski obračunava.',
+              },
+              {
+                icon: CreditCard,
+                title: '3. Platite online',
+                desc: 'Sigurno plaćanje karticom omogućava trenutnu obradu vaše porudžbine.',
+              },
+              {
+                icon: Package,
+                title: '4. Preuzmite štampu',
+                desc: 'Kada dobijete obaveštenje da je spremno, samo svratite po gotov materijal.',
+              },
+            ].map((step) => {
+              const Icon = step.icon;
               return (
-                <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid key={step.title} size={{ xs: 12, sm: 6, md: 3 }}>
                   <Card
+                    elevation={0}
                     sx={{
+                      p: 4,
                       height: '100%',
-                      borderRadius: 3,
-                      boxShadow: '0 10px 30px rgba(2,6,23,0.06)',
+                      borderRadius: 4,
+                      bgcolor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 12px 24px rgba(0,0,0,0.05)',
+                      },
                     }}
                   >
-                    <CardContent>
-                      <Icon size={24} color={theme.palette.primary.main} />
-                      <Typography sx={{ fontWeight: 700, mt: 2 }}>{f.title}</Typography>
-                      <Typography sx={{ color: '#475569', mt: 1 }}>{f.description}</Typography>
-                    </CardContent>
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 2,
+                        bgcolor: 'primary.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 3,
+                        color: 'white',
+                      }}
+                    >
+                      <Icon size={24} />
+                    </Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, fontSize: '1.15rem' }}>
+                      {step.title}
+                    </Typography>
+                    <Typography sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                      {step.desc}
+                    </Typography>
                   </Card>
                 </Grid>
               );
@@ -213,138 +357,290 @@ export default function LandingPage() {
         </Container>
       </Box>
 
-      {/* How it works */}
-      <Box sx={{ bgcolor: '#f8fafc' }}>
-        <Container maxWidth="lg" sx={{ py: 10 }}>
-          <Typography variant="h4" align="center" sx={{ fontWeight: 800, mb: 6 }}>
-            Kako funkcioniše
-          </Typography>
+      <Box
+        component="section"
+        id="pogodnosti"
+        sx={{
+          bgcolor: 'common.white',
+          scrollMarginTop: '72px',
+          py: 14,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={8} alignItems="center">
+            <Grid size={{ xs: 12, lg: 5 }}>
+              <Typography
+                variant="h2"
+                sx={{
+                  fontWeight: 900,
+                  fontSize: { xs: '2rem', md: '3rem' },
+                  letterSpacing: '-0.03em',
+                  mb: 3,
+                }}
+              >
+                Zašto Go2Copy?
+              </Typography>
+              <Typography variant="h6" sx={{ color: 'text.secondary', mb: 6, fontWeight: 400 }}>
+                Uštedite vreme, izbegnite redove i imajte potpunu kontrolu nad svojom štampom.
+              </Typography>
+
+              <Stack spacing={4}>
+                {[
+                  {
+                    title: 'Bez čekanja u redu',
+                    desc: 'Dolazite samo kada je dokument spreman. Vaše vreme je dragoceno.',
+                  },
+                  {
+                    title: 'Transparentne cene',
+                    desc: 'Tačno znate koliko plaćate pre potvrde. Bez skrivenih troškova.',
+                  },
+                  {
+                    title: 'Sigurnost na prvom mestu',
+                    desc: 'Vaši dokumenti su kriptovani i brišu se odmah nakon preuzimanja.',
+                  },
+                ].map((item) => (
+                  <Stack key={item.title} direction="row" spacing={3}>
+                    <Box sx={{ mt: 0.5 }}>
+                      <Box
+                        sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'primary.main' }}
+                      />
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight={800} sx={{ mb: 0.5 }}>
+                        {item.title}
+                      </Typography>
+                      <Typography sx={{ color: 'text.secondary' }}>{item.desc}</Typography>
+                    </Box>
+                  </Stack>
+                ))}
+              </Stack>
+            </Grid>
+
+            <Grid size={{ xs: 12, lg: 7 }}>
+              <Box
+                sx={{
+                  bgcolor: 'background.default',
+                  borderRadius: 6,
+                  p: 2,
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.05)',
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'relative',
+                    height: { xs: 300, md: 500 },
+                    borderRadius: 4,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <Image src="/hero-image.png" alt="Benefits" fill className="object-cover" />
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
+      <Box
+        component="section"
+        id="kontakt"
+        sx={{
+          background: 'linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%)',
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          scrollMarginTop: '72px',
+          py: 14,
+        }}
+      >
+        <Container maxWidth="md">
+          <Stack spacing={2} sx={{ mb: 8, textAlign: 'center' }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 900,
+                fontSize: { xs: '2rem', md: '3rem' },
+                letterSpacing: '-0.03em',
+              }}
+            >
+              Kontaktirajte nas
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ color: 'text.secondary', fontWeight: 400, fontSize: '1.125rem' }}
+            >
+              Imate pitanje ili želite saradnju? Naš tim je tu za vas.
+            </Typography>
+          </Stack>
 
           <Grid container spacing={4}>
-            {steps.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <Grid key={i} size={{ xs: 12, md: 3 }}>
-                  <Stack alignItems="center" textAlign="center" spacing={2}>
-                    <Box
-                      sx={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: '50%',
-                        bgcolor: `${theme.palette.primary.main}22`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Icon size={24} color={theme.palette.primary.main} />
-                    </Box>
-                    <Typography fontWeight={700}>{s.title}</Typography>
-                    <Typography sx={{ color: '#64748b' }}>{s.description}</Typography>
-                  </Stack>
-                </Grid>
-              );
-            })}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Card
+                elevation={0}
+                sx={{
+                  p: 4,
+                  borderRadius: 4,
+                  height: '100%',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                }}
+              >
+                <Stack spacing={4}>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800 }}>
+                      E-adresa
+                    </Typography>
+                    <Typography variant="h6" fontWeight={700}>
+                      support@go2copy.rs
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800 }}>
+                      Telefon
+                    </Typography>
+                    <Typography variant="h6" fontWeight={700}>
+                      +381 60 123 4567
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800 }}>
+                      Radno vreme
+                    </Typography>
+                    <Typography variant="h6" fontWeight={700}>
+                      Pon – Sub | 08:00 – 20:00
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Card>
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Card
+                elevation={0}
+                sx={{
+                  p: 4,
+                  borderRadius: 4,
+                  height: '100%',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  bgcolor: 'background.paper',
+                }}
+              >
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 3 }}>
+                  Brzi upit
+                </Typography>
+                <Stack spacing={2}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    Za sve poslovne ponude i tehničku podršku možete nas kontaktirati direktno.
+                    Odgovaramo u roku od 24 časa.
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    sx={{ mt: 2, borderRadius: 2 }}
+                  >
+                    Pošalji poruku
+                  </Button>
+                </Stack>
+              </Card>
+            </Grid>
           </Grid>
         </Container>
       </Box>
 
       {/* Footer */}
-      <Box component="footer" id="kontakt" sx={{ bgcolor: '#020617', color: '#e5e7eb', py: 6 }}>
+      <Box component="footer" sx={{ bgcolor: 'common.black', color: 'grey.300', py: 10 }}>
         <Container maxWidth="lg">
-          <Grid container spacing={4} sx={{ mb: 4 }}>
-            <Grid size={{ xs: 6, md: 3 }}>
-              <Typography sx={{ fontWeight: 700, mb: 1 }}>Proizvod</Typography>
-              <Stack spacing={1}>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Funkcionalnosti
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Cene
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  FAQ
-                </Link>
+          <Grid container spacing={8} sx={{ mb: 8 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 3 }}>
+                <Printer size={24} color={theme.palette.primary.main} />
+                <Typography variant="h5" sx={{ fontWeight: 900, color: 'white' }}>
+                  Go2Copy
+                </Typography>
               </Stack>
+              <Typography sx={{ color: 'grey.500', lineHeight: 1.8, maxWidth: 300 }}>
+                Prva onlajn platforma za štampanje u Srbiji koja štedi vaše vreme i novac.
+              </Typography>
             </Grid>
 
-            <Grid size={{ xs: 6, md: 3 }}>
-              <Typography sx={{ fontWeight: 700, mb: 1 }}>Kompanija</Typography>
-              <Stack spacing={1}>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  O nama
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Blog
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Karijera
-                </Link>
-              </Stack>
-            </Grid>
-
-            <Grid size={{ xs: 6, md: 3 }}>
-              <Typography sx={{ fontWeight: 700, mb: 1 }}>Podrška</Typography>
-              <Stack spacing={1}>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Kontakt
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Dokumentacija
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Status
-                </Link>
-              </Stack>
-            </Grid>
-
-            <Grid size={{ xs: 6, md: 3 }}>
-              <Typography sx={{ fontWeight: 700, mb: 1 }}>Pravno</Typography>
-              <Stack spacing={1}>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Privatnost
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Uslovi
-                </Link>
-                <Link href="#" underline="none" sx={{ color: '#cbd5f5' }}>
-                  Kolačići
-                </Link>
-              </Stack>
-            </Grid>
+            {[
+              {
+                title: 'Proizvod',
+                links: ['Funkcionalnosti', 'Cene', 'FAQ'],
+              },
+              {
+                title: 'Kompanija',
+                links: ['O nama', 'Blog', 'Karijera'],
+              },
+              {
+                title: 'Podrška',
+                links: ['Kontakt', 'Status', 'Privatnost'],
+              },
+            ].map((section) => (
+              <Grid key={section.title} size={{ xs: 6, md: 2 }}>
+                <Typography
+                  sx={{
+                    fontWeight: 800,
+                    color: 'white',
+                    mb: 3,
+                    fontSize: '0.9rem',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {section.title}
+                </Typography>
+                <Stack spacing={1.5}>
+                  {section.links.map((link) => (
+                    <Link
+                      key={link}
+                      href="#"
+                      underline="none"
+                      sx={{
+                        color: 'grey.500',
+                        fontSize: '0.95rem',
+                        Transition: 'color 0.2s',
+                        '&:hover': { color: 'white' },
+                      }}
+                    >
+                      {link}
+                    </Link>
+                  ))}
+                </Stack>
+              </Grid>
+            ))}
           </Grid>
 
           <Box
             sx={{
               borderTop: '1px solid rgba(255,255,255,0.1)',
-              pt: 3,
+              pt: 4,
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
               justifyContent: 'space-between',
               alignItems: 'center',
-              gap: 2,
+              gap: 3,
             }}
           >
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Printer size={16} />
-              <Typography sx={{ fontSize: 14, color: '#cbd5f5' }}>
-                © 2026 PrintGo. Sva prava zadržana.
-              </Typography>
-            </Stack>
+            <Typography sx={{ fontSize: 14, color: 'grey.600' }}>
+              © 2026 Go2Copy. Sva prava zadržana.
+            </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Link href="#" sx={{ color: '#cbd5f5', '&:hover': { color: '#ffffff' } }}>
-                <Facebook size={18} />
-              </Link>
-              <Link href="#" sx={{ color: '#cbd5f5', '&:hover': { color: '#ffffff' } }}>
-                <Twitter size={18} />
-              </Link>
-              <Link href="#" sx={{ color: '#cbd5f5', '&:hover': { color: '#ffffff' } }}>
-                <Instagram size={18} />
-              </Link>
-              <Link href="#" sx={{ color: '#cbd5f5', '&:hover': { color: '#ffffff' } }}>
-                <Linkedin size={18} />
-              </Link>
+            <Stack direction="row" spacing={3}>
+              {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+                <Link
+                  key={i}
+                  href="#"
+                  sx={{
+                    color: 'grey.600',
+                    transition: 'color 0.2s',
+                    '&:hover': { color: 'primary.main' },
+                  }}
+                >
+                  <Icon size={20} />
+                </Link>
+              ))}
             </Stack>
           </Box>
         </Container>

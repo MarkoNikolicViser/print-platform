@@ -68,7 +68,7 @@ export const lightPalette: PaletteOptions = {
    disabled: 'rgba(2,6,23,0.38)',
  },
  background: {
-   default: '#F9FAFB',
+   default: '#F1F5F9',
    paper: '#FFFFFF',
  },
  divider: '#E5E7EB',
