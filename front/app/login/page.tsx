@@ -17,8 +17,8 @@ import {
   Divider,
   CircularProgress,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { useState } from 'react';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -38,15 +38,12 @@ export default function LoginPage() {
   const { login, register, loading } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { t } = useTranslation();
 
   const [tabValue, setTabValue] = useState(0);
   const [error, setError] = useState('');
 
-  const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
-  });
-
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({
     name: '',
     email: '',
@@ -54,12 +51,9 @@ export default function LoginPage() {
     confirmPassword: '',
   });
 
-  const { t } = useTranslation();
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
     try {
       await login(loginData.email, loginData.password);
     } catch (err: any) {
@@ -106,31 +100,17 @@ export default function LoginPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background:
-            theme.palette.mode === 'dark'
-              ? 'linear-gradient(135deg, #0f172a 0%, #111827 40%, #0b1120 100%)'
-              : 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
+          bgcolor: 'background.default',
         }}
       >
-        <Box
-          sx={{
-            p: 4,
-            borderRadius: 4,
-            backdropFilter: 'blur(10px)',
-            background:
-              theme.palette.mode === 'dark' ? 'rgba(17,24,39,0.7)' : 'rgba(255,255,255,0.7)',
-            boxShadow:
-              theme.palette.mode === 'dark'
-                ? '0 10px 40px rgba(0,0,0,0.6)'
-                : '0 10px 40px rgba(0,0,0,0.08)',
-            textAlign: 'center',
-          }}
-        >
-          <CircularProgress size={40} sx={{ color: '#f97316' }} />
-          <Typography sx={{ mt: 2, fontSize: '0.9rem', color: 'text.secondary' }}>
-            {t('login.loading')}
-          </Typography>
-        </Box>
+        <Paper sx={{ p: 4, borderRadius: 3 }}>
+          <Box textAlign="center">
+            <CircularProgress />
+            <Typography sx={{ mt: 2 }} color="text.secondary">
+              {t('login.loading')}
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
     );
   }
@@ -139,10 +119,7 @@ export default function LoginPage() {
     <Box
       sx={{
         minHeight: '100vh',
-        background:
-          theme.palette.mode === 'dark'
-            ? 'linear-gradient(135deg, #0f172a 0%, #111827 40%, #0b1120 100%)'
-            : 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f1f5f9 100%)',
+        bgcolor: 'background.default',
         display: 'flex',
         alignItems: { xs: 'flex-start', md: 'center' },
         pt: { xs: 6, md: 0 },
@@ -150,47 +127,21 @@ export default function LoginPage() {
     >
       <Container maxWidth="sm">
         <Paper
-          elevation={0}
           sx={{
             p: { xs: 3, sm: 4 },
-            borderRadius: 4,
-            backdropFilter: 'blur(14px)',
-            background:
-              theme.palette.mode === 'dark' ? 'rgba(17,24,39,0.85)' : 'rgba(255,255,255,0.75)',
-            border:
-              theme.palette.mode === 'dark'
-                ? '1px solid rgba(255,255,255,0.06)'
-                : '1px solid rgba(255,255,255,0.6)',
-            boxShadow:
-              theme.palette.mode === 'dark'
-                ? '0 10px 40px rgba(0,0,0,0.6)'
-                : '0 10px 40px rgba(0,0,0,0.08)',
+            borderRadius: 3,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
           }}
         >
           {/* HEADER */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Typography
-              fontWeight={800}
-              sx={{
-                fontSize: {
-                  xs: '1.6rem',
-                  sm: '1.9rem',
-                  md: '2.2rem',
-                },
-                letterSpacing: '-0.5px',
-                color: theme.palette.mode === 'dark' ? '#fff' : 'inherit',
-              }}
-            >
+          <Box textAlign="center" mb={4}>
+            <Typography fontWeight={800} fontSize={{ xs: 24, md: 28 }}>
               Go2Copy
             </Typography>
 
-            <Typography
-              color="text.secondary"
-              sx={{
-                mt: 1,
-                fontSize: { xs: '0.85rem', md: '0.95rem' },
-              }}
-            >
+            <Typography color="text.secondary" mt={1}>
               {t('login.subtitle')}
             </Typography>
           </Box>
@@ -203,34 +154,12 @@ export default function LoginPage() {
               setError('');
             }}
             variant="fullWidth"
-            sx={{
-              mb: 1,
-              '& .MuiTabs-indicator': {
-                height: 3,
-                borderRadius: 3,
-                backgroundColor: '#f97316',
-              },
-              '& .MuiTab-root': {
-                fontWeight: 600,
-                textTransform: 'none',
-                color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.6)' : 'inherit',
-                fontSize: { xs: '0.85rem', md: '0.95rem' },
-                '&.Mui-selected': {
-                  color: theme.palette.mode === 'dark' ? '#fff' : 'inherit',
-                },
-              },
-            }}
           >
             <Tab label={t('login.tabLogin')} />
             <Tab label={t('login.tabRegister')} />
           </Tabs>
 
-          <Divider
-            sx={{
-              mb: 2,
-              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-            }}
-          />
+          <Divider sx={{ my: 2 }} />
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -245,30 +174,12 @@ export default function LoginPage() {
               variant="outlined"
               onClick={handleGoogleLogin}
               startIcon={<GoogleIcon />}
-              sx={{
-                py: 1.2,
-                fontWeight: 600,
-                borderRadius: 2,
-                textTransform: 'none',
-                backgroundColor: theme.palette.mode === 'dark' ? '#1f2937' : '#fff',
-                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : '#e5e7eb',
-                color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.9)' : 'inherit',
-                '&:hover': {
-                  backgroundColor: theme.palette.mode === 'dark' ? '#273549' : '#f9fafb',
-                },
-              }}
+              sx={{ py: 1.2, textTransform: 'none' }}
             >
               {isMobile ? 'Google' : t('login.googleButton')}
             </Button>
 
-            <Divider
-              sx={{
-                my: 3,
-                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-              }}
-            >
-              {t('login.or')}
-            </Divider>
+            <Divider sx={{ my: 3 }}>{t('login.or')}</Divider>
 
             <Box component="form" onSubmit={handleLogin}>
               <TextField
@@ -280,37 +191,17 @@ export default function LoginPage() {
                 required
                 value={loginData.email}
                 onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-                  },
-                }}
               />
 
               <TextField
                 fullWidth
-                label="Lozinka"
+                label={t('login.passwordLabel')}
                 type="password"
                 margin="normal"
                 size="small"
                 required
                 value={loginData.password}
                 onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-                  },
-                }}
               />
 
               <Button
@@ -318,26 +209,9 @@ export default function LoginPage() {
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                size="small"
-                sx={{
-                  mt: 3,
-                  py: 1.3,
-                  borderRadius: 2,
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  fontSize: '0.95rem',
-                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                  boxShadow: '0 8px 20px rgba(249,115,22,0.3)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #ea580c, #c2410c)',
-                  },
-                }}
+                sx={{ mt: 3, textTransform: 'none' }}
               >
-                {loading ? (
-                  <CircularProgress size={22} sx={{ color: '#fff' }} />
-                ) : (
-                  t('login.loginButton')
-                )}
+                {loading ? <CircularProgress size={22} /> : t('login.loginButton')}
               </Button>
             </Box>
           </TabPanel>
@@ -349,25 +223,12 @@ export default function LoginPage() {
                 fullWidth
                 label={t('login.nameLabel')}
                 margin="normal"
-                required
                 size="small"
+                required
                 value={registerData.name}
                 onChange={(e) =>
-                  setRegisterData({
-                    ...registerData,
-                    name: e.target.value,
-                  })
+                  setRegisterData({ ...registerData, name: e.target.value })
                 }
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-                  },
-                }}
               />
 
               <TextField
@@ -379,21 +240,8 @@ export default function LoginPage() {
                 required
                 value={registerData.email}
                 onChange={(e) =>
-                  setRegisterData({
-                    ...registerData,
-                    email: e.target.value,
-                  })
+                  setRegisterData({ ...registerData, email: e.target.value })
                 }
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-                  },
-                }}
               />
 
               <TextField
@@ -405,21 +253,8 @@ export default function LoginPage() {
                 required
                 value={registerData.password}
                 onChange={(e) =>
-                  setRegisterData({
-                    ...registerData,
-                    password: e.target.value,
-                  })
+                  setRegisterData({ ...registerData, password: e.target.value })
                 }
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-                  },
-                }}
               />
 
               <TextField
@@ -436,16 +271,6 @@ export default function LoginPage() {
                     confirmPassword: e.target.value,
                   })
                 }
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    backgroundColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'transparent',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor:
-                      theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : undefined,
-                  },
-                }}
               />
 
               <Button
@@ -453,39 +278,15 @@ export default function LoginPage() {
                 fullWidth
                 variant="contained"
                 disabled={loading}
-                size="small"
-                sx={{
-                  mt: 3,
-                  py: 1.3,
-                  borderRadius: 2,
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  fontSize: '0.95rem',
-                  background: 'linear-gradient(135deg, #f97316, #ea580c)',
-                  boxShadow: '0 8px 20px rgba(249,115,22,0.3)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #ea580c, #c2410c)',
-                  },
-                }}
+                sx={{ mt: 3, textTransform: 'none' }}
               >
-                {loading ? (
-                  <CircularProgress size={22} sx={{ color: '#fff' }} />
-                ) : (
-                  t('login.registerButton')
-                )}
+                {loading ? <CircularProgress size={22} /> : t('login.registerButton')}
               </Button>
             </Box>
           </TabPanel>
 
-          <Box sx={{ textAlign: 'center', mt: 4 }}>
-            <Link
-              href="/"
-              underline="hover"
-              sx={{
-                fontSize: '0.85rem',
-                color: 'text.secondary',
-              }}
-            >
+          <Box textAlign="center" mt={4}>
+            <Link href="/" underline="hover" color="text.secondary">
               {t('login.backToHome')}
             </Link>
           </Box>

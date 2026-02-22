@@ -306,7 +306,7 @@ export default function LandingPage() {
             ].map((step) => {
               const Icon = step.icon;
               return (
-                <Grid key={step.title} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Grid key={step.title} size={{ xs: 12, sm: 6, md: 6 }}>
                   <Card
                     elevation={0}
                     sx={{
