@@ -7,6 +7,7 @@ import { Box, Typography, Paper, Stack, Button, Container, Divider } from '@mui/
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 export default function CheckoutPage() {
   const { t } = useTranslation();
@@ -94,6 +95,8 @@ export default function CheckoutPage() {
 
   const services = Object.values(servicesMap || {});
   const hasMultipleServices = services.length > 1;
+  const EUR_RATE = 117.2 // ili dinamički kurs
+  const amountInEur = (Number(data.total) / EUR_RATE).toFixed(2);
 
   useEffect(() => {
     const code = localStorage.getItem('order_code');
@@ -165,25 +168,60 @@ export default function CheckoutPage() {
             {t('checkout.cardPaymentDescription')}
           </Typography>
 
-          {/* ovde ide PayPalButtons */}
-          <Box
-            sx={{
-              border: '1px dashed',
-              borderColor: 'divider',
-              p: 2,
-              borderRadius: 1,
-              textAlign: 'center',
-              mb: 2,
+          <PayPalScriptProvider
+            options={{
+              clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+              currency: 'EUR',
+              intent: 'capture',
             }}
           >
-            <Typography variant="caption" color="text.secondary">
-              {t('checkout.paypalPlaceholder')}
-            </Typography>
-          </Box>
+            <PayPalButtons
+              style={{ layout: 'vertical' }}
+              createOrder={async (_, actions) => {
+                return actions.order.create({
+                  intent: "CAPTURE",
+                  purchase_units: [
+                    {
+                      amount: {
+                        currency_code: 'EUR',
+                        value: amountInEur,
+                      },
+                      description: `Order ${orderCode}`,
+                    },
+                  ],
+                });
+              }}
+              onApprove={async (dataApprove, actions) => {
+                if (!actions.order) return;
 
-          <Button fullWidth size="large" variant="contained" onClick={handlePayment}>
-            {t('checkout.pay')} {currencyFmt.format(Number(data.total))}
-          </Button>
+                const details = await actions.order.capture();
+
+                const captureId =
+                  details.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+
+                if (!captureId) {
+                  console.error('No capture ID');
+                  return;
+                }
+
+                const payload = {
+                  order_code: orderCode,
+                  customer_email: details.payer?.email_address,
+                  provider: 'PayPal' as const,
+                  provider_payment_id: captureId,
+                  amount: Number(data.total),
+                  fee: 0, // real fee možeš kasnije računati preko webhook-a
+                };
+
+                payment(payload);
+
+                router.push('/home/success');
+              }}
+              onError={(err) => {
+                console.error('PayPal error:', err);
+              }}
+            />
+          </PayPalScriptProvider>
         </Paper>
 
         <Stack direction="row" justifyContent="flex-end" mt={2}>
