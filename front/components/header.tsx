@@ -129,7 +129,6 @@ export function Header() {
     <AppBar
       position="sticky"
       elevation={0}
-      color="transparent"
       sx={{
         bgcolor: alpha(theme.palette.background.paper, 0.8),
         backdropFilter: 'blur(8px)',
