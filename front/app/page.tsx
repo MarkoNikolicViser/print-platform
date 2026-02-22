@@ -49,8 +49,7 @@ export default function LandingPage() {
     <Box
       sx={{
         minHeight: '100vh',
-        background: (theme) =>
-          `linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
+        bgcolor: 'background.default',
         color: 'text.primary',
       }}
     >
@@ -252,9 +251,7 @@ export default function LandingPage() {
         component="section"
         id="kako-radi"
         sx={{
-          background: (theme) =>
-            `linear-gradient(180deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
-          scrollMarginTop: '72px',
+          bgcolor: 'background.default',
           py: 14,
         }}
       >
@@ -448,8 +445,7 @@ export default function LandingPage() {
         component="section"
         id="kontakt"
         sx={{
-          background: (theme) =>
-            `linear-gradient(180deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+          bgcolor: 'background.default',
           borderTop: '1px solid',
           borderColor: 'divider',
           scrollMarginTop: '72px',
