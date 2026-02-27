@@ -17,8 +17,15 @@ export default [
   'strapi::poweredBy',
   'strapi::logger',
   'strapi::query',
-  'strapi::body',
-  'strapi::session',
+  {
+    name: 'strapi::body',
+    config: {
+      jsonLimit: '10mb',
+      formLimit: '10mb',
+      textLimit: '10mb',
+      includeUnparsed: true, // 👈 KLJUČNO ZA STRIPE
+    },
+  }, 'strapi::session',
   'strapi::favicon',
   'strapi::public',
 ];
