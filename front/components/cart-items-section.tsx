@@ -194,7 +194,7 @@ export default function CartItemsSection() {
         alignItems={{ xs: 'stretch', sm: 'center' }}
         sx={{ mb: { xs: 1.5, md: 2 }, display: { xs: 'none', md: 'flex' } }}
       >
-        <Typography variant="h5" color='text.primary'>Stavke narudžbine</Typography>
+        <Typography variant="h5" color='text.primary'>{t('cart.orderItems')}</Typography>
         <Stack direction="row" spacing={1}>
           <Button variant="outlined" onClick={resetChanges} disabled={!dirty}>
             {t('cart.resetChanges')}
@@ -207,7 +207,7 @@ export default function CartItemsSection() {
 
       {/* Mobile Header */}
       <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 1.5 }}>
-        <Typography variant="h6">{t('cart.orderItems')}</Typography>
+        <Typography variant="h6" color='text.primary'>{t('cart.orderItems')}</Typography>
         {dirty && changed.length > 0 && (
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
             {t('cart.changed')}: {changed.join(', ')}
