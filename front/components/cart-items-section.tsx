@@ -194,7 +194,7 @@ export default function CartItemsSection() {
         alignItems={{ xs: 'stretch', sm: 'center' }}
         sx={{ mb: { xs: 1.5, md: 2 }, display: { xs: 'none', md: 'flex' } }}
       >
-        <Typography variant="h5">Stavke narudžbine</Typography>
+        <Typography variant="h5" color='text.primary'>{t('cart.orderItems')}</Typography>
         <Stack direction="row" spacing={1}>
           <Button variant="outlined" onClick={resetChanges} disabled={!dirty}>
             {t('cart.resetChanges')}
@@ -207,7 +207,7 @@ export default function CartItemsSection() {
 
       {/* Mobile Header */}
       <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 1.5 }}>
-        <Typography variant="h6">{t('cart.orderItems')}</Typography>
+        <Typography variant="h6" color='text.primary'>{t('cart.orderItems')}</Typography>
         {dirty && changed.length > 0 && (
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
             {t('cart.changed')}: {changed.join(', ')}
@@ -273,12 +273,16 @@ export default function CartItemsSection() {
                   </Typography>
 
                   {/* Quantity + Remove */}
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{ mt: 1, flexWrap: 'wrap' }}
-                    alignItems="center"
+                  <Box
+                    sx={{
+                      mt: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                      gap: 1,
+                    }}
                   >
+                    {/* Quantity controls */}
                     <Button
                       size="small"
                       variant="outlined"
@@ -286,9 +290,11 @@ export default function CartItemsSection() {
                     >
                       −
                     </Button>
+
                     <Typography variant="body2" sx={{ minWidth: 88, textAlign: 'center' }}>
                       {t('cart.quantity')}: {item.quantity}
                     </Typography>
+
                     <Button
                       size="small"
                       variant="outlined"
@@ -296,20 +302,23 @@ export default function CartItemsSection() {
                     >
                       +
                     </Button>
-                    <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }} />
+
+                    {/* Spacer pushes remove button to the right */}
+                    <Box sx={{ flexGrow: 1 }} />
+
+                    {/* Remove button */}
                     <Button
                       size="small"
                       color="error"
                       onClick={() => handleRemove(item.id)}
                       sx={{
-                        ml: { sm: 'auto' },
-                        mt: { xs: 1, sm: 0 },
                         width: { xs: '100%', sm: 'auto' },
+                        mt: { xs: 1, sm: 0 },
                       }}
                     >
                       {t('cart.remove')}
                     </Button>
-                  </Stack>
+                  </Box>
                 </Stack>
               </Grid>
 

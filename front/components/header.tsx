@@ -45,8 +45,7 @@ export function Header() {
     if (mode === 'system') return systemMode;
     return mode;
   }, [mode, systemMode]);
-  const isDark = (resolvedMode ?? theme.palette.mode) === 'dark';
-
+  const isDark = resolvedMode === 'dark';
   const toggleTheme = () => {
     setMode(isDark ? 'light' : 'dark');
   };
