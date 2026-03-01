@@ -1566,20 +1566,21 @@
     "@parcel/watcher-win32-ia32" "2.5.6"
     "@parcel/watcher-win32-x64" "2.5.6"
 
-"@paypal/paypal-js@^9.0.0":
+"@paypal/paypal-js@^9.3.0":
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/@paypal/paypal-js/-/paypal-js-9.3.0.tgz#d099b831ae882f31d564ab699158b57b5f5eecd2"
   integrity sha512-2PJ9xIH+RaBJzU9RXpzq/wqCLyjPknQXj01Vknwv+b8Kq294+2Yw7QVLPeQw+EC/vG2wqxKU7ENPupTe3MeouQ==
   dependencies:
     promise-polyfill "^8.3.0"
 
-"@paypal/react-paypal-js@^8.9.2":
-  version "8.9.2"
-  resolved "https://registry.yarnpkg.com/@paypal/react-paypal-js/-/react-paypal-js-8.9.2.tgz#6b5a5ae1215d037fd589c748a9a8c3cfab582852"
-  integrity sha512-z1GoA7KAkhFCSmpIsRxe9aseXRvfOMgF6vCJ2Mym0VOSYJm8bZSC3Ui4SjONnglfV8S4P8djpe5QB7FtKsDXrQ==
+"@paypal/react-paypal-js@^9.0.0":
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/@paypal/react-paypal-js/-/react-paypal-js-9.0.0.tgz#fea5e127536f32d4e6cefbdd00b241ff489dbeda"
+  integrity sha512-6Ei9fVVMWigRyYMteFf1ENHZolrT5bVfwLqI6WNlX7jAotI8326JN54nqOHLLeQwV9WNd8f+T7/Owom9RrBqbQ==
   dependencies:
-    "@paypal/paypal-js" "^9.0.0"
+    "@paypal/paypal-js" "^9.3.0"
     "@paypal/sdk-constants" "^1.0.122"
+    server-only "^0.0.1"
 
 "@paypal/sdk-constants@^1.0.122":
   version "1.0.157"
@@ -4938,6 +4939,11 @@ semver@^7.6.3, semver@^7.7.1, semver@^7.7.3:
   version "7.7.4"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.4.tgz#28464e36060e991fa7a11d0279d2d3f3b57a7e8a"
   integrity sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==
+
+server-only@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/server-only/-/server-only-0.0.1.tgz#0f366bb6afb618c37c9255a314535dc412cd1c9e"
+  integrity sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==
 
 set-function-length@^1.2.2:
   version "1.2.2"
