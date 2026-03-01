@@ -1,12 +1,7 @@
-module.exports = {
-  routes: [
-    {
-      method: "POST",
-      path: "/payment/create-order",
-      handler: "payment.createOrder",
-      config: {
-        auth: false,
-      },
-    },
-  ],
-};
+/**
+ * payment router
+ */
+
+import { factories } from '@strapi/strapi';
+
+export default factories.createCoreRouter('api::payment.payment');

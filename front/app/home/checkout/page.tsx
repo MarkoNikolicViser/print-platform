@@ -7,12 +7,7 @@ import { Box, Typography, Paper, Stack, Button, Container, Divider } from '@mui/
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  PayPalScriptProvider,
-  PayPalCardFieldsProvider,
-  PayPalCardFieldsForm,
-  usePayPalCardFields,
-} from '@paypal/react-paypal-js';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 
 export default function CheckoutPage() {
   const { t } = useTranslation();
@@ -20,29 +15,6 @@ export default function CheckoutPage() {
   const [orderCode, setOrderCode] = useState<string | null>(null);
 
   const { mutate: payment } = useMarkOrderPaid();
-
-  function CardSubmitButton({ amount }: { amount: string }) {
-    const { cardFields } = usePayPalCardFields();
-
-    const handleClick = async () => {
-      if (!cardFields) return;
-
-      const result = await cardFields.submit();
-
-      if (result?.error) {
-        console.error(result.error);
-        return;
-      }
-
-      console.log('Payment success', result);
-    };
-
-    return (
-      <Button fullWidth variant="contained" size="large" onClick={handleClick}>
-        Plati {amount}
-      </Button>
-    );
-  }
 
   const handlePayment = () => {
     const orderCode = localStorage.getItem('order_code');
@@ -123,7 +95,7 @@ export default function CheckoutPage() {
 
   const services = Object.values(servicesMap || {});
   const hasMultipleServices = services.length > 1;
-  const EUR_RATE = 117.2; // ili dinamički kurs
+  const EUR_RATE = 117.2 // ili dinamički kurs
   const amountInEur = (Number(data.total) / EUR_RATE).toFixed(2);
 
   useEffect(() => {
@@ -201,26 +173,54 @@ export default function CheckoutPage() {
               clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
               currency: 'EUR',
               intent: 'capture',
-              components: 'card-fields',
             }}
           >
-            <PayPalCardFieldsProvider
-              createOrder={async () => {
-                const res = await fetch('http://localhost:1337/api/payments/create-order', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ amount: amountInEur }),
+            <PayPalButtons
+              style={{ layout: 'vertical' }}
+              createOrder={async (_, actions) => {
+                return actions.order.create({
+                  intent: "CAPTURE",
+                  purchase_units: [
+                    {
+                      amount: {
+                        currency_code: 'EUR',
+                        value: amountInEur,
+                      },
+                      description: `Order ${orderCode}`,
+                    },
+                  ],
                 });
-
-                const order = await res.json();
-                return order.id;
               }}
-            >
-              <PayPalCardFieldsForm />
-              <Box mt={2}>
-                <CardSubmitButton amount={amountInEur} />
-              </Box>
-            </PayPalCardFieldsProvider>
+              onApprove={async (dataApprove, actions) => {
+                if (!actions.order) return;
+
+                const details = await actions.order.capture();
+
+                const captureId =
+                  details.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+
+                if (!captureId) {
+                  console.error('No capture ID');
+                  return;
+                }
+
+                const payload = {
+                  order_code: orderCode,
+                  customer_email: details.payer?.email_address,
+                  provider: 'PayPal' as const,
+                  provider_payment_id: captureId,
+                  amount: Number(data.total),
+                  fee: 0, // real fee možeš kasnije računati preko webhook-a
+                };
+
+                payment(payload);
+
+                router.push('/home/success');
+              }}
+              onError={(err) => {
+                console.error('PayPal error:', err);
+              }}
+            />
           </PayPalScriptProvider>
         </Paper>
 
