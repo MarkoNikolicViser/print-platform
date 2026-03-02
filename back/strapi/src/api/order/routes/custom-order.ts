@@ -29,6 +29,11 @@ module.exports = {
       handler: "shop-panel.list",
     },
     {
+      method: "GET",
+      path: "/order/status",
+      handler: "order.checkStatus",
+    },
+    {
       method: "POST",
       path: "/shop-panel/order-item",
       handler: "shop-panel.updateItem",

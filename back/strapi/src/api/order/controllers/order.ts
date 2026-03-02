@@ -340,12 +340,27 @@ module.exports = createCoreController("api::order.order", ({ strapi }) => ({
 
           product_template: template
             ? {
-                id: template.id,
-                name: template.name,
-              }
+              id: template.id,
+              name: template.name,
+            }
             : null,
         };
       }),
     }));
   },
+  async checkStatus(ctx) {
+    const { order_code } = ctx.query;
+
+    if (!order_code) return ctx.badRequest('Missing order_code');
+
+    const order = await strapi.db.query('api::order.order').findOne({
+      where: { order_code },
+    });
+
+    if (!order) return ctx.notFound();
+
+    ctx.send({
+      status_code: order.status_code,
+    });
+  }
 }));
