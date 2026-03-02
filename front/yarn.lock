@@ -1566,29 +1566,6 @@
     "@parcel/watcher-win32-ia32" "2.5.6"
     "@parcel/watcher-win32-x64" "2.5.6"
 
-"@paypal/paypal-js@^9.3.0":
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/@paypal/paypal-js/-/paypal-js-9.3.0.tgz#d099b831ae882f31d564ab699158b57b5f5eecd2"
-  integrity sha512-2PJ9xIH+RaBJzU9RXpzq/wqCLyjPknQXj01Vknwv+b8Kq294+2Yw7QVLPeQw+EC/vG2wqxKU7ENPupTe3MeouQ==
-  dependencies:
-    promise-polyfill "^8.3.0"
-
-"@paypal/react-paypal-js@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@paypal/react-paypal-js/-/react-paypal-js-9.0.0.tgz#fea5e127536f32d4e6cefbdd00b241ff489dbeda"
-  integrity sha512-6Ei9fVVMWigRyYMteFf1ENHZolrT5bVfwLqI6WNlX7jAotI8326JN54nqOHLLeQwV9WNd8f+T7/Owom9RrBqbQ==
-  dependencies:
-    "@paypal/paypal-js" "^9.3.0"
-    "@paypal/sdk-constants" "^1.0.122"
-    server-only "^0.0.1"
-
-"@paypal/sdk-constants@^1.0.122":
-  version "1.0.157"
-  resolved "https://registry.yarnpkg.com/@paypal/sdk-constants/-/sdk-constants-1.0.157.tgz#3aeed32b13118b4e72caacd7a045cd8b6754af29"
-  integrity sha512-BjxWT9rK6dM1AOffSpvHYY47/8BY775jgEYYiwH6eL4YaqU5Epcw7zOtwQ8L4UaEn4FCAjZ2EWxaS83dCN7SpA==
-  dependencies:
-    hi-base32 "^0.5.0"
-
 "@pdf-lib/standard-fonts@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@pdf-lib/standard-fonts/-/standard-fonts-1.0.0.tgz#8ba691c4421f71662ed07c9a0294b44528af2d7f"
@@ -3659,11 +3636,6 @@ hermes-parser@^0.25.1:
   dependencies:
     hermes-estree "0.25.1"
 
-hi-base32@^0.5.0:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/hi-base32/-/hi-base32-0.5.1.tgz#1279f2ddae2673219ea5870c2121d2a33132857e"
-  integrity sha512-EmBBpvdYh/4XxsnUybsPag6VikPYnN30td+vQk+GI3qpahVEG9+gTkG0aXVxTjBqQ5T6ijbWIu77O+C5WFWsnA==
-
 hoist-non-react-statics@^3.3.1:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-3.3.2.tgz#ece0acaf71d62c2969c2ec59feff42a4b1a85b45"
@@ -4582,11 +4554,6 @@ prettier@^3.8.0:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.8.1.tgz#edf48977cf991558f4fcbd8a3ba6015ba2a3a173"
   integrity sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==
 
-promise-polyfill@^8.3.0:
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/promise-polyfill/-/promise-polyfill-8.3.0.tgz#9284810268138d103807b11f4e23d5e945a4db63"
-  integrity sha512-H5oELycFml5yto/atYqmjyigJoAo3+OXwolYiH7OfQuYlAqhxNvTfiNMbV9hsC6Yp83yE5r2KTVmtrG6R9i6Pg==
-
 prop-types@^15.6.2, prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
@@ -4951,11 +4918,6 @@ semver@^7.6.3, semver@^7.7.1, semver@^7.7.3:
   version "7.7.4"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.4.tgz#28464e36060e991fa7a11d0279d2d3f3b57a7e8a"
   integrity sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==
-
-server-only@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/server-only/-/server-only-0.0.1.tgz#0f366bb6afb618c37c9255a314535dc412cd1c9e"
-  integrity sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==
 
 set-function-length@^1.2.2:
   version "1.2.2"
