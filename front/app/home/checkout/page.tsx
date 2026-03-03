@@ -16,7 +16,7 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   const [mounted, setMounted] = useState(false);
-  const [orderCode, setOrderCode] = useState<string | null>(null);
+  const [orderCode, setOrderCode] = useState<string>('');
   const [notifEmail, setNotifEmail] = useState<string>('');
 
   const { mutate: payment } = useMarkOrderPaid();

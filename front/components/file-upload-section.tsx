@@ -21,304 +21,403 @@ import {
   useTheme,
   Divider,
 } from '@mui/material';
-import { Upload, FileText, AlertCircle, X, ShieldCheck } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import { Upload, FileText, AlertCircle, X, ShieldCheck, ChevronUp, ChevronDown } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { PreviewModal } from './PreviewRenderer';
 import { PrintTypeSelector } from './print-type-selector';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Collapse } from '@mui/material';
+import { MultiFilePrintTypeSelector } from './multi-file-print-type-selector';
+
+type UploadedFile = {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  type: string;
+  pages?: number;
+  url?: string;
+  status: 'uploading' | 'done' | 'error';
+  error?: string;
+};
 
 export function FileUploadSection() {
   const { t } = useTranslation();
-
-  const {
-    file,
-    setFile,
-    fileInfo,
-    setFileInfo,
-    done,
-    setDone,
-    uploadedUrl,
-    setUploadedUrl,
-    previewOpen,
-    setPreviewOpen,
-  } = usePrintContext();
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [dragOver, setDragOver] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { uploadFile } = useFileUpload();
 
-  const { uploadFile, loading: uploading } = useFileUpload();
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [dragOver, setDragOver] = useState(false);
+  const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [securityOpen, setSecurityOpen] = useState(true);
+
+  const toggle = (id: string) => {
+    setOpenId((prev) => (prev === id ? null : id));
+  };
+
+  useEffect(() => {
+    if (files.length > 0) {
+      setSecurityOpen(false);
+    }
+  }, [files.length]);
+
   const maxFileSize = 50 * 1024 * 1024;
 
   const validateFile = (file: File): string | null => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-
     if (!allowedFileTypes.includes(ext)) {
       return t('home.fileUpload.allowedFormats', { formats: allowedFileTypes.join(', ') });
     }
-
     if (file.size > maxFileSize) {
       return t('home.fileUpload.maxSizeError');
     }
-
     return null;
   };
 
   const formatSize = (bytes: number) => {
-    if (!bytes) return '0 B';
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
   };
 
-  const selectFile = useCallback(
-    async (file: File) => {
-      const err = validateFile(file);
-      if (err) {
-        setError(err);
-        return;
-      }
+  const uploadSingleFile = async (file: File) => {
+    const error = validateFile(file);
 
-      setError(null);
-      setDone(false);
-      setUploadedUrl(null);
+    const id = crypto.randomUUID();
 
-      setFile(file);
-      setFileInfo({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-      });
+    const newFile: UploadedFile = {
+      id,
+      file,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      status: error ? 'error' : 'uploading',
+      error: error ?? undefined,
+    };
 
-      try {
-        const res = await uploadFile(file);
+    setFiles((prev) => [...prev, newFile]);
 
-        if (!res.success) {
-          throw new Error(res.error || t('home.fileUpload.uploadError'));
-        }
+    if (error) return;
 
-        setFileInfo((prev) =>
-          prev
+    try {
+      const res = await uploadFile(file);
+
+      if (!res.success) throw new Error(res.error);
+
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === id
             ? {
-                ...prev,
-                pages: res.pageCount,
-                url: res.url,
-              }
-            : prev,
-        );
+              ...f,
+              status: 'done',
+              pages: res.pageCount,
+              url: res.url,
+            }
+            : f,
+        ),
+      );
+    } catch (e: any) {
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === id
+            ? { ...f, status: 'error', error: e?.message }
+            : f,
+        ),
+      );
+    }
+  };
 
-        if (res.url) setUploadedUrl(res.url);
+  const handleFiles = async (fileList: FileList) => {
+    const arr = Array.from(fileList);
+    for (const file of arr) {
+      await uploadSingleFile(file);
+    }
+  };
 
-        setDone(true);
-      } catch (e: any) {
-        setError(e?.message || t('home.fileUpload.uploadError'));
-        setFile(null);
-        setFileInfo(null);
-        setDone(false);
-        setUploadedUrl(null);
-      }
-    },
-    [uploadFile, setFile, setFileInfo, setDone, setUploadedUrl],
-  );
-
-  const reset = () => {
-    if (uploading) return;
-    setFile(null);
-    setFileInfo(null);
-    setDone(false);
-    setError(null);
-    setUploadedUrl(null);
+  const removeFile = (id: string) => {
+    setFiles((prev) => prev.filter((f) => f.id !== id));
   };
 
   return (
-    <Card elevation={isMobile ? 4 : 0} sx={{ borderRadius: 3, boxShadow: 'none' }}>
+    <Card elevation={0} sx={{ borderRadius: 3 }}>
       <CardHeader
         title={
-          <Typography
-            variant="h6"
-            align="center"
-            sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.1rem' } }}
-          >
+          <Typography variant="h6" align="center" fontWeight={700}>
             {t('home.fileUpload.title')}
           </Typography>
         }
       />
 
       <CardContent>
-        {error && (
-          <Alert severity="error" icon={<AlertCircle size={18} />} sx={{ mb: 3 }}>
-            <AlertTitle>{t('home.fileUpload.errorTitle')}</AlertTitle>
-            {error}
-          </Alert>
-        )}
+        {/* Upload zone */}
+        <label>
+          <input
+            hidden
+            type="file"
+            multiple
+            accept={allowedFileTypes.join(',')}
+            onChange={(e) => e.target.files && handleFiles(e.target.files)}
+          />
 
-        {!file ? (
-          <label>
-            <input
-              hidden
-              type="file"
-              accept={allowedFileTypes.join(',')}
-              disabled={uploading}
-              onChange={(e) => e.target.files && selectFile(e.target.files[0])}
-            />
-
-            <Paper
-              onDragOver={(e) => {
-                e.preventDefault();
-                setDragOver(true);
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragOver(false);
-                const dropped = e.dataTransfer.files?.[0];
-                if (dropped) void selectFile(dropped);
-              }}
-              sx={{
-                p: { xs: 3, sm: 6 },
-                textAlign: 'center',
-                borderRadius: 3,
-                border: '2px dashed',
-                borderColor: dragOver ? 'primary.main' : 'divider',
-                bgcolor: dragOver ? 'action.hover' : 'background.default',
-                cursor: uploading ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {uploading ? (
-                <>
-                  <CircularProgress size={26} />
-                  <Typography mt={2} fontWeight={600}>
-                    {t('home.fileUpload.uploading')}
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Upload size={isMobile ? 28 : 40} />
-                  <Typography mt={2} fontWeight={700}>
-                    {t('home.fileUpload.clickOrDrag')}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: 'block', mt: 1 }}
-                  >
-                    {allowedFileTypes.join(', ').toUpperCase()} • max 50MB
-                  </Typography>
-                </>
-              )}
-            </Paper>
-          </label>
-        ) : (
           <Paper
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragOver(false);
+              handleFiles(e.dataTransfer.files);
+            }}
             sx={{
-              p: { xs: 2, sm: 3 },
+              p: 5,
+              textAlign: 'center',
               borderRadius: 3,
-              border: '1px solid',
-              borderColor: done ? 'primary.main' : 'divider',
+              border: '2px dashed',
+              borderColor: dragOver ? 'primary.main' : 'divider',
+              cursor: 'pointer',
             }}
           >
-            <Box
-              display="flex"
-              flexDirection={{ xs: 'column', sm: 'row' }}
-              gap={2}
-              alignItems={{ xs: 'flex-start', sm: 'center' }}
-              justifyContent="space-between"
-            >
-              {/* File info */}
-              <Box display="flex" gap={2} width="100%">
-                <FileText size={isMobile ? 20 : 24} />
+            <Upload size={isMobile ? 28 : 40} />
+            <Typography mt={2} fontWeight={700}>
+              {t('home.fileUpload.clickOrDrag')}
+            </Typography>
+          </Paper>
+        </label>
 
-                <Box flex={1}>
-                  <Typography
-                    fontWeight={700}
-                    fontSize={{ xs: '0.9rem', sm: '1rem' }}
-                    sx={{ wordBreak: 'break-word' }}
-                  >
-                    {fileInfo?.name}
-                  </Typography>
+        {/* File list */}
+        {/* File list */}
+        <Box mt={3} display="flex" flexDirection="column" gap={1.5}>
+          {files.map((file) => {
+            const isOpen = openId === file.id;
 
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: 'block', mt: 0.5 }}
-                  >
-                    {fileInfo?.size ? formatSize(fileInfo.size) : null}
-                    {fileInfo?.pages && !isItImage(fileInfo?.type)
-                      ? ` • ${t('home.fileUpload.pages', { count: fileInfo.pages })}`
-                      : null}
-                  </Typography>
-
-                  <Box mt={2} display="flex" gap={1} flexWrap="wrap">
-                    {uploading && (
-                      <Chip size="small" color="info" label={t('home.fileUpload.uploading')} />
-                    )}
-                    {uploadedUrl && (
-                      <Chip size="small" color="primary" label={t('home.fileUpload.uploaded')} />
-                    )}
-                    <Chip
-                      size="small"
-                      color={done ? 'success' : 'warning'}
-                      label={
-                        done ? t('home.fileUpload.processed') : t('home.fileUpload.notProcessed')
-                      }
-                    />
-                    <Chip
-                      size="small"
-                      icon={<VisibilityIcon />}
-                      label={t('home.fileUpload.preview')}
-                      disabled={!done}
-                      onClick={() => setPreviewOpen(true)}
-                    />
-                  </Box>
-                </Box>
-              </Box>
-              <IconButton
-                onClick={reset}
-                disabled={uploading}
+            return (
+              <Paper
+                key={file.id}
                 sx={{
-                  alignSelf: { xs: 'flex-end', sm: 'center' },
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  border: '1px solid',
+                  borderColor: isOpen ? 'primary.main' : 'divider',
                 }}
               >
-                <X size={20} />
-              </IconButton>
-            </Box>
-          </Paper>
-        )}
+                {/* HEADER ROW */}
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  px={2}
+                  py={1.5}
+                >
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    gap={1}
+                    flex={1}
+                    minWidth={0}
+                  >
+                    <FileText size={18} />
 
-        {/* SECURITY BOX */}
+                    <Typography
+                      fontWeight={600}
+                      noWrap
+                      sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {file.name}
+                    </Typography>
+
+                    {/* STATUS DOT */}
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        bgcolor:
+                          file.status === 'done'
+                            ? 'success.main'
+                            : file.status === 'error'
+                              ? 'error.main'
+                              : 'warning.main',
+                      }}
+                    />
+                  </Box>
+
+                  {/* ACTIONS */}
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    <IconButton size="small" onClick={() => toggle(file.id)}>
+                      <ExpandMoreIcon
+                        sx={{
+                          transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                          transition: '0.2s',
+                        }}
+                      />
+                    </IconButton>
+
+                    <IconButton size="small" onClick={() => removeFile(file.id)}>
+                      <X size={18} />
+                    </IconButton>
+                  </Box>
+                </Box>
+
+                {/* COLLAPSE CONTENT */}
+                {/* COLLAPSE CONTENT */}
+                <Collapse in={isOpen}>
+                  <Box px={2} pb={2}>
+                    <Divider sx={{ mb: 1.5 }} />
+
+                    <Typography variant="body2" color="text.secondary">
+                      Veličina: {formatSize(file.size)}
+                    </Typography>
+
+                    {file.pages && !isItImage(file.type) && (
+                      <Typography variant="body2" color="text.secondary">
+                        Stranice: {file.pages}
+                      </Typography>
+                    )}
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 1,
+                        fontWeight: 600,
+                        color:
+                          file.status === 'done'
+                            ? 'success.main'
+                            : file.status === 'error'
+                              ? 'error.main'
+                              : 'warning.main',
+                      }}
+                    >
+                      Status:{' '}
+                      {file.status === 'done'
+                        ? 'Obrađeno'
+                        : file.status === 'error'
+                          ? 'Greška'
+                          : 'Učitavanje...'}
+                    </Typography>
+
+                    {file.error && (
+                      <Alert severity="error" sx={{ mt: 1 }}>
+                        {file.error}
+                      </Alert>
+                    )}
+
+                    {/* PREVIEW BUTTON - ispod detalja */}
+                    {file.status === 'done' && (
+                      <Box mt={2}>
+                        <Chip
+                          size="small"
+                          icon={<VisibilityIcon />}
+                          label={t('home.fileUpload.preview')}
+                          onClick={() => setPreviewFile(file)}
+                          clickable
+                        />
+                      </Box>
+                    )}
+                  </Box>
+                </Collapse>
+              </Paper>
+            );
+          })}
+        </Box>
+
+        {/* Preview modal */}
+        <PreviewModal
+          open={!!previewFile}
+          onClose={() => setPreviewFile(null)}
+          printType={previewFile?.type ?? ''}
+          fileUrl={previewFile?.url ?? ''}
+        />
+        {/* SECURITY SECTION */}
         <Paper
           elevation={0}
           sx={{
             mt: 3,
-            p: 3,
             borderRadius: 3,
-            bgcolor: 'success.lighter',
             border: '1px solid',
             borderColor: 'success.light',
+            overflow: 'hidden',
           }}
         >
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <ShieldCheck size={18} />
-            <Typography fontWeight={700}>{t('home.fileUpload.securityTitle')}</Typography>
+          {/* HEADER */}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            px={{ xs: 2, sm: 3 }}
+            py={{ xs: 1.5, sm: 2 }}
+            sx={{
+              cursor: 'pointer',
+              bgcolor: 'success.lighter',
+            }}
+            onClick={() => setSecurityOpen((prev) => !prev)}
+          >
+            <Box display="flex" alignItems="center" gap={1}>
+              <ShieldCheck size={isMobile ? 16 : 18} />
+
+              <Typography
+                fontWeight={700}
+                fontSize={{ xs: '0.9rem', sm: '1rem' }}
+              >
+                {t('home.fileUpload.securityTitle')}
+              </Typography>
+            </Box>
+
+            <IconButton size="small">
+              <ExpandMoreIcon
+                sx={{
+                  transform: securityOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: '0.2s',
+                }}
+              />
+            </IconButton>
           </Box>
 
-          <Divider sx={{ my: 1 }} />
+          {/* COLLAPSE CONTENT */}
+          <Collapse in={securityOpen}>
+            <Box
+              px={{ xs: 2, sm: 3 }}
+              pb={{ xs: 2, sm: 3 }}
+            >
+              <Divider sx={{ my: { xs: 1.5, sm: 2 } }} />
 
-          <Typography variant="body2">{t('home.fileUpload.securityDescription')}</Typography>
+              <Typography
+                variant="body2"
+                fontSize={{ xs: '0.8rem', sm: '0.875rem' }}
+                color="text.secondary"
+                lineHeight={1.6}
+              >
+                {t('home.fileUpload.securityDescription')}
+              </Typography>
+            </Box>
+          </Collapse>
         </Paper>
-
-        <Box mt={{ xs: 3, md: 4 }}>
-          <PrintTypeSelector fileUploaded={done} uploading={uploading} documentMime={file?.type} />
-        </Box>
-
+        {files.length > 0 && (
+          <Box mt={{ xs: 3, md: 4 }}>
+            <MultiFilePrintTypeSelector
+              files={files.map((f) => ({
+                type: f.type,
+                status: f.status,
+              }))}
+            />
+          </Box>
+        )}
         <PreviewModal
-          open={previewOpen}
-          onClose={() => setPreviewOpen(false)}
-          printType={fileInfo?.type ?? 'application/pdf'}
-          fileUrl={fileInfo?.url ?? ''}
+          open={!!previewFile}
+          onClose={() => setPreviewFile(null)}
+          printType={previewFile?.type ?? ''}
+          fileUrl={previewFile?.url ?? ''}
         />
       </CardContent>
     </Card>
