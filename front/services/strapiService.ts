@@ -99,10 +99,18 @@ class StrapiService {
     return res.data;
   }
 
-  async getProductTemplatesByMime(documentMime: string) {
+  async getProductTemplatesByMime(documentMimes: string[]) {
     try {
       const res = await this.api.get('/product-templates/by-mime', {
-        params: { document_mime: documentMime },
+        params: { document_mime: documentMimes }, // niz MIME tipova
+        paramsSerializer: (params) =>
+          Object.entries(params)
+            .map(([key, val]) =>
+              Array.isArray(val)
+                ? val.map((v) => `${key}=${encodeURIComponent(v)}`).join('&')
+                : `${key}=${encodeURIComponent(val as string)}`
+            )
+            .join('&'),
       });
       return res.data.data;
     } catch (error) {

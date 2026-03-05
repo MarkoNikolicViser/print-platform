@@ -3,30 +3,10 @@
 import { usePrintContext } from '@/context/PrintContext';
 import { isItImage } from '@/helpers/formatters';
 import { useFileUpload } from '@/hooks/useFileUpload';
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  Typography,
-  Grid,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Checkbox,
-  Button,
-  Box,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
+import { Card, CardHeader, CardContent, Typography, Grid, FormControl, InputLabel, Select, MenuItem, FormLabel, RadioGroup, FormControlLabel, Radio, Checkbox, Button, Box, useMediaQuery, useTheme, Alert } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-
 import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
 
 interface OptionField {
@@ -38,77 +18,78 @@ interface OptionField {
   label?: string;
 }
 
-export function PrintConfigSection({ onNextStep }) {
+export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) {
   const { t } = useTranslation();
-
-  const {
-    file,
-    selectedTemplate,
-    printConfig,
-    setPrintConfig,
-    quantity,
-    setQuantity,
-    fileInfo,
-    setFileInfo,
-  } = usePrintContext();
-  const { uploadFile, loading: uploading } = useFileUpload();
-  const [open, setOpen] = useState(false);
-  const [image, setImage] = useState<string | null>(null);
+  const { files, updateFileConfig } = usePrintContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { uploadFile } = useFileUpload();
 
-  const updateConfig = (key: string, value: any) => {
-    setPrintConfig((prev: any) => ({ ...prev, [key]: value }));
-  };
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [printConfig, setLocalPrintConfig] = useState<Record<string, any> | null>(null);
+  const [image, setImage] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  // koristimo prvi selected template da inicijalizujemo konfiguraciju
+  const currentTemplate = files.find(f => f.selectedTemplate)?.selectedTemplate ?? null;
+
+  // provera da li je template disejblovan
+  const isDisabledTemplate = currentTemplate?.is_disabled ?? false;
+
+  // inicijalizacija printConfig po template-u
   useEffect(() => {
-    if (!selectedTemplate) {
-      return;
-    }
-    const temp = Object?.keys(selectedTemplate?.allowedOptions)?.reduce(
+    if (!currentTemplate) return;
+    const tempConfig = Object.keys(currentTemplate.allowedOptions || {}).reduce(
       (acc, key) => {
-        acc[key] = selectedTemplate?.allowedOptions[key]?.default;
+        acc[key] = currentTemplate.allowedOptions[key].default;
         return acc;
       },
-      {} as Record<string, any>,
+      {} as Record<string, any>
     );
-    setPrintConfig(temp);
-  }, [selectedTemplate]);
-  const disabled = !file || !selectedTemplate; // 👈 disable if file is empty
+    setLocalPrintConfig(tempConfig);
+
+    // bulk update po fajlovima
+    files.forEach(f => {
+      if (f.selectedTemplate?.id === currentTemplate.id) {
+        updateFileConfig(f.id, { printConfig: tempConfig });
+      }
+    });
+  }, [currentTemplate?.id, files]);
+
+  const updateConfig = (key: string, value: any) => {
+    setLocalPrintConfig(prev => ({ ...prev, [key]: value }));
+    files.forEach(f => {
+      if (f.selectedTemplate?.id === currentTemplate?.id) {
+        updateFileConfig(f.id, { printConfig: { ...f.printConfig, [key]: value } });
+      }
+    });
+  };
 
   const handleUploadCropped = useCallback(
-    async (editedFile: File) => {
+    async (editedFile: File, fileId: string) => {
       try {
         const res = await uploadFile(editedFile);
         if (!res.success) {
-          toast(t('home.printConfig.editError'), {
-            type: 'error',
-          });
+          toast(t('home.printConfig.editError'), { type: 'error' });
           return;
         }
         const url = res.url ?? '';
-        setFileInfo((prev) => (prev ? { ...prev, url } : prev));
-        toast(t('home.printConfig.editSuccess'), {
-          type: 'success',
-        });
+        updateFileConfig(fileId, { url });
+        toast(t('home.printConfig.editSuccess'), { type: 'success' });
       } catch (err) {
-        toast(t('home.printConfig.editError'), {
-          type: 'error',
-        });
+        toast(t('home.printConfig.editError'), { type: 'error' });
       }
     },
-    [setFileInfo, t, uploadFile],
+    [uploadFile, updateFileConfig, t]
   );
+
+  if (!currentTemplate) return null;
 
   return (
     <Card elevation={isMobile ? 4 : 0} sx={{ boxShadow: 'none' }}>
       <CardHeader
         title={
-          <Typography
-            variant="h6"
-            color="primary"
-            align="center"
-            sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
-          >
+          <Typography variant="h6" color="primary" align="center" sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}>
             {t('home.printConfig.title')}
           </Typography>
         }
@@ -118,112 +99,133 @@ export function PrintConfigSection({ onNextStep }) {
           display: 'flex',
           flexDirection: 'column',
           gap: 3,
-          opacity: disabled ? 0.5 : 1, // 👈 visual feedback
-          pointerEvents: disabled ? 'none' : 'auto', // 👈 block interaction
+          opacity: isDisabledTemplate ? 0.6 : 1,
+          pointerEvents: isDisabledTemplate ? 'none' : 'auto',
         }}
       >
+        {isDisabledTemplate && (
+          <Alert severity="warning">
+            {t('home.printConfig.disabledTemplateAlert') ??
+              'Ovaj template ne podržava sve izabrane fajlove. Možete obrisati fajlove koji nisu podržani ili ih dodati u korpu.'}
+          </Alert>
+        )}
+
+        <Typography variant="body2" color="text.secondary">
+          {currentTemplate.description}
+        </Typography>
+
+        {/* Prikaz svih MIME tipova */}
+        {currentTemplate.supported_mime && (
+          <Typography variant="caption" color="text.secondary">
+            {t('home.printConfig.supportedMime') ?? 'Supported file types'}:{' '}
+            {JSON.parse(currentTemplate.supported_mime).join(', ')}
+          </Typography>
+        )}
+
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            {printConfig && (
-              <FormControl fullWidth disabled={disabled}>
-                <InputLabel>{t('home.printConfig.copies')}</InputLabel>
-                <Select
-                  value={quantity} // safety
-                  onChange={(e) => setQuantity(Number(e.target.value))}
-                  label={t('home.printConfig.copies')}
-                >
-                  {' '}
-                  {[...Array(10)].map((_, i) => (
-                    <MenuItem key={i + 1} value={i + 1}>
-                      {i + 1}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
+          <Grid size={{ xs: 12, md: 6 }} >
+            <FormControl fullWidth>
+              <InputLabel>{t('home.printConfig.copies')}</InputLabel>
+              <Select
+                value={files[0]?.quantity ?? 1}
+                onChange={(e) =>
+                  files.forEach(f =>
+                    updateFileConfig(f.id, { quantity: Number(e.target.value) })
+                  )
+                }
+              >
+                {[...Array(10)].map((_, i) => (
+                  <MenuItem key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
-          {selectedTemplate &&
-            printConfig &&
-            (Object.entries(selectedTemplate.allowedOptions) as [string, OptionField][]).map(
-              ([key, field]) => (
-                <Grid size={{ xs: 12, md: 6 }} key={key}>
-                  {field.type === 'select' && field.options && (
-                    <FormControl fullWidth disabled={disabled}>
-                      <InputLabel>{field.label}</InputLabel>
-                      <Select
-                        value={printConfig[key] ?? field.default} // safety
-                        onChange={(e) => updateConfig(key, e.target.value)}
-                        label={field.label}
-                      >
-                        {field.options.map((opt) => (
-                          <MenuItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
 
-                  {field.type === 'radio' && field.options && printConfig && (
-                    <FormControl component="fieldset" disabled={disabled}>
-                      <FormLabel>{field.label}</FormLabel>
-                      <RadioGroup
-                        value={printConfig[key] ?? field.default}
-                        onChange={(e) => updateConfig(key, e.target.value)}
-                      >
-                        {field.options.map((opt) => (
-                          <FormControlLabel
-                            key={opt.value}
-                            value={opt.value}
-                            control={<Radio />}
-                            label={opt.label}
-                          />
-                        ))}
-                      </RadioGroup>
-                    </FormControl>
-                  )}
+          {Object.entries(currentTemplate.allowedOptions).map(([key, field]: [string, OptionField]) => (
+            <Grid size={{ xs: 12, md: 6 }} key={key}>
+              {field.type === 'select' && field.options && (
+                <FormControl fullWidth>
+                  <InputLabel>{field.label}</InputLabel>
+                  <Select
+                    value={printConfig?.[key] ?? field.default}
+                    onChange={(e) => updateConfig(key, e.target.value)}
+                    label={field.label}
+                  >
+                    {field.options.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
 
-                  {field.type === 'checkbox' && printConfig && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={!!printConfig[key]}
-                          onChange={(e) => updateConfig(key, e.target.checked)}
-                          disabled={disabled}
-                        />
-                      }
-                      label={field.label}
+              {field.type === 'radio' && field.options && (
+                <FormControl component="fieldset">
+                  <FormLabel>{field.label}</FormLabel>
+                  <RadioGroup
+                    value={printConfig?.[key] ?? field.default}
+                    onChange={(e) => updateConfig(key, e.target.value)}
+                  >
+                    {field.options.map((opt) => (
+                      <FormControlLabel key={opt.value} value={opt.value} control={<Radio />} label={opt.label} />
+                    ))}
+                  </RadioGroup>
+                </FormControl>
+              )}
+
+              {field.type === 'checkbox' && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={!!printConfig?.[key]}
+                      onChange={(e) => updateConfig(key, e.target.checked)}
                     />
-                  )}
-                </Grid>
-              ),
-            )}
+                  }
+                  label={field.label}
+                />
+              )}
+            </Grid>
+          ))}
         </Grid>
-        <>
-          {file && isItImage(fileInfo?.type) ? (
-            <Button
-              variant="contained"
-              onClick={() => {
-                setImage(URL.createObjectURL(file));
-                setOpen(true);
-              }}
-            >
-              {t('home.printConfig.cropImage')}
-            </Button>
-          ) : null}
 
-          {image && (
-            <ImageCropperDialog
-              open={open}
-              image={image}
-              aspect={1} // kvadrat, promeniti za šolju/majicu
-              onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile)}
-              onClose={() => setOpen(false)}
-            />
-          )}
-        </>
+        {/* Crop opcija za sve slike */}
+        {files.map(
+          (f) =>
+            isItImage(f.type) && (
+              <Box key={f.id} mt={2}>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setImage(URL.createObjectURL(f.file));
+                    setOpen(true);
+                  }}
+                >
+                  {t('home.printConfig.cropImage')} ({f.file.name})
+                </Button>
+              </Box>
+            )
+        )}
+
+        {image && (
+          <ImageCropperDialog
+            open={open}
+            image={image}
+            aspect={1} // kvadrat
+            onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile, files[0].id)}
+            onClose={() => setOpen(false)}
+          />
+        )}
+
         <Box mt={4} textAlign="center">
-          <Button variant="contained" color="primary" onClick={() => onNextStep?.()}>
+          <Button
+            variant="contained"
+            color="primary"
+            disabled={!currentTemplate}
+            onClick={() => onNextStep?.()}
+          >
             {t('home.printConfig.nextStep')}
           </Button>
         </Box>

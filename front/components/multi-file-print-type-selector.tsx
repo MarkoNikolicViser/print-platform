@@ -1,35 +1,35 @@
 'use client';
 
 import { usePrintContext } from '@/context/PrintContext';
-import AspectRatioIcon from '@mui/icons-material/AspectRatio';
-import CheckroomIcon from '@mui/icons-material/Checkroom';
-import DescriptionIcon from '@mui/icons-material/Description';
-import ImageIcon from '@mui/icons-material/Image';
-import LocalCafeIcon from '@mui/icons-material/LocalCafe';
-import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import {
     Grid,
     Card,
     CardActionArea,
     CardContent,
     Typography,
-    Skeleton,
     Box,
+    Skeleton,
+    Chip,
+    Tooltip,
 } from '@mui/material';
-import { useEffect, ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProductTemplatesByMime } from '../hooks/useProductTemplatesByMime';
-
-/* ---------------- TYPES ---------------- */
+import DescriptionIcon from '@mui/icons-material/Description';
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+import CheckroomIcon from '@mui/icons-material/Checkroom';
+import LocalCafeIcon from '@mui/icons-material/LocalCafe';
+import ImageIcon from '@mui/icons-material/Image';
+import WallpaperIcon from '@mui/icons-material/Wallpaper';
 
 type UploadedFileLite = {
+    id: string;
     type: string;
     status: 'uploading' | 'done' | 'error';
+    selectedTemplate?: any;
 };
 
-type Props = {
-    files: UploadedFileLite[];
-};
+type Props = { files: UploadedFileLite[] };
 
 type IconKey =
     | 'description'
@@ -45,9 +45,9 @@ type Template = {
     description: string;
     icon: IconKey;
     allowed_options?: any;
+    supported_mime: string | string[]; // 👈 može biti string
+    is_disabled: boolean;
 };
-
-/* ---------------- ICON MAP ---------------- */
 
 const iconMap: Record<IconKey, ReactElement> = {
     description: <DescriptionIcon fontSize="large" />,
@@ -57,8 +57,6 @@ const iconMap: Record<IconKey, ReactElement> = {
     image: <ImageIcon fontSize="large" />,
     wallpaper: <WallpaperIcon fontSize="large" />,
 };
-
-/* ---------------- SKELETON ---------------- */
 
 function TemplateSkeleton() {
     return (
@@ -72,171 +70,150 @@ function TemplateSkeleton() {
     );
 }
 
-/* ---------------- COMPONENT ---------------- */
-
 export function MultiFilePrintTypeSelector({ files }: Props) {
     const { t } = useTranslation();
-    const { selectedTemplate, setSelectedTemplate } = usePrintContext();
+    const { setSelectedTemplate } = usePrintContext();
 
-    const allDone =
-        files.length > 0 && files.every((f) => f.status === 'done');
-
+    const allDone = files.length > 0 && files.every((f) => f.status === 'done');
     const uniqueMimes = [...new Set(files.map((f) => f.type))];
-    const singleMime = uniqueMimes.length === 1 ? uniqueMimes[0] : null;
 
-    const canFetchTemplates = allDone && !!singleMime;
-
-    const {
-        data: templates = [],
-        isLoading,
-    } = useProductTemplatesByMime(singleMime ?? undefined, canFetchTemplates);
-
-    /* Reset selection if invalid */
-    useEffect(() => {
-        if (!canFetchTemplates) {
-            setSelectedTemplate(null);
-        }
-    }, [canFetchTemplates]);
-
-    /* ---------------- RENDER ---------------- */
+    const { data: templates = [], isLoading } =
+        useProductTemplatesByMime(uniqueMimes, allDone);
 
     if (!files.length) return null;
 
-    if (!allDone) {
-        return (
-            <Box textAlign="center" mt={2}>
-                <Typography variant="body2" color="text.secondary">
-                    {t('home.printTypeSelector.waitProcessing')}
-                </Typography>
-            </Box>
-        );
-    }
+    // if (!allDone) {
+    //     return (
+    //         <Box textAlign="center" mt={2}>
+    //             <Typography variant="body2" color="text.secondary">
+    //                 {t('home.printTypeSelector.waitProcessing')}
+    //             </Typography>
+    //         </Box>
+    //     );
+    // }
 
-    if (allDone && !singleMime) {
-        return (
-            <Box textAlign="center" mt={2}>
-                <Typography variant="body2" color="error" fontWeight={600}>
-                    {t('home.printTypeSelector.mixedTypesWarning')}
-                </Typography>
-            </Box>
-        );
-    }
+    const currentTemplateId = files[0]?.selectedTemplate?.id ?? null;
 
     return (
-        <>
-            <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-                {isLoading
-                    ? Array.from({ length: 6 }).map((_, idx) => (
-                        <Grid size={{ xs: 6, sm: 6, md: 4 }} key={idx}>
-                            <TemplateSkeleton />
-                        </Grid>
-                    ))
-                    : templates.map((template: Template) => {
-                        const isSelected =
-                            selectedTemplate?.id === template.id;
+        <Grid container spacing={{ xs: 1.5, sm: 2 }}>
+            {isLoading || !allDone
+                ? Array.from({ length: 6 }).map((_, idx) => (
+                    <Grid size={{ xs: 6, sm: 4, md: 4 }} key={idx}>
+                        <TemplateSkeleton />
+                    </Grid>
+                ))
+                : templates.map((template: Template) => {
+                    const isSelected = currentTemplateId === template.id;
 
-                        return (
-                            <Grid
-                                size={{ xs: 6, sm: 6, md: 4 }}
-                                key={template.id}
+                    // 👇 PARSIRANJE supported_mime
+                    let supportedMimes: string[] = [];
+
+                    if (Array.isArray(template.supported_mime)) {
+                        supportedMimes = template.supported_mime;
+                    } else if (typeof template.supported_mime === 'string') {
+                        try {
+                            supportedMimes = JSON.parse(template.supported_mime);
+                        } catch {
+                            supportedMimes = [];
+                        }
+                    }
+
+                    const mimeLabels = supportedMimes.map(
+                        (mime) => mime.split('/')[1] ?? mime
+                    );
+
+                    return (
+                        <Grid size={{ xs: 6, sm: 4, md: 4 }} key={template.id}>
+                            <Card
+                                elevation={0}
+                                sx={{
+                                    borderRadius: 3,
+                                    border: '1px solid',
+                                    borderColor: isSelected
+                                        ? 'primary.main'
+                                        : 'divider',
+                                    bgcolor: isSelected
+                                        ? 'primary.50'
+                                        : 'background.paper',
+                                    transition: 'all .2s ease',
+                                    opacity: template.is_disabled ? 0.5 : 1,
+                                }}
                             >
-                                <Card
-                                    elevation={0}
-                                    sx={{
-                                        borderRadius: 3,
-                                        border: '1px solid',
-                                        borderColor: isSelected
-                                            ? 'primary.main'
-                                            : 'divider',
-                                        bgcolor: isSelected
-                                            ? 'primary.50'
-                                            : 'background.paper',
-                                        transition: 'all .2s ease',
-                                        minHeight: { xs: 110, sm: 130 },
-                                    }}
+                                <Tooltip
+                                    title={
+                                        template.is_disabled
+                                            ? "Neki fajlovi nisu kompatibilni sa ovim tipom štampe.\nUklonite ih ili ih prvo dodajte u korpu."
+                                            : ""
+                                    }
                                 >
-                                    <CardActionArea
-                                        onClick={() =>
-                                            setSelectedTemplate({
-                                                id: template.id,
-                                                allowedOptions:
-                                                    template.allowed_options,
-                                            })
-                                        }
-                                        sx={{
-                                            py: { xs: 2, sm: 3 },
-                                        }}
-                                    >
-                                        <CardContent
-                                            sx={{
-                                                textAlign: 'center',
-                                                p: { xs: 1.5, sm: 2 },
+                                    <span>
+                                        <CardActionArea
+                                            disabled={template.is_disabled}
+                                            onClick={() => {
+                                                if (template.is_disabled) return;
+
+                                                files.forEach((file) =>
+                                                    setSelectedTemplate(file.id, {
+                                                        id: template.id,
+                                                        allowedOptions:
+                                                            template.allowed_options,
+                                                        supportedMime: supportedMimes,
+                                                    })
+                                                );
                                             }}
+                                            sx={{ py: 2 }}
                                         >
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                    mb: 1,
-                                                    color: isSelected
-                                                        ? 'primary.main'
-                                                        : 'text.secondary',
-                                                }}
-                                            >
-                                                {iconMap[template.icon] ??
-                                                    <DescriptionIcon fontSize="medium" />}
-                                            </Box>
+                                            <CardContent sx={{ textAlign: 'center' }}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'center',
+                                                        mb: 1,
+                                                        color: isSelected
+                                                            ? 'primary.main'
+                                                            : 'text.secondary',
+                                                    }}
+                                                >
+                                                    {iconMap[template.icon] ??
+                                                        <DescriptionIcon />}
+                                                </Box>
 
-                                            <Typography
-                                                fontWeight={700}
-                                                fontSize={{
-                                                    xs: '0.85rem',
-                                                    sm: '1rem',
-                                                }}
-                                            >
-                                                {template.name}
-                                            </Typography>
+                                                <Typography fontWeight={700}>
+                                                    {template.name}
+                                                </Typography>
 
-                                            <Typography
-                                                variant="caption"
-                                                color="text.secondary"
-                                                sx={{
-                                                    display: {
-                                                        xs: 'none',
-                                                        sm: 'block',
-                                                    },
-                                                    mt: 0.5,
-                                                }}
-                                            >
-                                                {template.description}
-                                            </Typography>
-                                        </CardContent>
-                                    </CardActionArea>
-                                </Card>
-                            </Grid>
-                        );
-                    })}
-            </Grid>
+                                                <Typography
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                    sx={{ mt: 0.5 }}
+                                                >
+                                                    {template.description}
+                                                </Typography>
 
-            {allDone &&
-                !selectedTemplate &&
-                !isLoading && (
-                    <Box
-                        sx={{
-                            width: '100%',
-                            mt: 2,
-                            textAlign: 'center',
-                        }}
-                    >
-                        <Typography
-                            variant="body2"
-                            color="error"
-                            sx={{ fontWeight: 700 }}
-                        >
-                            {t('home.printTypeSelector.selectTypeWarning')}
-                        </Typography>
-                    </Box>
-                )}
-        </>
+                                                {/* MIME badges */}
+                                                <Box
+                                                    mt={1}
+                                                    display="flex"
+                                                    justifyContent="center"
+                                                    flexWrap="wrap"
+                                                    gap={0.5}
+                                                >
+                                                    {mimeLabels.map((label, i) => (
+                                                        <Chip
+                                                            key={i}
+                                                            size="small"
+                                                            label={label}
+                                                        />
+                                                    ))}
+                                                </Box>
+                                            </CardContent>
+                                        </CardActionArea>
+                                    </span>
+                                </Tooltip>
+                            </Card>
+                        </Grid>
+                    );
+                })}
+        </Grid >
     );
 }

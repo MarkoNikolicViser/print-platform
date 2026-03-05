@@ -2,17 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { strapiService } from '../services/strapiService';
 import type { ProductTemplate } from '../types';
 
-export function useProductTemplatesByMime(documentMime?: string, enabled: boolean = true) {
+export function useProductTemplatesByMime(documentMimes?: string[], enabled: boolean = true) {
   return useQuery<ProductTemplate[]>({
-    queryKey: ['product-templates', documentMime],
+    queryKey: ['product-templates', documentMimes],
     queryFn: () => {
-      if (!documentMime) {
-        throw new Error('documentMime is required');
+      if (!documentMimes || documentMimes.length === 0) {
+        throw new Error('documentMimes is required');
       }
-
-      return strapiService.getProductTemplatesByMime(documentMime);
+      return strapiService.getProductTemplatesByMime(documentMimes);
     },
-    enabled: enabled && !!documentMime,
+    enabled: enabled && !!documentMimes && documentMimes.length > 0,
     staleTime: 5 * 60 * 1000, // 5 min
     refetchOnWindowFocus: false,
   });

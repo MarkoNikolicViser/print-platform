@@ -5,42 +5,27 @@ import { isItImage } from '@/helpers/formatters';
 import { allowedFileTypes } from '@/hooks/useFileUpload';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import {
   Box,
   Typography,
   Card,
   CardContent,
   CardHeader,
-  Alert,
-  AlertTitle,
   IconButton,
   Paper,
   Chip,
-  CircularProgress,
   useMediaQuery,
   useTheme,
   Divider,
+  Collapse,
+  Alert,
 } from '@mui/material';
-import { Upload, FileText, AlertCircle, X, ShieldCheck, ChevronUp, ChevronDown } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { Upload, FileText, X, ShieldCheck } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PreviewModal } from './PreviewRenderer';
-import { PrintTypeSelector } from './print-type-selector';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Collapse } from '@mui/material';
 import { MultiFilePrintTypeSelector } from './multi-file-print-type-selector';
-
-type UploadedFile = {
-  id: string;
-  file: File;
-  name: string;
-  size: number;
-  type: string;
-  pages?: number;
-  url?: string;
-  status: 'uploading' | 'done' | 'error';
-  error?: string;
-};
 
 export function FileUploadSection() {
   const { t } = useTranslation();
@@ -49,36 +34,44 @@ export function FileUploadSection() {
 
   const { uploadFile } = useFileUpload();
 
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const {
+    files = [],
+    setFiles,
+    removeFile,
+    previewFileId,
+    setPreviewFileId,
+  } = usePrintContext();
+
   const [dragOver, setDragOver] = useState(false);
-  const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [securityOpen, setSecurityOpen] = useState(true);
 
-  const toggle = (id: string) => {
-    setOpenId((prev) => (prev === id ? null : id));
-  };
-
   useEffect(() => {
-    if (files.length > 0) {
-      setSecurityOpen(false);
-    }
+    if (files.length > 0) setSecurityOpen(false);
   }, [files.length]);
 
-  const maxFileSize = 50 * 1024 * 1024;
+  useEffect(() => {
+    if (previewFileId && !files.find(f => f.id === previewFileId)) {
+      setPreviewFileId(null);
+    }
+  }, [files, previewFileId, setPreviewFileId]);
 
+  const toggle = (id: string) => setOpenId(prev => (prev === id ? null : id));
+
+  const maxFileSize = 50 * 1024 * 1024;
   const validateFile = (file: File): string | null => {
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
     if (!allowedFileTypes.includes(ext)) {
-      return t('home.fileUpload.allowedFormats', { formats: allowedFileTypes.join(', ') });
+      return t('home.fileUpload.allowedFormats', {
+        formats: allowedFileTypes.join(', '),
+      });
     }
-    if (file.size > maxFileSize) {
-      return t('home.fileUpload.maxSizeError');
-    }
+    if (file.size > maxFileSize) return t('home.fileUpload.maxSizeError');
     return null;
   };
 
   const formatSize = (bytes: number) => {
+    if (!bytes) return '0 B';
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
@@ -86,64 +79,48 @@ export function FileUploadSection() {
 
   const uploadSingleFile = async (file: File) => {
     const error = validateFile(file);
-
+    if (error) return;
     const id = crypto.randomUUID();
 
-    const newFile: UploadedFile = {
-      id,
-      file,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      status: error ? 'error' : 'uploading',
-      error: error ?? undefined,
-    };
-
-    setFiles((prev) => [...prev, newFile]);
-
-    if (error) return;
+    setFiles(prev => [
+      ...prev,
+      {
+        id,
+        file,
+        url: '',
+        type: file.type,
+        pages: 0,
+        quantity: 1,
+        printConfig: null,
+        selectedTemplate: null,
+        status: 'uploading',
+      },
+    ]);
 
     try {
       const res = await uploadFile(file);
-
       if (!res.success) throw new Error(res.error);
-
-      setFiles((prev) =>
-        prev.map((f) =>
+      setFiles(prev =>
+        prev.map(f =>
           f.id === id
-            ? {
-              ...f,
-              status: 'done',
-              pages: res.pageCount,
-              url: res.url,
-            }
-            : f,
-        ),
+            ? { ...f, url: res.url, pages: res.pageCount, status: 'done' }
+            : f
+        )
       );
-    } catch (e: any) {
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.id === id
-            ? { ...f, status: 'error', error: e?.message }
-            : f,
-        ),
+    } catch {
+      setFiles(prev =>
+        prev.map(f => (f.id === id ? { ...f, status: 'error' } : f))
       );
     }
   };
 
   const handleFiles = async (fileList: FileList) => {
-    const arr = Array.from(fileList);
-    for (const file of arr) {
-      await uploadSingleFile(file);
-    }
+    for (const file of Array.from(fileList)) await uploadSingleFile(file);
   };
 
-  const removeFile = (id: string) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id));
-  };
-
+  const previewFile = files.find(f => f.id === previewFileId) ?? null;
   return (
-    <Card elevation={0} sx={{ borderRadius: 3 }}>
+    <Card elevation={isMobile ? 4 : 0} sx={{ borderRadius: 3, boxShadow: 'none' }}>
       <CardHeader
         title={
           <Typography variant="h6" align="center" fontWeight={700}>
@@ -153,23 +130,24 @@ export function FileUploadSection() {
       />
 
       <CardContent>
-        {/* Upload zone */}
+        {/* UPLOAD ZONE */}
         <label>
           <input
             hidden
             type="file"
             multiple
             accept={allowedFileTypes.join(',')}
-            onChange={(e) => e.target.files && handleFiles(e.target.files)}
+            onChange={e =>
+              e.target.files && handleFiles(e.target.files)
+            }
           />
-
           <Paper
-            onDragOver={(e) => {
+            onDragOver={e => {
               e.preventDefault();
               setDragOver(true);
             }}
             onDragLeave={() => setDragOver(false)}
-            onDrop={(e) => {
+            onDrop={e => {
               e.preventDefault();
               setDragOver(false);
               handleFiles(e.dataTransfer.files);
@@ -189,13 +167,59 @@ export function FileUploadSection() {
             </Typography>
           </Paper>
         </label>
-
-        {/* File list */}
-        {/* File list */}
+        {/* SECURITY */}
+        <Paper
+          elevation={0}
+          sx={{
+            mt: 3,
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: 'success.light',
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            px={{ xs: 2, sm: 3 }}
+            py={{ xs: 1.5, sm: 2 }}
+            sx={{ cursor: 'pointer', bgcolor: 'success.lighter' }}
+            onClick={() => setSecurityOpen(prev => !prev)}
+          >
+            <Box display="flex" alignItems="center" gap={1}>
+              <ShieldCheck size={isMobile ? 16 : 18} />
+              <Typography fontWeight={700} fontSize={{ xs: '0.9rem', sm: '1rem' }}>
+                {t('home.fileUpload.securityTitle')}
+              </Typography>
+            </Box>
+            <IconButton size="small">
+              <ExpandMoreIcon
+                sx={{
+                  transform: securityOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: '0.2s',
+                }}
+              />
+            </IconButton>
+          </Box>
+          <Collapse in={securityOpen}>
+            <Box px={{ xs: 2, sm: 3 }} pb={{ xs: 2, sm: 3 }}>
+              <Divider sx={{ my: { xs: 1.5, sm: 2 } }} />
+              <Typography
+                variant="body2"
+                fontSize={{ xs: '0.8rem', sm: '0.875rem' }}
+                color="text.secondary"
+                lineHeight={1.6}
+              >
+                {t('home.fileUpload.securityDescription')}
+              </Typography>
+            </Box>
+          </Collapse>
+        </Paper>
+        {/* FILE LIST */}
         <Box mt={3} display="flex" flexDirection="column" gap={1.5}>
-          {files.map((file) => {
+          {files.map(file => {
             const isOpen = openId === file.id;
-
             return (
               <Paper
                 key={file.id}
@@ -206,7 +230,7 @@ export function FileUploadSection() {
                   borderColor: isOpen ? 'primary.main' : 'divider',
                 }}
               >
-                {/* HEADER ROW */}
+                {/* HEADER */}
                 <Box
                   display="flex"
                   alignItems="center"
@@ -214,29 +238,15 @@ export function FileUploadSection() {
                   px={2}
                   py={1.5}
                 >
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    gap={1}
-                    flex={1}
-                    minWidth={0}
-                  >
+                  <Box display="flex" alignItems="center" gap={1} flex={1} minWidth={0}>
                     <FileText size={18} />
-
                     <Typography
                       fontWeight={600}
                       noWrap
-                      sx={{
-                        flex: 1,
-                        minWidth: 0,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
+                      sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}
                     >
-                      {file.name}
+                      {file.file.name}
                     </Typography>
-
-                    {/* STATUS DOT */}
                     <Box
                       sx={{
                         width: 8,
@@ -253,7 +263,6 @@ export function FileUploadSection() {
                     />
                   </Box>
 
-                  {/* ACTIONS */}
                   <Box display="flex" alignItems="center" gap={0.5}>
                     <IconButton size="small" onClick={() => toggle(file.id)}>
                       <ExpandMoreIcon
@@ -263,29 +272,24 @@ export function FileUploadSection() {
                         }}
                       />
                     </IconButton>
-
                     <IconButton size="small" onClick={() => removeFile(file.id)}>
                       <X size={18} />
                     </IconButton>
                   </Box>
                 </Box>
 
-                {/* COLLAPSE CONTENT */}
-                {/* COLLAPSE CONTENT */}
+                {/* COLLAPSE */}
                 <Collapse in={isOpen}>
                   <Box px={2} pb={2}>
                     <Divider sx={{ mb: 1.5 }} />
-
                     <Typography variant="body2" color="text.secondary">
-                      Veličina: {formatSize(file.size)}
+                      Veličina: {formatSize(file.file.size)}
                     </Typography>
-
                     {file.pages && !isItImage(file.type) && (
                       <Typography variant="body2" color="text.secondary">
                         Stranice: {file.pages}
                       </Typography>
                     )}
-
                     <Typography
                       variant="body2"
                       sx={{
@@ -307,20 +311,20 @@ export function FileUploadSection() {
                           : 'Učitavanje...'}
                     </Typography>
 
-                    {file.error && (
+                    {file.file.error && (
                       <Alert severity="error" sx={{ mt: 1 }}>
                         {file.error}
                       </Alert>
                     )}
 
-                    {/* PREVIEW BUTTON - ispod detalja */}
+                    {/* PREVIEW BUTTON */}
                     {file.status === 'done' && (
                       <Box mt={2}>
                         <Chip
                           size="small"
                           icon={<VisibilityIcon />}
                           label={t('home.fileUpload.preview')}
-                          onClick={() => setPreviewFile(file)}
+                          onClick={() => setPreviewFileId(file.id)}
                           clickable
                         />
                       </Box>
@@ -332,90 +336,21 @@ export function FileUploadSection() {
           })}
         </Box>
 
-        {/* Preview modal */}
-        <PreviewModal
-          open={!!previewFile}
-          onClose={() => setPreviewFile(null)}
-          printType={previewFile?.type ?? ''}
-          fileUrl={previewFile?.url ?? ''}
-        />
-        {/* SECURITY SECTION */}
-        <Paper
-          elevation={0}
-          sx={{
-            mt: 3,
-            borderRadius: 3,
-            border: '1px solid',
-            borderColor: 'success.light',
-            overflow: 'hidden',
-          }}
-        >
-          {/* HEADER */}
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-            px={{ xs: 2, sm: 3 }}
-            py={{ xs: 1.5, sm: 2 }}
-            sx={{
-              cursor: 'pointer',
-              bgcolor: 'success.lighter',
-            }}
-            onClick={() => setSecurityOpen((prev) => !prev)}
-          >
-            <Box display="flex" alignItems="center" gap={1}>
-              <ShieldCheck size={isMobile ? 16 : 18} />
 
-              <Typography
-                fontWeight={700}
-                fontSize={{ xs: '0.9rem', sm: '1rem' }}
-              >
-                {t('home.fileUpload.securityTitle')}
-              </Typography>
-            </Box>
 
-            <IconButton size="small">
-              <ExpandMoreIcon
-                sx={{
-                  transform: securityOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: '0.2s',
-                }}
-              />
-            </IconButton>
-          </Box>
-
-          {/* COLLAPSE CONTENT */}
-          <Collapse in={securityOpen}>
-            <Box
-              px={{ xs: 2, sm: 3 }}
-              pb={{ xs: 2, sm: 3 }}
-            >
-              <Divider sx={{ my: { xs: 1.5, sm: 2 } }} />
-
-              <Typography
-                variant="body2"
-                fontSize={{ xs: '0.8rem', sm: '0.875rem' }}
-                color="text.secondary"
-                lineHeight={1.6}
-              >
-                {t('home.fileUpload.securityDescription')}
-              </Typography>
-            </Box>
-          </Collapse>
-        </Paper>
+        {/* PRINT CONFIG */}
         {files.length > 0 && (
-          <Box mt={{ xs: 3, md: 4 }}>
+          <Box mt={4}>
             <MultiFilePrintTypeSelector
-              files={files.map((f) => ({
-                type: f.type,
-                status: f.status,
-              }))}
+              files={files.map(f => ({ type: f.type, status: f.status, id: f.id }))}
             />
           </Box>
         )}
+
+        {/* PREVIEW MODAL */}
         <PreviewModal
-          open={!!previewFile}
-          onClose={() => setPreviewFile(null)}
+          open={Boolean(previewFile)}
+          onClose={() => setPreviewFileId(null)}
           printType={previewFile?.type ?? ''}
           fileUrl={previewFile?.url ?? ''}
         />

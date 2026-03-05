@@ -25,67 +25,75 @@ export default function HomePage() {
 
   const steps = useMemo(
     () => [t('home.steps.upload'), t('home.steps.config'), t('home.steps.location')],
-    [t],
+    [t]
   );
 
   const [activeStep, setActiveStep] = useState(0);
   const [completed, setCompleted] = useState<{ [k: number]: boolean }>({});
-  const { selectedTemplate, selectedShop } = usePrintContext();
+  const [autoAdvance, setAutoAdvance] = useState(true);
+
+  const { files = [], selectedShop } = usePrintContext();
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleStep = (step: number) => () => {
+    // korisnik preuzima kontrolu nad stepom
+    setAutoAdvance(false);
     setActiveStep(step);
   };
 
+  /* ================================
+     STEP 0 → STEP 1 (Template ready)
+  ================================= */
   useEffect(() => {
-    if (!selectedTemplate) return;
+    if (!files || files.length === 0) {
+      setCompleted({});
+      setActiveStep(0);
+      setAutoAdvance(true);
+      return;
+    }
 
-    setCompleted({ 0: true });
+    const allHaveTemplate = files.every(file => file.selectedTemplate);
 
-    const timer = setTimeout(() => {
-      setActiveStep(1);
-    }, 500);
+    if (!allHaveTemplate) return;
 
-    return () => clearTimeout(timer);
-  }, [selectedTemplate]);
+    setCompleted(prev => ({ ...prev, 0: true }));
 
+    if (autoAdvance) {
+      const timer = setTimeout(() => {
+        setActiveStep(1);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [files, autoAdvance]);
+
+  /* ================================
+     STEP 1 → STEP 2 (Shop selected)
+  ================================= */
   useEffect(() => {
     if (!selectedShop) return;
-    setCompleted((prev) => ({ ...prev, 2: true }));
-  }, [selectedShop]);
+
+    setCompleted(prev => ({ ...prev, 2: true }));
+
+    if (autoAdvance && activeStep === 1) {
+      setActiveStep(2);
+    }
+  }, [selectedShop, autoAdvance, activeStep]);
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Header />
 
-      <Container
-        maxWidth="md"
-        sx={{
-          py: { xs: 3, md: 6 },
-          px: { xs: 2, sm: 3 },
-        }}
-      >
-        {/* Hero */}
-        <Box
-          textAlign="center"
-          mb={{ xs: 3, sm: 4, md: 6 }}
-          px={{ xs: 2, sm: 0 }} // padding horizontal za mobile
-        >
+      <Container maxWidth="md" sx={{ py: { xs: 3, md: 6 }, px: { xs: 2, sm: 3 } }}>
+        {/* HERO */}
+        <Box textAlign="center" mb={{ xs: 3, sm: 4, md: 6 }} px={{ xs: 2, sm: 0 }}>
           <Typography
             variant={isMobile ? 'h6' : 'h3'}
             fontWeight={800}
             color="primary.main"
             gutterBottom
-            sx={{
-              fontSize: {
-                xs: '1.5rem', // mobile
-                sm: '2rem', // small tablets
-                md: '2.5rem', // desktop
-              },
-              lineHeight: 1.2,
-            }}
+            sx={{ fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' }, lineHeight: 1.2 }}
           >
             {t('home.heroTitle')}
           </Typography>
@@ -93,44 +101,23 @@ export default function HomePage() {
           <Typography
             variant={isMobile ? 'body2' : 'body1'}
             color="text.secondary"
-            sx={{
-              fontSize: {
-                xs: '0.85rem',
-                sm: '0.95rem',
-                md: '1rem',
-              },
-              lineHeight: 1.5,
-            }}
+            sx={{ fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem' }, lineHeight: 1.5 }}
           >
             {t('home.heroSubtitle')}
           </Typography>
         </Box>
 
-        <Card
-          elevation={4}
-          sx={{
-            borderRadius: 3,
-          }}
-        >
-          <CardContent
-            sx={{
-              p: { xs: 2, md: 4 },
-            }}
-          >
-            {/* Stepper */}
-            <Box
-              sx={{
-                mb: { xs: 3, md: 5 },
-                overflowX: 'visible', // no forced scroll
-              }}
-            >
+        <Card elevation={4} sx={{ borderRadius: 3 }}>
+          <CardContent sx={{ p: { xs: 2, md: 4 } }}>
+            {/* STEPPER */}
+            <Box sx={{ mb: { xs: 3, md: 5 }, overflowX: 'visible' }}>
               <Stepper
                 nonLinear
                 activeStep={activeStep}
                 alternativeLabel={!isMobile}
                 sx={{
                   width: '100%',
-                  flexWrap: isMobile ? 'wrap' : 'nowrap', // wrap steps on mobile
+                  flexWrap: isMobile ? 'wrap' : 'nowrap',
                   justifyContent: isMobile ? 'center' : 'flex-start',
                 }}
               >
@@ -166,47 +153,20 @@ export default function HomePage() {
               </Stepper>
             </Box>
 
-            {/* Step content */}
-            <Box
-              sx={{
-                transition: 'opacity 0.4s ease, transform 0.4s ease',
-                opacity: activeStep === 0 ? 1 : 0,
-                transform: activeStep === 0 ? 'translateY(0)' : 'translateY(10px)',
-                mb: 2,
-              }}
-            >
-              {activeStep === 0 && <FileUploadSection />}
-            </Box>
+            {/* STEP CONTENT */}
+            {activeStep === 0 && <FileUploadSection />}
 
-            <Box
-              sx={{
-                transition: 'opacity 0.4s ease, transform 0.4s ease',
-                opacity: activeStep === 1 ? 1 : 0,
-                transform: activeStep === 1 ? 'translateY(0)' : 'translateY(10px)',
-                mb: 2,
-              }}
-            >
-              {activeStep === 1 && (
-                <PrintConfigSection
-                  onNextStep={() => {
-                    setActiveStep((prev) => prev + 1);
-                    setCompleted((prev) => ({
-                      ...prev,
-                      1: true,
-                    }));
-                  }}
-                />
-              )}
-            </Box>
-            <Box
-              sx={{
-                transition: 'opacity 0.4s ease, transform 0.4s ease',
-                opacity: activeStep === 2 ? 1 : 0,
-                transform: activeStep === 2 ? 'translateY(0)' : 'translateY(10px)',
-              }}
-            >
-              {activeStep === 2 && <ShopSelectionSection />}
-            </Box>
+            {activeStep === 1 && (
+              <PrintConfigSection
+                onNextStep={() => {
+                  setCompleted(prev => ({ ...prev, 1: true }));
+                  setAutoAdvance(false);
+                  setActiveStep(2);
+                }}
+              />
+            )}
+
+            {activeStep === 2 && <ShopSelectionSection />}
           </CardContent>
         </Card>
       </Container>

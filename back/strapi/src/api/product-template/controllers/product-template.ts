@@ -2,26 +2,35 @@
 
 module.exports = {
     async findByMime(ctx) {
+        let { document_mime } = ctx.query;
 
-        const { document_mime } = ctx.query;
+        if (!document_mime) {
+            return ctx.badRequest('document_mime is required');
+        }
 
-        if (!document_mime || typeof document_mime !== 'string') {
-            return ctx.badRequest('document_mime is required and must be string');
+        if (!Array.isArray(document_mime)) {
+            document_mime = [document_mime];
         }
 
         const templates = await strapi.entityService.findMany(
             'api::product-template.product-template',
             {
-                filters: {
-                    supported_mime: {
-                        $contains: [document_mime] as any,
-                    },
-                },
-                fields: ['id', 'name', 'description', 'icon', 'allowed_options'],
+                fields: ['id', 'name', 'description', 'icon', 'allowed_options', 'supported_mime'],
             }
         );
 
-        ctx.send({ data: templates });
+        const enriched = templates.map(template => {
+            const supportsAll = document_mime.every(mime =>
+                template.supported_mime?.includes(mime)
+            );
+
+            return {
+                ...template,
+                is_disabled: !supportsAll,
+            };
+        });
+
+        ctx.send({ data: enriched });
     },
     async findAll(ctx) {
         const printShopId = ctx.state.printShopId;

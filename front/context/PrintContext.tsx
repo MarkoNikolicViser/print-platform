@@ -1,6 +1,6 @@
 'use client';
 
-import { FileInfo } from '@/types';
+import { CopyShop } from '@/types';
 import React, {
   createContext,
   useContext,
@@ -10,68 +10,73 @@ import React, {
   SetStateAction,
 } from 'react';
 
-type SelectedTemplate = {
+export type SelectedTemplate = {
   id: number;
   allowedOptions: any;
 };
-
-type PrintContextType = {
-  file: File | null;
-  setFile: Dispatch<SetStateAction<File | null>>;
-  selectedTemplate: SelectedTemplate | null;
-  setSelectedTemplate: Dispatch<SetStateAction<SelectedTemplate | null>>;
-  printConfig: any;
-  setPrintConfig: any;
+export type PrintableFile = {
+  id: string;
+  file: File;
+  url: string;
+  type: string;
+  pages?: number;
   quantity: number;
-  setQuantity: Dispatch<SetStateAction<number>>;
-  fileInfo: FileInfo | null;
-  setFileInfo: Dispatch<SetStateAction<FileInfo | null>>;
-  done: boolean;
-  setDone: Dispatch<SetStateAction<boolean>>;
-  uploadedUrl: string | null;
-  setUploadedUrl: Dispatch<SetStateAction<string | null>>;
-  previewOpen: boolean;
-  setPreviewOpen: Dispatch<SetStateAction<boolean>>;
-  selectedShop: number | null;
-  setSelectedShop: Dispatch<SetStateAction<number | null>>;
+  printConfig: any;
+  selectedTemplate: SelectedTemplate | null;
+  status: 'uploading' | 'done' | 'error';
 };
 
-// Create the context with default undefined
+type PrintContextType = {
+  files: PrintableFile[];
+  setFiles: Dispatch<SetStateAction<PrintableFile[]>>;
+  previewFileId: string | null;
+  setPreviewFileId: Dispatch<SetStateAction<string | null>>;
+  updateFileConfig: (id: string, data: Partial<PrintableFile>) => void;
+  removeFile: (id: string) => void;
+  setSelectedTemplate: (fileId: string, template: SelectedTemplate) => void;
+
+  selectedShop: CopyShop | null;
+  setSelectedShop: Dispatch<SetStateAction<CopyShop | null>>;
+};
+
 const PrintContext = createContext<PrintContextType | undefined>(undefined);
 
-// Provider component
 export function PrintProvider({ children }: { children: ReactNode }) {
-  const [file, setFile] = useState<File | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<SelectedTemplate | null>(null);
-  const [printConfig, setPrintConfig] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
-  const [done, setDone] = useState(false);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [selectedShop, setSelectedShop] = useState<number | null>(null);
+  const [files, setFiles] = useState<PrintableFile[]>([]);
+  const [previewFileId, setPreviewFileId] = useState<string | null>(null);
+  const [selectedShop, setSelectedShop] = useState<CopyShop | null>(null);
+
+  const updateFileConfig = (id: string, data: Partial<PrintableFile>) => {
+    setFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, ...data } : f)),
+    );
+  };
+
+  const removeFile = (id: string) => {
+    setFiles((prev) => prev.filter((f) => f.id !== id));
+    if (previewFileId === id) setPreviewFileId(null);
+  };
+
+  const setSelectedTemplate = (fileId: string, template: SelectedTemplate) => {
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.id === fileId ? { ...f, selectedTemplate: template } : f,
+      ),
+    );
+  };
 
   return (
     <PrintContext.Provider
       value={{
-        file,
-        setFile,
-        selectedTemplate,
+        files,
+        setFiles,
+        previewFileId,
+        setPreviewFileId,
+        updateFileConfig,
+        removeFile,
         setSelectedTemplate,
-        printConfig,
-        setPrintConfig,
-        quantity,
-        setQuantity,
-        fileInfo,
-        setFileInfo,
-        done,
-        setDone,
-        uploadedUrl,
-        setUploadedUrl,
-        previewOpen,
-        setPreviewOpen,
         selectedShop,
-        setSelectedShop
+        setSelectedShop,
       }}
     >
       {children}
@@ -79,7 +84,6 @@ export function PrintProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Custom hook for consuming context
 export function usePrintContext() {
   const context = useContext(PrintContext);
   if (!context) {
