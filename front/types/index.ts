@@ -39,8 +39,8 @@ export interface CopyShop {
   city: string;
   phone?: string;
   working_hours?: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | null;
+  longitude?: number | null;
   templates: string[];
   is_open_now: boolean;
   working_time_today: string | null;
@@ -78,6 +78,13 @@ export interface User {
   avatarUrl?: string;
 }
 
+export interface CartDocument {
+  url?: string;
+  name: string;
+  pages: number;
+  mime?: string;
+}
+
 export interface AddToCartPayload {
   order_code?: string;
   product_template_id?: number;
@@ -85,10 +92,7 @@ export interface AddToCartPayload {
   quantity: number;
   print_shop_id: number | null;
   customer_email?: string;
-  document_url: string | undefined;
-  document_name: string | undefined;
-  document_pages: string;
-  document_mime?: string;
+  documents: CartDocument[];
 }
 
 export interface Order {
@@ -108,16 +112,26 @@ export interface OrderItemsResponse {
   total: number;
   items: OrderItem[];
 }
+export type IconKey =
+  | 'description'
+  | 'aspect_ratio'
+  | 'checkroom'
+  | 'local_cafe'
+  | 'image'
+  | 'wallpaper';
+
 export interface ProductTemplate {
   id: number;
   name: string;
   description: string;
-  icon: string;
+  icon: IconKey;
   allowed_options?: Record<string, AllowedOption>;
   pricing?: {
     is_active: boolean;
     [key: string]: string | number | boolean | null | undefined;
   };
+  supported_mime: string | string[];
+  is_disabled: boolean;
 }
 
 export type SelectedOptions = {

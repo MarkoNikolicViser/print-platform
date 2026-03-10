@@ -12,17 +12,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-interface Copyshop {
-  id: string;
+interface MapShop {
+  id: number;
   name: string;
-  lat: number | null; // allow nulls
-  lng: number | null; // allow nulls
+  lat: number | null | undefined;
+  lng: number | null | undefined;
 }
 
 interface Props {
   apiKey: string;
-  shops: Copyshop[];
+  shops: MapShop[];
 }
+
 
 export default function CopyshopsMap({ apiKey, shops }: Props) {
   const mapRef = useRef<L.Map | null>(null);
@@ -71,7 +72,7 @@ export default function CopyshopsMap({ apiKey, shops }: Props) {
         typeof s.lng === 'number' &&
         isFinite(s.lat) &&
         isFinite(s.lng),
-    ) as Array<Required<Pick<Copyshop, 'lat' | 'lng'>> & Copyshop>;
+    ) as Array<Required<Pick<MapShop, 'lat' | 'lng'>> & MapShop>;
 
     // Add markers for valid shops
     validShops.forEach((shop) => {

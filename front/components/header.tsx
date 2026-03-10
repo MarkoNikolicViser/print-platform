@@ -22,7 +22,6 @@ import { LogOut, Sun, Moon, Printer } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { useCartItemCount } from '../hooks/useCartItemCount';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import CartButton from './ui/CartButton';
@@ -50,14 +49,21 @@ export function Header() {
     setMode(isDark ? 'light' : 'dark');
   };
 
-  // Cart logic
-  const orderId = undefined; // Ako ti treba orderId, možeš ga uzeti iz context ili props
-  const { data: cartCounter } = useCartItemCount(orderId);
+  const { data: cartCounter } = useCartItemCount();
   const cartQty = cartCounter?.count ?? 0;
+
+  const homeRedirectRoute = () => {
+    const currLocation = window.location.pathname
+    if (currLocation === '/home') {
+      router.push('/')
+      return
+    }
+    router.push('/home')
+  }
 
   const handleLogout = () => {
     handleCloseUserMenu();
-    logout(); // koristi logout iz context-a
+    logout();
   };
 
   const renderUserMenu = () => (
@@ -147,7 +153,7 @@ export function Header() {
           {/* Brand */}
           <Stack
             sx={{ ':hover': { cursor: 'pointer' } }}
-            onClick={() => router.push('/')}
+            onClick={homeRedirectRoute}
             direction="row"
             spacing={1}
             alignItems="center"

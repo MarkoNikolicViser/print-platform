@@ -311,7 +311,7 @@ export function FileUploadSection() {
                           : 'Učitavanje...'}
                     </Typography>
 
-                    {file.file.error && (
+                    {file.error && (
                       <Alert severity="error" sx={{ mt: 1 }}>
                         {file.error}
                       </Alert>

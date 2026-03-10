@@ -94,11 +94,22 @@ module.exports = {
   async listShops(ctx) {
     const {
       productTemplateId,
-      numberOfPages = 1,
+      documents = "[]", // očekujemo JSON string za GET query
       quantity = 1,
       selectedOptions = "{}",
     } = ctx.query;
 
+    // Parse documents
+    let parsedDocuments = [];
+    try {
+      parsedDocuments =
+        typeof documents === "string" ? JSON.parse(documents) : documents;
+      if (!Array.isArray(parsedDocuments)) parsedDocuments = [];
+    } catch {
+      return ctx.badRequest("documents must be valid JSON array");
+    }
+
+    // Parse selected options
     let parsedOptions = {};
     try {
       parsedOptions =
@@ -109,11 +120,7 @@ module.exports = {
       return ctx.badRequest("selectedOptions must be valid JSON");
     }
 
-    const hasParams =
-      !!productTemplateId ||
-      ctx.query.numberOfPages ||
-      ctx.query.quantity ||
-      ctx.query.selectedOptions;
+    const hasParams = !!productTemplateId || parsedDocuments.length > 0;
 
     /**
      * 🟦 BEZ PARAMETARA
@@ -130,7 +137,6 @@ module.exports = {
 
       return shops.map((shop) => {
         const workingTime = getTodayWorkingTime(shop.working_hours);
-
         return {
           id: shop.id,
           name: shop.name,
@@ -177,26 +183,25 @@ module.exports = {
 
     return await Promise.all(
       pricings.map(async (pricing) => {
-        const pages = Number(numberOfPages) || 1;
         const qty = Number(quantity) || 1;
-        const calculated = await calculatePrice({
-          printShopId: pricing.print_shop.id,
-          productTemplate: pricing.product_template,
-          pricing: {
-            rules: pricing.option_price_modifiers,
-          },
-          document: {
-            pages,
-          },
-          options: parsedOptions,
-        });
 
-        const totalPrice =
-          (Number(pricing.base_price) + calculated) * qty * pages;
+        // Saberi cenu svih dokumenata za ovaj shop
+        let totalPrice = 0;
+        for (const doc of parsedDocuments) {
+          const pages = Number(doc.pages) || 1;
+          const calc = await calculatePrice({
+            printShopId: pricing.print_shop.id,
+            productTemplate: pricing.product_template,
+            pricing: { rules: pricing.option_price_modifiers },
+            document: { pages },
+            options: parsedOptions,
+          });
 
-        const workingTime = getTodayWorkingTime(
-          pricing.print_shop.working_hours
-        );
+          totalPrice += (Number(pricing.base_price) + calc) * qty * pages;
+        }
+
+        const workingTime = getTodayWorkingTime(pricing.print_shop.working_hours);
+
         return {
           id: pricing.print_shop.id,
           name: pricing.print_shop.name,

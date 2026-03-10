@@ -59,14 +59,14 @@ class StrapiService {
 
   async getCopyShops(
     productTemplateId?: number,
-    numberOfPages?: number,
+    documents?: { pages?: number; name?: string; url?: string; mime?: string }[],
     quantity?: number,
     selectedOptions?: PrintOptions | string,
   ): Promise<CopyShop[]> {
     const params: Record<string, any> = {};
 
     if (productTemplateId !== undefined) params.productTemplateId = productTemplateId;
-    if (numberOfPages !== undefined) params.numberOfPages = numberOfPages;
+    if (documents !== undefined) params.documents = JSON.stringify(documents);
     if (quantity !== undefined) params.quantity = quantity;
     if (selectedOptions !== undefined) params.selectedOptions = selectedOptions;
 

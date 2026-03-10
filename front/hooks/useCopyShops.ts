@@ -3,29 +3,29 @@ import { strapiService } from '../services/strapiService';
 import type { CopyShop, PrintOptions } from '../types';
 
 type UseCopyShopsParams = {
-  selectedTemplate?: number | undefined;
+  selectedTemplate?: number;
+  documents?: { pages?: number; name?: string; url?: string; mime?: string }[];
   quantity?: number;
   memoizedConfig?: PrintOptions | string;
-  numberOfPages?: number; // Defaults to 3 to match your current call
   enabled?: boolean;
 };
 
 export function useCopyShops({
   selectedTemplate,
-  quantity,
+  documents = [],
+  quantity = 1,
   memoizedConfig,
-  numberOfPages = 3,
   enabled = true,
 }: UseCopyShopsParams) {
   const templateId = selectedTemplate ?? null;
 
   return useQuery<CopyShop[], Error>({
-    queryKey: ['copyShops', memoizedConfig, quantity],
+    queryKey: ['copyShops', templateId, documents, quantity, memoizedConfig],
     enabled,
     refetchOnWindowFocus: false,
     queryFn: () =>
       !templateId
         ? strapiService.getCopyShops()
-        : strapiService.getCopyShops(templateId, numberOfPages, quantity, memoizedConfig),
+        : strapiService.getCopyShops(templateId, documents, quantity, memoizedConfig),
   });
 }

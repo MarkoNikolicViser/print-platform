@@ -60,17 +60,32 @@ export function ShopSelectionSection() {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
 
+  // ===============================
+  // Memoize documents + print config
+  // ===============================
+  const documentsPayload = useMemo(() => {
+    return files.map(f => ({
+      url: f.url,
+      name: f.file.name,
+      pages: f.pages || 1,
+      mime: f.type,
+    }));
+  }, [files]);
+
   const memoizedConfig = useMemo(
     () => JSON.stringify(currentFile?.printConfig),
     [currentFile?.printConfig]
   );
 
+  // ===============================
+  // Fetch shops with multi-file logic
+  // ===============================
   const { data: copyShops = [], isLoading, error, isError } = useCopyShops({
     selectedTemplate: currentFile?.selectedTemplate?.id,
+    documents: documentsPayload,
     quantity: currentFile?.quantity || 1,
     memoizedConfig,
-    numberOfPages: currentFile?.pages,
-    enabled: !!currentFile,
+    enabled: !!currentFile && files.length > 0,
   });
 
   const mapShops = copyShops.map(shop => ({
@@ -83,29 +98,29 @@ export function ShopSelectionSection() {
   const { mutate: addToCart, isPending } = useAddToCart();
 
   const handleAddToCart = () => {
-    if (!currentFile || !currentFile.selectedTemplate || !selectedShop) return;
+    if (!files.length || !selectedShop) return;
 
     const orderCode = localStorage.getItem('order_code');
+    const template = files[0].selectedTemplate;
+    if (!template) return;
+
     const payload: AddToCartPayload = {
       order_code: orderCode || undefined,
-      product_template_id: currentFile.selectedTemplate.id,
+      product_template_id: template.id,
       selected_options: memoizedConfig,
-      quantity: currentFile.quantity,
-      print_shop_id: selectedShop,
-      document_url: currentFile.url,
-      document_name: currentFile.file.name,
-      document_pages: String(currentFile.pages),
-      document_mime: currentFile.type,
+      quantity: files[0].quantity,
+      print_shop_id: selectedShop.id,
+      documents: documentsPayload,
     };
+
     addToCart(payload);
   };
 
   const handleAddToCartAndPay = () => {
     handleAddToCart();
-    setTimeout(() => {
-      router.push('/home/cart');
-    }, 500);
+    setTimeout(() => router.push('/home/cart'), 500);
   };
+
 
   // ===============================
   // LOADING / ERROR STATE
@@ -315,38 +330,14 @@ export function ShopSelectionSection() {
       </CardContent>
 
       {/* Rezime */}
+
       {selectedShop && currentFile?.selectedTemplate && (
-        <Box
-          sx={{
-            p: 2,
-            bgcolor: 'background.paper',
-            boxShadow: { xs: 6, md: 0 },
-          }}
-        >
-          <Card
-            variant="outlined"
-            sx={{
-              display: 'flex',
-              gap: 2,
-              flexDirection: { xs: 'column', md: 'row' },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={handleAddToCart}
-              disabled={isPending}
-            >
+        <Box sx={{ p: 2, bgcolor: 'background.paper', boxShadow: { xs: 6, md: 0 } }}>
+          <Card variant="outlined" sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
+            <Button variant="contained" color="primary" fullWidth onClick={handleAddToCart} disabled={isPending}>
               {t('home.shopSelection.addToCart')}
             </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              fullWidth
-              onClick={handleAddToCartAndPay}
-              disabled={isPending}
-            >
+            <Button variant="contained" color="secondary" fullWidth onClick={handleAddToCartAndPay} disabled={isPending}>
               {t('home.shopSelection.payNow')}
             </Button>
           </Card>

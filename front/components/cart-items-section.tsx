@@ -2,6 +2,8 @@
 
 import { OrderItem, SelectedOptions, AllowedOption } from '@/types';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import CropIcon from '@mui/icons-material/Crop';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   Box,
   Typography,
@@ -16,12 +18,11 @@ import {
   useTheme,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { renderOptionField } from '../components/ui/DynamicRenderOfFields';
 import { useAuth } from '../context/AuthContext';
-import { useCartItemCount } from '../hooks/useCartItemCount';
 import { useDirtyCart } from '../hooks/useDirtyCart';
 import { useOrderItems } from '../hooks/useOrderItems';
 import { useSyncCart } from '../hooks/useSyncCart';
@@ -29,6 +30,10 @@ import EmptyCartState from './ui/EmptyCartState';
 import ErrorState from './ui/error-state';
 import GoogleOneTapButton from './ui/GoogleOneTapButton';
 import { OrderItemsSkeleton } from './ui/OrderItemsSkeleton';
+import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
+import { toast } from 'react-toastify';
+import { usePrintContext } from '@/context/PrintContext';
+import { isItImage } from '@/helpers/formatters';
 
 /** Memoized email input component */
 const CustomerEmailInput = React.memo(function CustomerEmailInput({
@@ -81,16 +86,19 @@ const CustomerEmailInput = React.memo(function CustomerEmailInput({
 
 export default function CartItemsSection() {
   const { t } = useTranslation();
+  const { updateFileConfig } = usePrintContext()
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
   const router = useRouter();
+  const { uploadFile } = useFileUpload();
 
   const { user } = useAuth(); // <-- koristi auth context
   const isLoggedIn = Boolean(user);
 
   const [orderId, setOrderId] = useState<string | undefined>(undefined);
   const [customerNotificationEmail, setCustomerNotificationEmail] = useState('');
-
+  const [image, setImage] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   // učitaj email iz localStorage samo ako nije logovan
   useEffect(() => {
     if (!isLoggedIn) {
@@ -168,13 +176,29 @@ export default function CartItemsSection() {
     if (stored) setOrderId(String(stored));
   }, []);
 
-  const { data: cartCounter } = useCartItemCount(orderId);
-  const cartQty = cartCounter?.count ?? 0;
-  console.log('Cart quantity:', cartQty);
+
+  const handleUploadCropped = useCallback(
+    async (editedFile: File, fileId: string) => {
+      try {
+        const res = await uploadFile(editedFile);
+        if (!res.success) {
+          toast(t('home.printConfig.editError'), { type: 'error' });
+          return;
+        }
+        const url = res.url ?? '';
+        updateFileConfig(fileId, { url });
+        toast(t('home.printConfig.editSuccess'), { type: 'success' });
+      } catch {
+        toast(t('home.printConfig.editError'), { type: 'error' });
+      }
+    },
+    [uploadFile, updateFileConfig, t]
+  );
+
 
   if (isLoading || !orderId) return <OrderItemsSkeleton />;
   if (isError) return <ErrorState queryKey={['order-items']} message={error.message} />;
-  if (edited.length === 0) return <EmptyCartState />;
+  if (edited.length === 0) return <EmptyCartState ctaHref='/home' />;
 
   const containerMaxWidth = { xs: '100%', md: 'md' as const };
 
@@ -256,6 +280,17 @@ export default function CartItemsSection() {
                         sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }}
                       />
                     )}
+                    {isItImage(item.document_mime) && (
+                      <Chip
+                        icon={<CropIcon />}
+                        size="small"
+                        label={t('home.printConfig.cropImage')}
+                        clickable
+                        onClick={() => {
+                          setImage(item?.document_url);
+                          setOpen(true);
+                        }}
+                      />)}
                   </Stack>
 
                   <Typography variant="body2" color="text.secondary">
@@ -318,6 +353,7 @@ export default function CartItemsSection() {
                     >
                       {t('cart.remove')}
                     </Button>
+
                   </Box>
                 </Stack>
               </Grid>
@@ -337,6 +373,17 @@ export default function CartItemsSection() {
                   ))}
                 </Grid>
               </Grid>
+              <Box key={item.id} mt={2}>
+                {image && (
+                  <ImageCropperDialog
+                    open={open}
+                    image={image}
+                    aspect={1}
+                    onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile, item.id)}
+                    onClose={() => setOpen(false)}
+                  />
+                )}
+              </Box>
             </Grid>
           </Paper>
         ))}
@@ -390,7 +437,7 @@ export default function CartItemsSection() {
             size="large"
             disabled={dirty || !canProceedToPayment}
           >
-            {t('cart.payment')}
+            {t('cart.payment')} {currencyFmt.format(Number(orderItems?.total ?? 0))}
           </Button>
         </Stack>
       </Box>
@@ -449,7 +496,7 @@ export default function CartItemsSection() {
               disabled={dirty || !canProceedToPayment}
               fullWidth
             >
-              {t('cart.payment')}
+              {t('cart.payment')} {currencyFmt.format(Number(orderItems?.total ?? 0))}
             </Button>
           </Stack>
         </Stack>

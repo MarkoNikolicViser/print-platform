@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { strapiService } from '../services/strapiService';
 
-export function useCartItemCount(orderId?: string, enabled: boolean = true) {
+export function useCartItemCount(enabled: boolean = true) {
+  const orderId = localStorage.getItem('order_code') || ''
   return useQuery<{ orderId: string; count: number }>({
     queryKey: ['cart-item-count'],
     queryFn: () => {

@@ -15,6 +15,7 @@ import {
 import { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProductTemplatesByMime } from '../hooks/useProductTemplatesByMime';
+
 import DescriptionIcon from '@mui/icons-material/Description';
 import AspectRatioIcon from '@mui/icons-material/AspectRatio';
 import CheckroomIcon from '@mui/icons-material/Checkroom';
@@ -22,22 +23,15 @@ import LocalCafeIcon from '@mui/icons-material/LocalCafe';
 import ImageIcon from '@mui/icons-material/Image';
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
 
+import { IconKey } from '@/types';
+
 type UploadedFileLite = {
     id: string;
     type: string;
     status: 'uploading' | 'done' | 'error';
-    selectedTemplate?: any;
 };
 
 type Props = { files: UploadedFileLite[] };
-
-type IconKey =
-    | 'description'
-    | 'aspect_ratio'
-    | 'checkroom'
-    | 'local_cafe'
-    | 'image'
-    | 'wallpaper';
 
 type Template = {
     id: number;
@@ -45,7 +39,7 @@ type Template = {
     description: string;
     icon: IconKey;
     allowed_options?: any;
-    supported_mime: string | string[]; // 👈 može biti string
+    supported_mime: string | string[];
     is_disabled: boolean;
 };
 
@@ -72,7 +66,7 @@ function TemplateSkeleton() {
 
 export function MultiFilePrintTypeSelector({ files }: Props) {
     const { t } = useTranslation();
-    const { setSelectedTemplate } = usePrintContext();
+    const { setSelectedTemplate, files: contextFiles } = usePrintContext();
 
     const allDone = files.length > 0 && files.every((f) => f.status === 'done');
     const uniqueMimes = [...new Set(files.map((f) => f.type))];
@@ -82,17 +76,8 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
 
     if (!files.length) return null;
 
-    // if (!allDone) {
-    //     return (
-    //         <Box textAlign="center" mt={2}>
-    //             <Typography variant="body2" color="text.secondary">
-    //                 {t('home.printTypeSelector.waitProcessing')}
-    //             </Typography>
-    //         </Box>
-    //     );
-    // }
-
-    const currentTemplateId = files[0]?.selectedTemplate?.id ?? null;
+    // 👇 template uzimamo iz contexta
+    const currentTemplateId = contextFiles[0]?.selectedTemplate?.id ?? null;
 
     return (
         <Grid container spacing={{ xs: 1.5, sm: 2 }}>
@@ -105,7 +90,6 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                 : templates.map((template: Template) => {
                     const isSelected = currentTemplateId === template.id;
 
-                    // 👇 PARSIRANJE supported_mime
                     let supportedMimes: string[] = [];
 
                     if (Array.isArray(template.supported_mime)) {
@@ -129,12 +113,8 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                                 sx={{
                                     borderRadius: 3,
                                     border: '1px solid',
-                                    borderColor: isSelected
-                                        ? 'primary.main'
-                                        : 'divider',
-                                    bgcolor: isSelected
-                                        ? 'primary.50'
-                                        : 'background.paper',
+                                    borderColor: isSelected ? 'primary.main' : 'divider',
+                                    bgcolor: isSelected ? 'primary.50' : 'background.paper',
                                     transition: 'all .2s ease',
                                     opacity: template.is_disabled ? 0.5 : 1,
                                 }}
@@ -142,7 +122,7 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                                 <Tooltip
                                     title={
                                         template.is_disabled
-                                            ? "Neki fajlovi nisu kompatibilni sa ovim tipom štampe.\nUklonite ih ili ih prvo dodajte u korpu."
+                                            ? "Neki fajlovi nisu kompatibilni sa ovim tipom štampe."
                                             : ""
                                     }
                                 >
@@ -152,12 +132,14 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                                             onClick={() => {
                                                 if (template.is_disabled) return;
 
-                                                files.forEach((file) =>
+                                                contextFiles.forEach((file) =>
                                                     setSelectedTemplate(file.id, {
                                                         id: template.id,
-                                                        allowedOptions:
-                                                            template.allowed_options,
+                                                        allowedOptions: template.allowed_options,
                                                         supportedMime: supportedMimes,
+                                                        is_disabled: template.is_disabled,
+                                                        description: template.description,
+                                                        supported_mime: template.supported_mime as any,
                                                     })
                                                 );
                                             }}
@@ -174,8 +156,7 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                                                             : 'text.secondary',
                                                     }}
                                                 >
-                                                    {iconMap[template.icon] ??
-                                                        <DescriptionIcon />}
+                                                    {iconMap[template.icon] ?? <DescriptionIcon />}
                                                 </Box>
 
                                                 <Typography fontWeight={700}>
@@ -190,7 +171,6 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                                                     {template.description}
                                                 </Typography>
 
-                                                {/* MIME badges */}
                                                 <Box
                                                     mt={1}
                                                     display="flex"
@@ -199,11 +179,7 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                                                     gap={0.5}
                                                 >
                                                     {mimeLabels.map((label, i) => (
-                                                        <Chip
-                                                            key={i}
-                                                            size="small"
-                                                            label={label}
-                                                        />
+                                                        <Chip key={i} size="small" label={label} />
                                                     ))}
                                                 </Box>
                                             </CardContent>
@@ -214,6 +190,6 @@ export function MultiFilePrintTypeSelector({ files }: Props) {
                         </Grid>
                     );
                 })}
-        </Grid >
+        </Grid>
     );
 }

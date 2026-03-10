@@ -26,11 +26,11 @@ export default function EmptyCartState({
   const resolvedCtaLabel = ctaLabel ?? t('cart.emptyCta');
 
   return (
-    <Box maxWidth="sm" mx="auto" mt={8} px={2} textAlign="center">
+    <Box maxWidth="sm" mx="auto" mt={8} px={2} height={'80vh'} textAlign="center">
       <Stack spacing={3} alignItems="center">
         <ShoppingCartOutlinedIcon sx={{ fontSize: 64, color: 'text.secondary' }} />
 
-        <Typography variant="h5" fontWeight={600}>
+        <Typography variant="h5" color='text.primary' fontWeight={600}>
           {resolvedTitle}
         </Typography>
 

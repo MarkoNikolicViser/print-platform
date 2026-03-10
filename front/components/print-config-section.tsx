@@ -3,7 +3,12 @@
 import { usePrintContext } from '@/context/PrintContext';
 import { isItImage } from '@/helpers/formatters';
 import { useFileUpload } from '@/hooks/useFileUpload';
-import { Card, CardHeader, CardContent, Typography, Grid, FormControl, InputLabel, Select, MenuItem, FormLabel, RadioGroup, FormControlLabel, Radio, Checkbox, Button, Box, useMediaQuery, useTheme, Alert } from '@mui/material';
+import {
+  Card, CardHeader, CardContent, Typography, Grid,
+  FormControl, InputLabel, Select, MenuItem, FormLabel,
+  RadioGroup, FormControlLabel, Radio, Checkbox, Button,
+  Box, useMediaQuery, useTheme, Alert
+} from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -18,6 +23,15 @@ interface OptionField {
   label?: string;
 }
 
+// ✅ Ensure allowedOptions is typed correctly
+interface Template {
+  id: string;
+  description?: string;
+  is_disabled?: boolean;
+  supported_mime?: string;
+  allowedOptions: Record<string, OptionField>;
+}
+
 export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) {
   const { t } = useTranslation();
   const { files, updateFileConfig } = usePrintContext();
@@ -25,18 +39,15 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { uploadFile } = useFileUpload();
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [printConfig, setLocalPrintConfig] = useState<Record<string, any> | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
-  // koristimo prvi selected template da inicijalizujemo konfiguraciju
-  const currentTemplate = files.find(f => f.selectedTemplate)?.selectedTemplate ?? null;
+  const currentTemplate: Template | null =
+    files.find(f => f.selectedTemplate)?.selectedTemplate ?? null;
 
-  // provera da li je template disejblovan
   const isDisabledTemplate = currentTemplate?.is_disabled ?? false;
 
-  // inicijalizacija printConfig po template-u
   useEffect(() => {
     if (!currentTemplate) return;
     const tempConfig = Object.keys(currentTemplate.allowedOptions || {}).reduce(
@@ -48,13 +59,12 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
     );
     setLocalPrintConfig(tempConfig);
 
-    // bulk update po fajlovima
     files.forEach(f => {
       if (f.selectedTemplate?.id === currentTemplate.id) {
         updateFileConfig(f.id, { printConfig: tempConfig });
       }
     });
-  }, [currentTemplate?.id, files]);
+  }, [currentTemplate?.id]);
 
   const updateConfig = (key: string, value: any) => {
     setLocalPrintConfig(prev => ({ ...prev, [key]: value }));
@@ -76,7 +86,7 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
         const url = res.url ?? '';
         updateFileConfig(fileId, { url });
         toast(t('home.printConfig.editSuccess'), { type: 'success' });
-      } catch (err) {
+      } catch {
         toast(t('home.printConfig.editError'), { type: 'error' });
       }
     },
@@ -114,20 +124,20 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
           {currentTemplate.description}
         </Typography>
 
-        {/* Prikaz svih MIME tipova */}
-        {currentTemplate.supported_mime && (
+        {/* {currentTemplate.supported_mime && (
           <Typography variant="caption" color="text.secondary">
             {t('home.printConfig.supportedMime') ?? 'Supported file types'}:{' '}
             {JSON.parse(currentTemplate.supported_mime).join(', ')}
           </Typography>
-        )}
+        )} */}
 
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 6 }} >
+          <Grid size={{ xs: 12, md: 6 }}>
             <FormControl fullWidth>
               <InputLabel>{t('home.printConfig.copies')}</InputLabel>
               <Select
                 value={files[0]?.quantity ?? 1}
+                label={t('home.printConfig.copies')}
                 onChange={(e) =>
                   files.forEach(f =>
                     updateFileConfig(f.id, { quantity: Number(e.target.value) })
@@ -143,7 +153,7 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
             </FormControl>
           </Grid>
 
-          {Object.entries(currentTemplate.allowedOptions).map(([key, field]: [string, OptionField]) => (
+          {Object.entries(currentTemplate.allowedOptions).map(([key, field]) => (
             <Grid size={{ xs: 12, md: 6 }} key={key}>
               {field.type === 'select' && field.options && (
                 <FormControl fullWidth>
@@ -191,7 +201,6 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
           ))}
         </Grid>
 
-        {/* Crop opcija za sve slike */}
         {files.map(
           (f) =>
             isItImage(f.type) && (
@@ -213,7 +222,7 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
           <ImageCropperDialog
             open={open}
             image={image}
-            aspect={1} // kvadrat
+            aspect={1}
             onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile, files[0].id)}
             onClose={() => setOpen(false)}
           />

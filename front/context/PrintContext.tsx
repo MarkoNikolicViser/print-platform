@@ -13,13 +13,18 @@ import React, {
 export type SelectedTemplate = {
   id: number;
   allowedOptions: any;
+  supportedMime: string[]
+  is_disabled: boolean
+  description: string,
+  supported_mime: string
 };
 export type PrintableFile = {
   id: string;
   file: File;
-  url: string;
+  url?: string;
   type: string;
   pages?: number;
+  error?: string
   quantity: number;
   printConfig: any;
   selectedTemplate: SelectedTemplate | null;
