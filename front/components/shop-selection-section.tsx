@@ -1,6 +1,6 @@
 'use client';
 
-import { usePrintContext, PrintableFile } from '@/context/PrintContext';
+import { usePrintContext } from '@/context/PrintContext';
 import { GEOAPIFY_KEY } from '@/helpers/constants';
 import { useCopyShops } from '@/hooks/useCopyShops';
 import { AddToCartPayload, CopyShop } from '@/types';
@@ -23,7 +23,7 @@ import {
 import { MapPin, Clock, Star, Navigation, Filter, Search, EuroIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import ErrorState from '../components/ui/error-state';
 import ShopSelectionSkeleton from '../components/ui/shop-selection-skeleton';
@@ -39,53 +39,32 @@ export function ShopSelectionSection() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const { files, previewFileId, setPreviewFileId, selectedShop, setSelectedShop } = usePrintContext();
-
-  // ===============================
-  // AUTOMATSKI SETOVANJE PREVIEW-A
-  // ===============================
-  useEffect(() => {
-    if (!previewFileId && files.length > 0) {
-      const firstWithTemplate = files.find(f => f.selectedTemplate)?.id || files[0].id;
-      setPreviewFileId(firstWithTemplate);
-    }
-  }, [previewFileId, files, setPreviewFileId]);
-
-  const currentFile: PrintableFile | undefined = files.find(f => f.id === previewFileId);
-
-  const disabled = !currentFile || !currentFile.selectedTemplate;
+  const { files, selectedShop, setSelectedShop } = usePrintContext();
 
   const [sortBy, setSortBy] = useState<SortBy>('distance');
   const [filterCity, setFilterCity] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(false);
 
-  // ===============================
-  // Memoize documents + print config
-  // ===============================
+  // Memoize documents and configs for all files
   const documentsPayload = useMemo(() => {
     return files.map(f => ({
       url: f.url,
       name: f.file.name,
       pages: f.pages || 1,
       mime: f.type,
+      selectedTemplateId: f.selectedTemplate?.id,
+      printConfig: f.printConfig,
+      quantity: f.quantity,
     }));
   }, [files]);
 
-  const memoizedConfig = useMemo(
-    () => JSON.stringify(currentFile?.printConfig),
-    [currentFile?.printConfig]
-  );
-
-  // ===============================
-  // Fetch shops with multi-file logic
-  // ===============================
   const { data: copyShops = [], isLoading, error, isError } = useCopyShops({
-    selectedTemplate: currentFile?.selectedTemplate?.id,
+    selectedTemplate: files[0]?.selectedTemplate?.id,
     documents: documentsPayload,
-    quantity: currentFile?.quantity || 1,
-    memoizedConfig,
-    enabled: !!currentFile && files.length > 0,
+    quantity: files[0]?.quantity || 1,
+    memoizedConfig: JSON.stringify(files[0]?.printConfig || {}),
+    enabled: files.length > 0 && !!files[0]?.selectedTemplate,
   });
 
   const mapShops = copyShops.map(shop => ({
@@ -101,13 +80,11 @@ export function ShopSelectionSection() {
     if (!files.length || !selectedShop) return;
 
     const orderCode = localStorage.getItem('order_code');
-    const template = files[0].selectedTemplate;
-    if (!template) return;
 
     const payload: AddToCartPayload = {
       order_code: orderCode || undefined,
-      product_template_id: template.id,
-      selected_options: memoizedConfig,
+      product_template_id: files[0].selectedTemplate?.id,
+      selected_options: JSON.stringify(files[0]?.printConfig || {}),
       quantity: files[0].quantity,
       print_shop_id: selectedShop.id,
       documents: documentsPayload,
@@ -121,11 +98,19 @@ export function ShopSelectionSection() {
     setTimeout(() => router.push('/home/cart'), 500);
   };
 
+  // Loading / error states
+  if (!files.length) {
+    return (
+      <Card>
+        <CardContent sx={{ textAlign: 'center', py: 6 }}>
+          <Typography variant="body2" color="text.secondary">
+            {t('home.shopSelection.noFiles')}
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
 
-  // ===============================
-  // LOADING / ERROR STATE
-  // ===============================
-  if (!currentFile) return <ShopSelectionSkeleton />;
   if (isLoading) return <ShopSelectionSkeleton />;
   if (isError) return <ErrorState queryKey={['copyShops']} message={error.message} />;
 
@@ -144,15 +129,7 @@ export function ShopSelectionSection() {
         }
       />
 
-      <CardContent
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 3,
-          opacity: disabled ? 0.5 : 1,
-          pointerEvents: disabled ? 'none' : 'auto',
-        }}
-      >
+      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {/* Filters and Search */}
         <Box display="flex" flexDirection={isMobile ? 'column' : 'row'} flexWrap="wrap" gap={2}>
           <Box flex={1} minWidth={200} position="relative">
@@ -228,10 +205,7 @@ export function ShopSelectionSection() {
 
         {/* Map */}
         {showMap && (
-          <Card
-            variant="outlined"
-            sx={{ borderStyle: 'dashed', borderColor: 'primary.main', overflow: 'visible', mt: 2 }}
-          >
+          <Card variant="outlined" sx={{ borderStyle: 'dashed', borderColor: 'primary.main', overflow: 'visible', mt: 2 }}>
             <CardContent sx={{ textAlign: 'initial', py: 3 }}>
               <Box display="flex" alignItems="center" gap={1} mb={2}>
                 <Navigation size={24} color="var(--mui-palette-primary-main)" />
@@ -261,7 +235,7 @@ export function ShopSelectionSection() {
                   variant="outlined"
                   sx={{
                     cursor: 'pointer',
-                    borderColor: selectedShop?.id === shop.id ? 'primary.main' : 'grey.300',
+                    borderColor: selectedShop?.id === shop.id ? 'primary.main' : 'grey.600',
                     backgroundColor: selectedShop?.id === shop.id ? 'action.hover' : 'inherit',
                   }}
                   onClick={() => setSelectedShop(shop)}
@@ -330,8 +304,7 @@ export function ShopSelectionSection() {
       </CardContent>
 
       {/* Rezime */}
-
-      {selectedShop && currentFile?.selectedTemplate && (
+      {selectedShop && files[0]?.selectedTemplate && (
         <Box sx={{ p: 2, bgcolor: 'background.paper', boxShadow: { xs: 6, md: 0 } }}>
           <Card variant="outlined" sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
             <Button variant="contained" color="primary" fullWidth onClick={handleAddToCart} disabled={isPending}>

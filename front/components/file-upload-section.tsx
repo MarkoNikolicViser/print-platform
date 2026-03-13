@@ -21,11 +21,13 @@ import {
   Collapse,
   Alert,
 } from '@mui/material';
-import { Upload, FileText, X, ShieldCheck } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Upload, FileText, X, ShieldCheck, CropIcon } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PreviewModal } from './PreviewRenderer';
 import { MultiFilePrintTypeSelector } from './multi-file-print-type-selector';
+import { toast } from 'react-toastify';
+import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
 
 export function FileUploadSection() {
   const { t } = useTranslation();
@@ -40,23 +42,27 @@ export function FileUploadSection() {
     removeFile,
     previewFileId,
     setPreviewFileId,
+    updateFileConfig
   } = usePrintContext();
 
   const [dragOver, setDragOver] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<number | null | string>(null);
   const [securityOpen, setSecurityOpen] = useState(true);
+  const [image, setImage] = useState<string | undefined>(undefined);
+  const [editingFileId, setEditingFileId] = useState<number | null | string>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (files.length > 0) setSecurityOpen(false);
   }, [files.length]);
 
-  useEffect(() => {
-    if (previewFileId && !files.find(f => f.id === previewFileId)) {
-      setPreviewFileId(null);
-    }
-  }, [files, previewFileId, setPreviewFileId]);
+  // useEffect(() => {
+  //   if (previewFileId && !files.find(f => f.id === previewFileId)) {
+  //     setPreviewFileId(null);
+  //   }
+  // }, [files, previewFileId, setPreviewFileId]);
 
-  const toggle = (id: string) => setOpenId(prev => (prev === id ? null : id));
+  const toggle = (id: number | string) => setOpenId(prev => (prev === id ? null : id));
 
   const maxFileSize = 50 * 1024 * 1024;
   const validateFile = (file: File): string | null => {
@@ -69,7 +75,23 @@ export function FileUploadSection() {
     if (file.size > maxFileSize) return t('home.fileUpload.maxSizeError');
     return null;
   };
-
+  const handleUploadCropped = useCallback(
+    async (editedFile: File, fileId: number | string) => {
+      try {
+        const res = await uploadFile(editedFile);
+        if (!res.success) {
+          toast(t('home.printConfig.editError'), { type: 'error' });
+          return;
+        }
+        const url = res.url ?? '';
+        updateFileConfig(fileId, { url });
+        toast(t('home.printConfig.editSuccess'), { type: 'success' });
+      } catch {
+        toast(t('home.printConfig.editError'), { type: 'error' });
+      }
+    },
+    [uploadFile, updateFileConfig, t]
+  );
   const formatSize = (bytes: number) => {
     if (!bytes) return '0 B';
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -329,6 +351,19 @@ export function FileUploadSection() {
                         />
                       </Box>
                     )}
+                    {isItImage(file.type) && (
+                      <Chip
+                        icon={<CropIcon />}
+                        size="small"
+                        label={t('home.printConfig.cropImage')}
+                        clickable
+                        onClick={() => {
+                          const url = URL.createObjectURL(file.file);
+                          setImage(url);
+                          setEditingFileId(file.id);
+                          setOpen(true)
+                        }}
+                      />)}
                   </Box>
                 </Collapse>
               </Paper>
@@ -353,6 +388,20 @@ export function FileUploadSection() {
           onClose={() => setPreviewFileId(null)}
           printType={previewFile?.type ?? ''}
           fileUrl={previewFile?.url ?? ''}
+        />
+        <ImageCropperDialog
+          open={open}
+          image={image}
+          aspect={1}
+          onComplete={(editedFile) => {
+            if (editedFile && editingFileId) {
+              handleUploadCropped(editedFile, editingFileId);
+            }
+          }}
+          onClose={() => {
+            setOpen(false);
+            setEditingFileId(null);
+          }}
         />
       </CardContent>
     </Card>

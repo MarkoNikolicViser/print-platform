@@ -26,7 +26,7 @@ import WallpaperIcon from '@mui/icons-material/Wallpaper';
 import { IconKey } from '@/types';
 
 type UploadedFileLite = {
-    id: string;
+    id: string | number;
     type: string;
     status: 'uploading' | 'done' | 'error';
 };

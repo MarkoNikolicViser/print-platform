@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 interface ImageCropperDialogProps {
   open: boolean;
-  image: string; // URL ili objectURL
+  image: string | undefined; // URL ili objectURL
   aspect?: number;
   onComplete: (file: File) => void;
   onClose: () => void;
@@ -99,18 +99,18 @@ export const ImageCropperDialog: React.FC<ImageCropperDialogProps> = ({
 
 // -----------------------------
 // Helper funkcije (canvas → File)
-function createImage(url: string): Promise<HTMLImageElement> {
+function createImage(url: string | undefined): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => resolve(img);
     img.onerror = reject;
-    img.src = url;
+    img.src = url || '';
   });
 }
 
 export async function getCroppedImg(
-  imageSrc: string,
+  imageSrc: string | undefined,
   pixelCrop: Area,
   rotation = 0,
 ): Promise<File> {

@@ -1,7 +1,6 @@
 'use client';
 
 import { usePrintContext } from '@/context/PrintContext';
-import { isItImage } from '@/helpers/formatters';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   Card, CardHeader, CardContent, Typography, Grid,
@@ -9,10 +8,8 @@ import {
   RadioGroup, FormControlLabel, Radio, Checkbox, Button,
   Box, useMediaQuery, useTheme, Alert
 } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'react-toastify';
-import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
 
 interface OptionField {
   type: 'number' | 'select' | 'radio' | 'checkbox';
@@ -25,7 +22,7 @@ interface OptionField {
 
 // ✅ Ensure allowedOptions is typed correctly
 interface Template {
-  id: string;
+  id: number;
   description?: string;
   is_disabled?: boolean;
   supported_mime?: string;
@@ -40,8 +37,6 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
   const { uploadFile } = useFileUpload();
 
   const [printConfig, setLocalPrintConfig] = useState<Record<string, any> | null>(null);
-  const [image, setImage] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
 
   const currentTemplate: Template | null =
     files.find(f => f.selectedTemplate)?.selectedTemplate ?? null;
@@ -74,24 +69,6 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
       }
     });
   };
-
-  const handleUploadCropped = useCallback(
-    async (editedFile: File, fileId: string) => {
-      try {
-        const res = await uploadFile(editedFile);
-        if (!res.success) {
-          toast(t('home.printConfig.editError'), { type: 'error' });
-          return;
-        }
-        const url = res.url ?? '';
-        updateFileConfig(fileId, { url });
-        toast(t('home.printConfig.editSuccess'), { type: 'success' });
-      } catch {
-        toast(t('home.printConfig.editError'), { type: 'error' });
-      }
-    },
-    [uploadFile, updateFileConfig, t]
-  );
 
   if (!currentTemplate) return null;
 
@@ -201,33 +178,16 @@ export function PrintConfigSection({ onNextStep }: { onNextStep?: () => void }) 
           ))}
         </Grid>
 
-        {files.map(
-          (f) =>
-            isItImage(f.type) && (
-              <Box key={f.id} mt={2}>
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setImage(URL.createObjectURL(f.file));
-                    setOpen(true);
-                  }}
-                >
-                  {t('home.printConfig.cropImage')} ({f.file.name})
-                </Button>
-              </Box>
-            )
+        {files.length > 1 && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: 'block', mt: 2 }}
+          >
+            *Opcije koje ovde zadate primenjuju se na sve uploadovane fajlove.
+            Izmene za pojedinačne fajlove možete napraviti kasnije u korpi.
+          </Typography>
         )}
-
-        {image && (
-          <ImageCropperDialog
-            open={open}
-            image={image}
-            aspect={1}
-            onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile, files[0].id)}
-            onClose={() => setOpen(false)}
-          />
-        )}
-
         <Box mt={4} textAlign="center">
           <Button
             variant="contained"

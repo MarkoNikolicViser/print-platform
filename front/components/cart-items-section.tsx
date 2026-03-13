@@ -2,7 +2,7 @@
 
 import { OrderItem, SelectedOptions, AllowedOption } from '@/types';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import CropIcon from '@mui/icons-material/Crop';
+// import CropIcon from '@mui/icons-material/Crop';
 import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   Box,
@@ -16,6 +16,8 @@ import {
   Divider,
   useMediaQuery,
   useTheme,
+  IconButton,
+  Collapse,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -34,7 +36,10 @@ import { ImageCropperDialog } from './FileEditor/ImageCropperDialog';
 import { toast } from 'react-toastify';
 import { usePrintContext } from '@/context/PrintContext';
 import { isItImage } from '@/helpers/formatters';
-
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { X } from 'lucide-react';
+import { CropIcon } from 'lucide-react';
+import { FileText } from 'lucide-react';
 /** Memoized email input component */
 const CustomerEmailInput = React.memo(function CustomerEmailInput({
   email,
@@ -97,8 +102,9 @@ export default function CartItemsSection() {
 
   const [orderId, setOrderId] = useState<string | undefined>(undefined);
   const [customerNotificationEmail, setCustomerNotificationEmail] = useState('');
-  const [image, setImage] = useState<string | null>(null);
+  const [image, setImage] = useState<string | undefined>(undefined);
   const [open, setOpen] = useState(false);
+  const [openId, setOpenId] = useState<string | null | number>(null);
   // učitaj email iz localStorage samo ako nije logovan
   useEffect(() => {
     if (!isLoggedIn) {
@@ -178,7 +184,7 @@ export default function CartItemsSection() {
 
 
   const handleUploadCropped = useCallback(
-    async (editedFile: File, fileId: string) => {
+    async (editedFile: File, fileId: number) => {
       try {
         const res = await uploadFile(editedFile);
         if (!res.success) {
@@ -194,7 +200,9 @@ export default function CartItemsSection() {
     },
     [uploadFile, updateFileConfig, t]
   );
-
+  const toggle = (id: number | string | null) => {
+    setOpenId(prev => (prev === id ? null : id));
+  };
 
   if (isLoading || !orderId) return <OrderItemsSkeleton />;
   if (isError) return <ErrorState queryKey={['order-items']} message={error.message} />;
@@ -242,149 +250,150 @@ export default function CartItemsSection() {
       {/* Items */}
       <Stack spacing={{ xs: 1.5, md: 2 }}>
         {edited.map((item) => (
-          <Paper key={item.id} variant="outlined" sx={{ p: { xs: 1.5, md: 2 }, borderRadius: 2 }}>
-            <Grid container spacing={{ xs: 1.5, md: 2 }}>
-              {/* Left column */}
-              <Grid size={{ xs: 12, md: 4 }}>
-                <Stack spacing={0.5}>
-                  <Stack
-                    direction={{ xs: 'column', sm: 'row' }}
-                    spacing={1}
-                    alignItems={{ xs: 'flex-start', sm: 'center' }}
-                    flexWrap="wrap"
-                  >
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight={600}
-                      sx={{
-                        maxWidth: '100%',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {item.document_name} ({item.document_pages} str.)
-                    </Typography>
+          <Paper key={item.id} variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            {/* HEADER */}
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1.5}
+              px={{ xs: 1.5, md: 2 }}
+              py={1.2}
+            >
+              <FileText size={18} />
 
-                    {item.document_url && (
-                      <Chip
-                        icon={<VisibilityIcon />}
-                        label={t('cart.preview')}
-                        size="small"
-                        clickable
-                        onClick={() =>
-                          window.open(item.document_url, '_blank', 'noopener,noreferrer')
-                        }
-                        sx={{ alignSelf: { xs: 'flex-start', sm: 'center' } }}
-                      />
-                    )}
-                    {isItImage(item.document_mime) && (
-                      <Chip
-                        icon={<CropIcon />}
-                        size="small"
-                        label={t('home.printConfig.cropImage')}
-                        clickable
-                        onClick={() => {
-                          setImage(item?.document_url);
-                          setOpen(true);
-                        }}
-                      />)}
-                  </Stack>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {item.document_name} ({item.document_pages} str.)
+              </Typography>
 
-                  <Typography variant="body2" color="text.secondary">
-                    • TIP: {item.document_mime}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    • {t('cart.service')}: {item.product_template.description}
-                  </Typography>
+              <Typography
+                variant="body2"
+                fontWeight={700}
+                sx={{ minWidth: 90, textAlign: 'right' }}
+              >
+                {currencyFmt.format(Number(item.total_price))}
+              </Typography>
 
-                  <Typography variant="body2" sx={{ mt: 0.5 }}>
-                    {t('cart.unitPrice')}: <b>{currencyFmt.format(Number(item.unit_price))}</b>
-                  </Typography>
-                  <Typography variant="body2">
-                    {t('cart.itemTotal')}: <b>{currencyFmt.format(Number(item.total_price))}</b>
-                  </Typography>
+              {/* quantity */}
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    handleQuantityChange(item.id, Math.max(1, item.quantity - 1))
+                  }
+                >
+                  −
+                </IconButton>
 
-                  {/* Quantity + Remove */}
-                  <Box
-                    sx={{
-                      mt: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                      gap: 1,
-                    }}
-                  >
-                    {/* Quantity controls */}
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => handleQuantityChange(item.id, Math.max(1, item.quantity - 1))}
-                    >
-                      −
-                    </Button>
+                <Typography variant="body2" sx={{ minWidth: 24, textAlign: 'center' }}>
+                  {item.quantity}
+                </Typography>
 
-                    <Typography variant="body2" sx={{ minWidth: 88, textAlign: 'center' }}>
-                      {t('cart.quantity')}: {item.quantity}
-                    </Typography>
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    handleQuantityChange(item.id, item.quantity + 1)
+                  }
+                >
+                  +
+                </IconButton>
+              </Stack>
 
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                    >
-                      +
-                    </Button>
+              {/* preview */}
+              {item.document_url && (
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    window.open(item.document_url, '_blank', 'noopener,noreferrer')
+                  }
+                >
+                  <VisibilityIcon fontSize="small" />
+                </IconButton>
+              )}
 
-                    {/* Spacer pushes remove button to the right */}
-                    <Box sx={{ flexGrow: 1 }} />
+              {/* crop */}
+              {isItImage(item.document_mime) && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setImage(item.document_url);
+                    setOpen(true);
+                  }}
+                >
+                  <CropIcon size={16} />
+                </IconButton>
+              )}
 
-                    {/* Remove button */}
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() => handleRemove(item.id)}
-                      sx={{
-                        width: { xs: '100%', sm: 'auto' },
-                        mt: { xs: 1, sm: 0 },
-                      }}
-                    >
-                      {t('cart.remove')}
-                    </Button>
+              {/* remove */}
+              <IconButton size="small" onClick={() => handleRemove(item.id)}>
+                <X size={16} />
+              </IconButton>
 
-                  </Box>
-                </Stack>
-              </Grid>
+              {/* expand */}
+              <IconButton size="small" onClick={() => toggle(item.id)}>
+                <ExpandMoreIcon
+                  sx={{
+                    transform: openId === item.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: '0.2s',
+                  }}
+                />
+              </IconButton>
+            </Box>
 
-              {/* Options column */}
-              <Grid size={{ xs: 12 }}>
-                <Grid container spacing={{ xs: 1.5, md: 2 }}>
+            {/* DETAILS */}
+            <Collapse in={openId === item.id}>
+              <Box px={{ xs: 1.5, md: 2 }} pb={2}>
+
+                <Divider sx={{ mb: 1.5 }} />
+
+                <Typography variant="body2" color="text.secondary">
+                  TIP: {item.document_mime}
+                </Typography>
+
+                <Typography variant="body2" color="text.secondary">
+                  {t('cart.service')}: {item.product_template.description}
+                </Typography>
+
+                <Typography variant="body2">
+                  {t('cart.unitPrice')}: <b>{currencyFmt.format(Number(item.unit_price))}</b>
+                </Typography>
+
+                {/* OPTIONS */}
+                <Grid container spacing={{ xs: 1.5, md: 2 }} mt={0.5}>
                   {Object.entries(item.allowed_options || {}).map(([key, option]) => (
-                    <Grid key={key} size={{ xs: 12, sm: 6, md: 6 }}>
+                    <Grid key={key} size={{ xs: 12, sm: 6 }}>
                       {renderOptionField(
                         item,
                         key as keyof SelectedOptions,
                         option as AllowedOption,
-                        handleOptionChange,
+                        handleOptionChange
                       )}
                     </Grid>
                   ))}
                 </Grid>
-              </Grid>
-              <Box key={item.id} mt={2}>
-                {image && (
-                  <ImageCropperDialog
-                    open={open}
-                    image={image}
-                    aspect={1}
-                    onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile, item.id)}
-                    onClose={() => setOpen(false)}
-                  />
-                )}
               </Box>
-            </Grid>
+            </Collapse>
+
+            {/* CROP MODAL */}
+            {image && (
+              <ImageCropperDialog
+                open={open}
+                image={image}
+                aspect={1}
+                onComplete={(editedFile) =>
+                  editedFile && handleUploadCropped(editedFile, item.id)
+                }
+                onClose={() => setOpen(false)}
+              />
+            )}
           </Paper>
         ))}
       </Stack>

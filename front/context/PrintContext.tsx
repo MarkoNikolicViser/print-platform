@@ -19,7 +19,7 @@ export type SelectedTemplate = {
   supported_mime: string
 };
 export type PrintableFile = {
-  id: string;
+  id: number | string;
   file: File;
   url?: string;
   type: string;
@@ -34,11 +34,11 @@ export type PrintableFile = {
 type PrintContextType = {
   files: PrintableFile[];
   setFiles: Dispatch<SetStateAction<PrintableFile[]>>;
-  previewFileId: string | null;
-  setPreviewFileId: Dispatch<SetStateAction<string | null>>;
-  updateFileConfig: (id: string, data: Partial<PrintableFile>) => void;
-  removeFile: (id: string) => void;
-  setSelectedTemplate: (fileId: string, template: SelectedTemplate) => void;
+  previewFileId: number | null | string;
+  setPreviewFileId: Dispatch<SetStateAction<number | null | string>>;
+  updateFileConfig: (id: number | string, data: Partial<PrintableFile>) => void;
+  removeFile: (id: number | string) => void;
+  setSelectedTemplate: (fileId: number | string, template: SelectedTemplate) => void;
 
   selectedShop: CopyShop | null;
   setSelectedShop: Dispatch<SetStateAction<CopyShop | null>>;
@@ -48,21 +48,21 @@ const PrintContext = createContext<PrintContextType | undefined>(undefined);
 
 export function PrintProvider({ children }: { children: ReactNode }) {
   const [files, setFiles] = useState<PrintableFile[]>([]);
-  const [previewFileId, setPreviewFileId] = useState<string | null>(null);
+  const [previewFileId, setPreviewFileId] = useState<number | null | string>(null);
   const [selectedShop, setSelectedShop] = useState<CopyShop | null>(null);
 
-  const updateFileConfig = (id: string, data: Partial<PrintableFile>) => {
+  const updateFileConfig = (id: number | string, data: Partial<PrintableFile>) => {
     setFiles((prev) =>
       prev.map((f) => (f.id === id ? { ...f, ...data } : f)),
     );
   };
 
-  const removeFile = (id: string) => {
+  const removeFile = (id: number | string) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
     if (previewFileId === id) setPreviewFileId(null);
   };
 
-  const setSelectedTemplate = (fileId: string, template: SelectedTemplate) => {
+  const setSelectedTemplate = (fileId: number | string, template: SelectedTemplate) => {
     setFiles((prev) =>
       prev.map((f) =>
         f.id === fileId ? { ...f, selectedTemplate: template } : f,
