@@ -91,7 +91,7 @@ const CustomerEmailInput = React.memo(function CustomerEmailInput({
 
 export default function CartItemsSection() {
   const { t } = useTranslation();
-  const { updateFileConfig } = usePrintContext()
+  const { updateFileConfig } = usePrintContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // < 600px
   const router = useRouter();
@@ -182,7 +182,6 @@ export default function CartItemsSection() {
     if (stored) setOrderId(String(stored));
   }, []);
 
-
   const handleUploadCropped = useCallback(
     async (editedFile: File, fileId: number) => {
       try {
@@ -198,15 +197,15 @@ export default function CartItemsSection() {
         toast(t('home.printConfig.editError'), { type: 'error' });
       }
     },
-    [uploadFile, updateFileConfig, t]
+    [uploadFile, updateFileConfig, t],
   );
   const toggle = (id: number | string | null) => {
-    setOpenId(prev => (prev === id ? null : id));
+    setOpenId((prev) => (prev === id ? null : id));
   };
 
   if (isLoading || !orderId) return <OrderItemsSkeleton />;
   if (isError) return <ErrorState queryKey={['order-items']} message={error.message} />;
-  if (edited.length === 0) return <EmptyCartState ctaHref='/home' />;
+  if (edited.length === 0) return <EmptyCartState ctaHref="/home" />;
 
   const containerMaxWidth = { xs: '100%', md: 'md' as const };
 
@@ -226,7 +225,9 @@ export default function CartItemsSection() {
         alignItems={{ xs: 'stretch', sm: 'center' }}
         sx={{ mb: { xs: 1.5, md: 2 }, display: { xs: 'none', md: 'flex' } }}
       >
-        <Typography variant="h5" color='text.primary'>{t('cart.orderItems')}</Typography>
+        <Typography variant="h5" color="text.primary">
+          {t('cart.orderItems')}
+        </Typography>
         <Stack direction="row" spacing={1}>
           <Button variant="outlined" onClick={resetChanges} disabled={!dirty}>
             {t('cart.resetChanges')}
@@ -239,7 +240,9 @@ export default function CartItemsSection() {
 
       {/* Mobile Header */}
       <Box sx={{ display: { xs: 'block', md: 'none' }, mb: 1.5 }}>
-        <Typography variant="h6" color='text.primary'>{t('cart.orderItems')}</Typography>
+        <Typography variant="h6" color="text.primary">
+          {t('cart.orderItems')}
+        </Typography>
         {dirty && changed.length > 0 && (
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
             {t('cart.changed')}: {changed.join(', ')}
@@ -252,13 +255,7 @@ export default function CartItemsSection() {
         {edited.map((item) => (
           <Paper key={item.id} variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden' }}>
             {/* HEADER */}
-            <Box
-              display="flex"
-              alignItems="center"
-              gap={1.5}
-              px={{ xs: 1.5, md: 2 }}
-              py={1.2}
-            >
+            <Box display="flex" alignItems="center" gap={1.5} px={{ xs: 1.5, md: 2 }} py={1.2}>
               <FileText size={18} />
 
               <Typography
@@ -286,9 +283,7 @@ export default function CartItemsSection() {
               <Stack direction="row" alignItems="center" spacing={0.5}>
                 <IconButton
                   size="small"
-                  onClick={() =>
-                    handleQuantityChange(item.id, Math.max(1, item.quantity - 1))
-                  }
+                  onClick={() => handleQuantityChange(item.id, Math.max(1, item.quantity - 1))}
                 >
                   −
                 </IconButton>
@@ -299,9 +294,7 @@ export default function CartItemsSection() {
 
                 <IconButton
                   size="small"
-                  onClick={() =>
-                    handleQuantityChange(item.id, item.quantity + 1)
-                  }
+                  onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                 >
                   +
                 </IconButton>
@@ -311,9 +304,7 @@ export default function CartItemsSection() {
               {item.document_url && (
                 <IconButton
                   size="small"
-                  onClick={() =>
-                    window.open(item.document_url, '_blank', 'noopener,noreferrer')
-                  }
+                  onClick={() => window.open(item.document_url, '_blank', 'noopener,noreferrer')}
                 >
                   <VisibilityIcon fontSize="small" />
                 </IconButton>
@@ -351,7 +342,6 @@ export default function CartItemsSection() {
             {/* DETAILS */}
             <Collapse in={openId === item.id}>
               <Box px={{ xs: 1.5, md: 2 }} pb={2}>
-
                 <Divider sx={{ mb: 1.5 }} />
 
                 <Typography variant="body2" color="text.secondary">
@@ -374,7 +364,7 @@ export default function CartItemsSection() {
                         item,
                         key as keyof SelectedOptions,
                         option as AllowedOption,
-                        handleOptionChange
+                        handleOptionChange,
                       )}
                     </Grid>
                   ))}
@@ -388,9 +378,7 @@ export default function CartItemsSection() {
                 open={open}
                 image={image}
                 aspect={1}
-                onComplete={(editedFile) =>
-                  editedFile && handleUploadCropped(editedFile, item.id)
-                }
+                onComplete={(editedFile) => editedFile && handleUploadCropped(editedFile, item.id)}
                 onClose={() => setOpen(false)}
               />
             )}

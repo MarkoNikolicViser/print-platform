@@ -6,7 +6,7 @@ import { Box } from '@mui/material';
 
 export default function CartPage() {
   return (
-    <Box width={'100%'} bgcolor="background.default">
+    <Box width={'100%'} minHeight={'100vh'} bgcolor="background.default">
       <Header />
       <CartItemsSection />
     </Box>
